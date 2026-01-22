@@ -1,0 +1,10 @@
+[Match]
+Name={{ main_iface }}
+
+[Network]
+Address={{ ip }}/24
+Gateway={{ gateway }}
+Domains={{ domain }}
+DNS={{ dns }}
+NTP={{ ntp }}
+IPv6AcceptRA=no

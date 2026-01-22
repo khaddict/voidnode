@@ -1,0 +1,110 @@
+network:
+  domain: khaddict.lab
+  default_iface: &default_iface ens18
+
+  vlans:
+    CORE: &vlan_core
+      id: 10
+      cidr: 10.10.0.0/24
+      router: &core_router 10.10.0.1
+      gateway: *core_router
+      dns: *core_router
+      ntp: *core_router
+
+    ADMIN: &vlan_admin
+      id: 20
+      cidr: 10.20.0.0/24
+      router: &admin_router 10.20.0.1
+      gateway: *admin_router
+      dns: *admin_router
+      ntp: *admin_router
+
+    INFRA: &vlan_infra
+      id: 30
+      cidr: 10.30.0.0/24
+      router: &infra_router 10.30.0.1
+      gateway: *infra_router
+      dns: *infra_router
+      ntp: *infra_router
+
+    EDGE: &vlan_edge
+      id: 40
+      cidr: 10.40.0.0/24
+      router: &edge_router 10.40.0.1
+      gateway: *edge_router
+      dns: *edge_router
+      ntp: *edge_router
+
+proxmox:
+  backups:
+    storage: pbs
+
+  nodes:
+    voidnode:
+      ip: 10.10.0.2
+      main_iface: *default_iface
+      <<: *vlan_core
+
+  vms:
+    # VLAN ADMIN
+    git:
+      ip: 10.20.0.2
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    saltmaster:
+      ip: 10.20.0.3
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    stackstorm:
+      ip: 10.20.0.4
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    vault:
+      ip: 10.20.0.5
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    easypki:
+      ip: 10.20.0.6
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    pbs:
+      ip: 10.20.0.7
+      main_iface: *default_iface
+      <<: *vlan_admin
+
+    # VLAN INFRA
+    netbox:
+      ip: 10.30.0.2
+      main_iface: *default_iface
+      <<: *vlan_infra
+
+    prometheus:
+      ip: 10.30.0.3
+      main_iface: *default_iface
+      <<: *vlan_infra
+
+    grafana:
+      ip: 10.30.0.4
+      main_iface: *default_iface
+      <<: *vlan_infra
+
+    loki:
+      ip: 10.30.0.5
+      main_iface: *default_iface
+      <<: *vlan_infra
+
+    ai:
+      ip: 10.30.0.6
+      main_iface: *default_iface
+      <<: *vlan_infra
+
+    # VLAN EDGE
+    revproxy:
+      ip: 10.40.0.2
+      main_iface: *default_iface
+      <<: *vlan_edge

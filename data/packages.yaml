@@ -1,0 +1,40 @@
+# Common packages
+common_packages:
+  common:
+    - curl
+    - git
+    - htop
+    - tmux
+    - jq
+    - gnupg
+    - rsync
+    - tree
+    - bc
+    - qemu-guest-agent
+    - parted
+    - figlet
+    - lolcat
+    - ca-certificates
+    - fping
+    - tcpdump
+    - tig
+    - iproute2
+  debian:
+    - yq
+  ubuntu: []
+
+# Binaries
+binaries:
+  common: []
+  debian: []
+  ubuntu:
+    - yq
+
+# Purged packages
+purged_packages:
+  common:
+    - openipmi
+    - netplan.io
+    - cloud-init
+  debian: []
+  ubuntu: []
