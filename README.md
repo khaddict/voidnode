@@ -1,5 +1,7 @@
 # Voidnode – Single Node, Segmented & Secure
 
+<img width="512" height="768" alt="image" src="https://github.com/user-attachments/assets/30f17632-b131-45e0-ad49-b0f6131c2d41" />
+
 # Introduction
 J'ai un homelab full HA, en cluster, 3 nodes avec CEPH etc
 Un noeud tombe, pas de soucis, mais ça demande plus de maintenance, 3 fois plus de matériel = 3 fois plus de possibilités de pannes et mon matériel arrive en fin de garantie.
@@ -63,4 +65,5 @@ Concernant le matériel, actuellement les prix des RAM sont abusés, j'ai déjà
 
 # Sécurité
 - pas d'accès aux VMs sauf via clé SSH (password disabled)
-- 
+- La seule interface qui va vers mon WAN (freebox) c'est l'interface WAN de mon opnsense
+- Pour récupérer accès à mon Proxmox si routeur KO par exemple, je peux y accéder en me branchant directement au node Proxmox
