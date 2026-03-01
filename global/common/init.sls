@@ -7,3 +7,4 @@ include:
   - .packages
   - .salt-minion
   - .sources
+  - .ssh
