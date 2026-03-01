@@ -8,7 +8,7 @@
 {{ host }}_network_conf:
   file.managed:
     - name: /etc/systemd/network/10-{{ vm.main_iface }}.network
-    - source: salt://global/common/networkd/files/default-networkd-conf
+    - source: salt://global/common/network/systemd-networkd/files/default-networkd-conf
     - template: jinja
     - context:
         gateway: {{ vm.gateway }}
