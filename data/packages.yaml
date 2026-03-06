@@ -35,6 +35,7 @@ purged_packages:
   common:
     - openipmi
     - netplan.io
+    - netplan-generator
     - cloud-init
   debian: []
   ubuntu: []
