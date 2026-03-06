@@ -1,0 +1,28 @@
+---
+user: salt
+external_auth:
+  pam:
+    saltgui:
+      - .*
+      - '@runner'
+      - '@wheel'
+      - '@jobs'
+state_verbose: False
+netapi_enable_clients:
+  - local
+  - local_async
+  - runner
+  - wheel
+rest_cherrypy:
+  port: 8000
+  host: 0.0.0.0
+  disable_ssl: false
+  app: /srv/saltgui/index.html
+  static: /srv/saltgui/static
+  static_path: /static
+  ssl_crt: /etc/salt/saltmaster.khaddict.lab.cert.pem
+  ssl_key: /etc/salt/saltmaster.khaddict.lab.key.pem
+state_top_saltenv: base
+file_roots:
+  base:
+    - /srv/voidnode
