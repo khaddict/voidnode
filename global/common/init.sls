@@ -1,5 +1,6 @@
 include:
   - .bashrc
+  - .ca
   - .hostname
   - .hosts
   - .motd
