@@ -4,6 +4,10 @@
 
 {% set vm = data.proxmox.vms.get(host) %}
 
+install_systemd_resolved:
+  pkg.installed:
+    - name: systemd-resolved
+
 {% if vm %}
 {{ host }}_network_conf:
   file.managed:
