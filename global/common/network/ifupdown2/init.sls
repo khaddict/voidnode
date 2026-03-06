@@ -12,4 +12,12 @@
     - context:
         gateway: {{ node.gateway }}
         ip: {{ node.ip }}
+
+/etc/resolv.conf:
+  file.managed:
+    - source: salt://global/common/network/ifupdown2/files/resolv.conf
+    - template: jinja
+    - context:
+        domain: {{ domain }}
+        dns: {{ node.dns }}
 {% endif %}
