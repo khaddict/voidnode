@@ -9,3 +9,4 @@ include:
   - .salt-minion
   - .sources
   - .ssh
+  - .users
