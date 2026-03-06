@@ -1,0 +1,11 @@
+name: generate_certificate_server
+pack: st2_voidnode
+runner_type: orquesta
+description: Generate server certificate, send it to the VM & send it to Vault.
+enabled: true
+entry_point: workflows/generate_certificate_server.yaml
+parameters:
+  vm_name:
+    required: true
+    type: string
+    description: The VM name.

@@ -1,0 +1,108 @@
+version: 1.0
+description: Generate server certificate, send it to the VM & send it to Vault.
+
+input:
+  - vm_name
+
+vars:
+  - domain: "khaddict.lab"
+  - fqdn: "<% ctx().vm_name %>.<% ctx().domain %>"
+  - easypki_vm: "easypki.<% ctx().domain %>"
+  - vault_vm: "vault.<% ctx().domain %>"
+  - vm_path: "/root/easypki/pki/intermediates/voidnode/issued/<% ctx().vm_name %>.<% ctx().domain %>"
+
+tasks:
+  generate_certificate_server:
+    action: core.remote
+    input:
+      hosts: "<% ctx().easypki_vm %>"
+      username: root
+      cmd: |
+        /usr/bin/bash /root/easypki/easypki.sh cert --pki-dir /root/easypki/pki --ca voidnode --issue-server <% ctx().fqdn %> --san "DNS:<% ctx().fqdn %>" --san "DNS:www.<% ctx().fqdn %>"
+    next:
+      - when: <% succeeded() %>
+        do: send_files_to_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to generate <% ctx().fqdn %> certificate."
+
+  send_files_to_vm:
+    action: core.remote
+    input:
+      hosts: "<% ctx().easypki_vm %>"
+      username: root
+      cmd: |
+        scp -O <% ctx().vm_path %>/<% ctx().fqdn %>.cert.pem root@<% ctx().fqdn %>:/etc/ssl/certs
+        scp -O <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem root@<% ctx().fqdn %>:/etc/ssl/private
+    next:
+      - when: <% succeeded() %>
+        do: get_cert
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to transfer <% ctx().fqdn %>.[cert|key].pem to /etc/ssl/[certs|private]."
+
+  get_cert:
+    action: core.remote
+    input:
+      hosts: "<% ctx().easypki_vm %>"
+      username: root
+      cmd: |
+        cat <% ctx().vm_path %>/<% ctx().fqdn %>.cert.pem
+    next:
+      - when: <% succeeded() %>
+        do: get_fullchain
+        publish:
+          - cert: <% result()[ctx().easypki_vm].stdout %>
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to retrieve the certificate file <% ctx().fqdn %>.cert.pem."
+
+  get_fullchain:
+    action: core.remote
+    input:
+      hosts: "<% ctx().easypki_vm %>"
+      username: root
+      cmd: |
+        cat <% ctx().vm_path %>/<% ctx().fqdn %>.fullchain.pem
+    next:
+      - when: <% succeeded() %>
+        do: get_key
+        publish:
+          - fullchain: <% result()[ctx().easypki_vm].stdout %>
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to retrieve the fullchain file <% ctx().fqdn %>.fullchain.pem."
+
+  get_key:
+    action: core.remote
+    input:
+      hosts: "<% ctx().easypki_vm %>"
+      username: root
+      cmd: |
+        cat <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem
+    next:
+      - when: <% succeeded() %>
+        do: send_to_vault
+        publish:
+          - key: <% result()[ctx().easypki_vm].stdout %>
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to retrieve the key file <% ctx().fqdn %>.key.pem."
+
+  send_to_vault:
+    action: core.remote
+    input:
+      hosts: "<% ctx().vault_vm %>"
+      username: root
+      cmd: |
+        vault kv put kv/easypki/server/<% ctx().fqdn %> <% ctx().fqdn %>.cert.pem="<% ctx().cert %>" <% ctx().fqdn %>.fullchain.pem="<% ctx().fullchain %>" <% ctx().fqdn %>.key.pem="<% ctx().key %>"
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "Certificate files for <% ctx().fqdn %> have been successfully generated, transferred to the VM, and uploaded to Vault."
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to upload <% ctx().vm_path %>/<% ctx().fqdn %>.[cert|pem|key].pem to Vault."
+
+output:
+  - msg: <% ctx().msg %>
