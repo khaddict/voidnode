@@ -4,35 +4,35 @@
     - global
 
 # Per role configuration
-  'easypki.khaddict.lab':
+  'easypki':
     - role.easypki
 
-  'grafana.khaddict.lab':
+  'grafana':
     - role.grafana
 
-  'netbox.khaddict.lab':
+  'netbox':
     - role.netbox
 
-  'pbs.khaddict.lab':
+  'pbs':
     - role.pbs
 
-  'prometheus.khaddict.lab':
+  'prometheus':
     - role.prometheus
 
-  'revproxy.khaddict.lab':
+  'revproxy':
     - role.revproxy
 
-  'saltmaster.khaddict.lab':
+  'saltmaster':
     - role.saltmaster
 
-  'stackstorm.khaddict.lab':
+  'stackstorm':
     - role.stackstorm
 
-  'uptimekuma.khaddict.lab':
+  'uptimekuma':
     - role.uptimekuma
 
-  'vault.khaddict.lab':
+  'vault':
     - role.vault
 
-  'voidnode.khaddict.lab':
+  'voidnode':
     - role.proxmox
