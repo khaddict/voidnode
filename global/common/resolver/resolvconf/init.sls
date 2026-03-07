@@ -4,10 +4,10 @@
 
 {% set node = data.proxmox.nodes.get(host) %}
 
-/etc/network/interfaces:
+/etc/resolv.conf:
   file.managed:
-    - source: salt://global/common/network/ifupdown2/files/interfaces
+    - source: salt://global/common/network/resolvconf/files/resolv.conf
     - template: jinja
     - context:
-        gateway: {{ node.gateway }}
-        ip: {{ node.ip }}
+        domain: {{ domain }}
+        dns: {{ node.dns }}
