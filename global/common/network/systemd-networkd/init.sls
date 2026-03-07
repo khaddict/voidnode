@@ -4,11 +4,9 @@
 
 {% set vm = data.proxmox.vms.get(host) %}
 
-install_systemd_resolved:
-  pkg.installed:
-    - name: systemd-resolved
+include:
+  - base.systemd
 
-{% if vm %}
 {{ host }}_network_conf:
   file.managed:
     - name: /etc/systemd/network/10-{{ vm.main_iface }}.network
@@ -30,4 +28,3 @@ service_systemd_networkd:
       - file: {{ host }}_network_conf
     - watch:
       - file: {{ host }}_network_conf
-{% endif %}
