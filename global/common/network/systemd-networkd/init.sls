@@ -4,8 +4,8 @@
 
 {% set vm = data.proxmox.vms.get(host) %}
 
-include:
-  - base.systemd
+systemd:
+  pkg.installed
 
 {{ host }}_network_conf:
   file.managed:
