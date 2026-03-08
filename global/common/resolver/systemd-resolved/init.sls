@@ -1,5 +1,5 @@
-include:
-  - base.systemd
+systemd:
+  pkg.installed
 
 service_systemd_networkd:
   service.running:
