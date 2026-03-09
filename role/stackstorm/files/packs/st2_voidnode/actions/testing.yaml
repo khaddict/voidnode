@@ -1,0 +1,7 @@
+---
+name: testing
+pack: st2_voidnode
+description: Test things. Highstate stackstorm.khaddict.lab to reset it.
+runner_type: orquesta
+entry_point: workflows/testing.yaml
+enabled: true

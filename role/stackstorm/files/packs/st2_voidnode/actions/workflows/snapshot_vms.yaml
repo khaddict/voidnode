@@ -1,0 +1,75 @@
+version: 1.0
+description: Sequential snapshot of Proxmox VMs (ID < 200) with memory, cleanup of old automated snapshots, and a final Discord summary.
+
+vars:
+  - proxmox_node: voidnode
+  - snapshot_name: "<% 'auto_snapshot_' + str(now().year) + str(now().month) + str(now().day) + '_' + str(now().hour + 1) + str(now().minute) + str(now().second) %>"
+  - snapshot_script: |
+      SUCCESS=0
+      FAILED=0
+      VMIDS=$(pvesh get /nodes/$NODE/qemu --output-format json 2>/dev/null | jq -r '.[] | select(.vmid < 200) | .vmid')
+
+      for VMID in $VMIDS; do
+
+          pvesh create /nodes/$NODE/qemu/$VMID/snapshot --snapname "$SNAPNAME" \
+              --description "Automated snapshot" --vmstate true >/dev/null 2>&1
+
+          sleep 5
+
+          if pvesh get /nodes/$NODE/qemu/$VMID/snapshot --output-format json 2>/dev/null \
+              | jq -e --arg name "$SNAPNAME" '.[] | select(.name == $name)' >/dev/null; then
+              SUCCESS=$((SUCCESS+1))
+          else
+              FAILED=$((FAILED+1))
+          fi
+
+          SNAPSHOTS=$(pvesh get /nodes/$NODE/qemu/$VMID/snapshot --output-format json 2>/dev/null \
+            | jq -r '.[] | select(.name | startswith("auto_snapshot_")) | .name' \
+            | sort -r)
+
+          COUNT=0
+          for SNAPSHOT in $SNAPSHOTS; do
+              COUNT=$((COUNT+1))
+              if [ $COUNT -gt 3 ]; then
+                  pvesh delete /nodes/$NODE/qemu/$VMID/snapshot/$SNAPSHOT --force >/dev/null 2>&1
+              fi
+          done
+
+          sleep 10
+      done
+
+      echo ""
+      echo "[$NODE snapshot summary]"
+      echo "✅ Success: $SUCCESS"
+      echo "❌ Failure: $FAILED"
+
+tasks:
+  snapshot_node:
+    action: core.remote
+    input:
+      hosts: "<% ctx().proxmox_node %>"
+      username: root
+      timeout: 3600
+      cmd: |
+        export NODE="<% ctx().proxmox_node %>"
+        export SNAPNAME="<% ctx().snapshot_name %>"
+        <% ctx().snapshot_script %>
+    next:
+      - when: <% succeeded() or failed() %>
+        do: send_summary_to_discord
+        publish:
+          - node_stdout: <% result()[ctx().proxmox_node].stdout %>
+
+  send_summary_to_discord:
+    action: core.http
+    input:
+      method: POST
+      url: "{{ snapshot_vms_discord_webhook }}"
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "content": """
+                     ```<% str(ctx().node_stdout) %>```
+                     """
+        }

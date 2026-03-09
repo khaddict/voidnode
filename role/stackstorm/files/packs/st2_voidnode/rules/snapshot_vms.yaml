@@ -1,0 +1,14 @@
+name: snapshot_vms
+pack: st2_voidnode
+enabled: true
+description: Sequential snapshot of Proxmox VMs (ID < 200) with memory, cleanup of old automated snapshots, and a final Discord summary.
+trigger:
+  type: "core.st2.CronTimer"
+  parameters:
+      timezone: "UTC"
+      day_of_week: "*"
+      hour: 0
+      minute: 0
+      second: 0
+action:
+  ref: st2_voidnode.snapshot_vms
