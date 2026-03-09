@@ -35,7 +35,7 @@ Concernant le matériel, actuellement les prix des RAM sont abusés, j'ai déjà
 - `stackstorm.khaddict.lab`
 - `netbox.khaddict.lab`
 - `easypki.khaddict.lab`
-- `git.khaddict.lab`
+- `assets.khaddict.lab`
 - `vault.khaddict.lab`
 - `pbs.khaddict.lab`
 
@@ -57,7 +57,7 @@ Concernant le matériel, actuellement les prix des RAM sont abusés, j'ai déjà
 2. Installer la VM OPNsense & configuration des interfaces, VLANs, DNS, DHCP, NTP, wireguard pour accéder au network 10.0.0.0/16
 3. Installer le saltmaster & stackstorm
 4. Faire un workflow simpliste pour déployer des VMs à la volée
-5. Déployer netbox, easypki, git, vault avec salt
+5. Déployer netbox, easypki, assets, vault avec salt
 6. Compléter le workflow st2 pour faire des déploiements propres avec ajouts vault, netbox
 7. Faire le reste des VMs + configurations salt
 8. Faire un repo `voidnode_cloud` pour la partie k8s
