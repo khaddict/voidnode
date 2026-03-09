@@ -1,0 +1,95 @@
+version: 1.0
+description: Deploy template.
+
+input:
+  - distribution
+  - codename
+  - osrelease
+  - vmid
+
+vars:
+  - node: "voidnode"
+  - debian_url: "https://cloud.debian.org/images/cloud/<% ctx().codename %>/latest/debian-<% ctx().osrelease %>-generic-amd64.qcow2"
+  - ubuntu_url: "https://cloud-images.ubuntu.com/<% ctx().codename %>/current/<% ctx().codename %>-server-cloudimg-amd64.img"
+  - storage: "local-lvm"
+  - memory: "2048"
+  - cores: "1"
+
+tasks:
+  get_url:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - url: <% ctx()[ctx().distribution + '_url'] %>
+        do: set_template_name
+
+  set_template_name:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - template_name: "<% ctx().distribution %>-<% ctx().codename %>-template"
+        do: check_template_existence
+
+  check_template_existence:
+    action: core.remote
+    input:
+      cmd: qm list | grep -i "<% ctx().template_name %>"
+      hosts: <% ctx().node %>
+      username: root
+    next:
+      - when: <% succeeded() %>
+        do: fail
+        publish:
+          - msg: "<% ctx().template_name %> is already existing."
+      - when: <% failed() %>
+        do: download_iso
+
+  download_iso:
+    action: core.remote
+    input:
+      cmd: wget <% ctx().url %> -O /var/lib/vz/images/<% ctx().template_name %>.img
+      hosts: <% ctx().node %>
+      username: root
+    next:
+      - when: <% succeeded() %>
+        do: create_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Could not download the ISO."
+
+  create_vm:
+    action: core.remote
+    input:
+      cmd: qm create <% ctx().vmid %> --tags template --serial0 socket --scsi0 <% ctx().storage %>:0,import-from=/var/lib/vz/images/<% ctx().template_name %>.img --scsihw virtio-scsi-single --efidisk0 "<% ctx().storage %>:0" --ide0 "local:cloudinit" --name "<% ctx().template_name %>" --memory <% ctx().memory %> --cores <% ctx().cores %> --net0 virtio,bridge=vmbr0 --onboot 1 --agent 1
+      hosts: <% ctx().node %>
+      username: root
+    next:
+      - when: <% succeeded() %>
+        do: convert_vm_to_template
+      - when: <% failed() %>
+        publish:
+          - msg: "Could not create the VM."
+
+  convert_vm_to_template:
+    action: core.remote
+    input:
+      cmd: qm template <% ctx().vmid %>
+      hosts: <% ctx().node %>
+      username: root
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "<% ctx().template_name %> created on <% ctx().node %>."
+      - when: <% failed() %>
+        publish:
+          - msg: "Unable to convert VM to template."
+
+output:
+  - url: <% ctx().url %>
+  - template_name: <% ctx().template_name %>
+  - storage: <% ctx().storage %>
+  - memory: <% ctx().memory %>
+  - cores: <% ctx().cores %>
+  - msg: <% ctx().msg %>
