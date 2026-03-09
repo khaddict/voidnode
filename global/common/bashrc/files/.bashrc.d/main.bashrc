@@ -16,85 +16,158 @@ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-# Function rc to display the return code
-function rc {
-    [[ $? -eq 0 ]] && echo -e "\e[01;34m" || echo -e "\e[01;31m"
+# Parse python virtual env
+function parse_python_venv {
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        basename "$VIRTUAL_ENV"
+    fi
 }
 
-# Function to display the current Git branch
+# Parse Kubernetes context
+function parse_k8s_context {
+    command -v kubectl >/dev/null 2>&1 || return
+
+    local ctx ns
+    ctx=$(kubectl config current-context 2>/dev/null) || return
+    ns=$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)
+
+    [[ -z "$ns" ]] && ns="default"
+
+    echo "${ctx}:${ns}"
+}
+
+# Parse Git branch
 function parse_git_branch {
-    git branch 2>/dev/null | grep '\*' | sed 's/* //'
+    git rev-parse --is-inside-work-tree &>/dev/null || return
+    git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null
 }
 
-# Prompt configuration
+# Check if Git repo is dirty
+function git_is_dirty {
+    git rev-parse --is-inside-work-tree &>/dev/null || return 1
+
+    if ! git diff --quiet 2>/dev/null; then
+        return 0
+    fi
+
+    if ! git diff --cached --quiet 2>/dev/null; then
+        return 0
+    fi
+
+    if [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
+# Start timer before each command
+function __prompt_timer_start {
+    [[ -n "${__IN_PROMPT_COMMAND:-}" ]] && return
+
+    case "$BASH_COMMAND" in
+        __prompt_command|__prompt_command\ *|__setprompt|__setprompt\ *)
+            return
+            ;;
+    esac
+
+    if [[ -n "${EPOCHREALTIME:-}" ]]; then
+        __CMD_START_TIME="$EPOCHREALTIME"
+    else
+        __CMD_START_TIME=""
+    fi
+}
+
+# Prompt builder
 function __setprompt {
-    local LAST_COMMAND=$? # Capture the return code of the last command
+    local LAST_COMMAND="${1:-$?}"
 
     # Colors
-    local LIGHTGRAY="\033[0;37m"
-    local DARKGRAY="\033[1;30m"
     local RED="\033[0;31m"
     local MAGENTA="\033[0;35m"
     local CYAN="\033[0;36m"
-    local BLUE="\033[0;34m"
-    local BROWN="\033[0;33m"
     local GREEN="\033[0;32m"
+    local WHITE="\033[1;37m"
+    local GRAY="\033[0;90m"
+    local YELLOW="\033[1;33m"
     local NOCOLOR="\033[0m"
-    local WHITE="\033[0;37m"
 
-    # Date and time
-    PS1="\
-\[${WHITE}\](\[${MAGENTA}\]\$(date +%A) \[${MAGENTA}\]\$(date +%-d) \[${MAGENTA}\]\$(date +%b)${WHITE})\
-\[${WHITE}\](${BLUE}\$(date +'%H:%M:%S')\[${WHITE}\])"
+    PS1=""
 
-    # SSH information
-    local SSH_IP=$(echo $SSH_CLIENT | awk '{ print $1 }')
-    local SSH2_IP=$(echo $SSH2_CLIENT | awk '{ print $1 }')
-    if [ -n "$SSH_IP" ] || [ -n "$SSH2_IP" ]; then
-        PS1+="(\[${RED}\]\u@\h\[${WHITE}\]:\[${BROWN}\]\w\[${WHITE}\])"
-    else
-        PS1+="(\[${RED}\]\u\[${WHITE}\]:\[${BROWN}\]\w\[${WHITE}\])"
+    # Date + Time combined
+    PS1+="\[${WHITE}\][\[${GRAY}\]\$(date +%a) \$(date +%-d) \$(date +%b) - \$(date +'%H:%M:%S')\[${WHITE}\]]\[${NOCOLOR}\] "
+
+    # User / host / path
+    PS1+="\[${WHITE}\][\[${RED}\]\u@\h\[${WHITE}\]:\[${YELLOW}\]\w\[${WHITE}\]]\[${NOCOLOR}\]"
+
+    # Python virtualenv
+    local py_venv
+    py_venv="$(parse_python_venv)"
+    if [[ -n "$py_venv" ]]; then
+        PS1+=" \[${WHITE}\][\[${GREEN}\]py:${py_venv}\[${WHITE}\]]\[${NOCOLOR}\]"
     fi
 
-    # Add the current Git branch name only if inside a Git repository
-    if git rev-parse --is-inside-work-tree &>/dev/null; then
-        PS1+="\[${WHITE}\](\[${CYAN}\]\$(parse_git_branch | sed 's/^ //g')\[${WHITE}\])"
+    # Git info
+    local git_branch
+    git_branch="$(parse_git_branch)"
+    if [[ -n "$git_branch" ]]; then
+        if git_is_dirty; then
+            PS1+=" \[${WHITE}\][\[${CYAN}\]git:${git_branch} \[${RED}\]✗\[${WHITE}\]]\[${NOCOLOR}\]"
+        else
+            PS1+=" \[${WHITE}\][\[${CYAN}\]git:${git_branch} \[${GREEN}\]✔\[${WHITE}\]]\[${NOCOLOR}\]"
+        fi
     fi
 
-    # Total size of files in the current directory
-    local total_size=$(ls -lah | awk '/^total/ {print $2}')
+    # Kubernetes context
+    local k8s_info
+    k8s_info="$(parse_k8s_context)"
+    if [[ -n "$k8s_info" ]]; then
+        PS1+=" \[${WHITE}\][\[${MAGENTA}\]k8s:${k8s_info}\[${WHITE}\]]\[${NOCOLOR}\]"
+    fi
 
-    # Number of directories and files
-    local num_dirs=$(find . -maxdepth 1 -type d | wc -l)
-    local num_files=$(find . -maxdepth 1 -type f | wc -l)
+    # Last command exit code (only if non-zero)
+    if [[ "$LAST_COMMAND" -ne 0 ]]; then
+        PS1+=" \[${WHITE}\][\[${RED}\]✗ ${LAST_COMMAND}\[${WHITE}\]]\[${NOCOLOR}\]"
+    fi
 
-    # Adjust the directory count to exclude the current directory
-    num_dirs=$((num_dirs - 1))
+    # Last command duration (only if >1s)
+    if [[ -n "${__LAST_CMD_DURATION:-}" ]]; then
+        if awk "BEGIN { exit !(${__LAST_CMD_DURATION} > 1.0) }"; then
+            PS1+=" \[${WHITE}\][\[${GRAY}\]${__LAST_CMD_DURATION}s\[${WHITE}\]]\[${NOCOLOR}\]"
+        fi
+    fi
 
-    PS1+="(\[${GREEN}\]${total_size}:\[${GREEN}\]${num_dirs}D:\[${GREEN}\]${num_files}F\[${WHITE}\])"
-
-    # New line
     PS1+="\n"
 
-    # Prompt for normal user or root
-    if [[ $EUID -ne 0 ]]; then
-        PS1+="\[${GREEN}\]>\[${NOCOLOR}\] " # Normal user
-    else
-        PS1+="\[${RED}\]>\[${NOCOLOR}\] " # Root user
-    fi
+    # Prompt char
+    PS1+="\[${RED}\]>\[${NOCOLOR}\] "
 
-    # PS2 for continuing a command
     PS2="\[${WHITE}\]>\[${NOCOLOR}\] "
-
-    # PS3 for script choices
     PS3='Please enter a number from above list: '
-
-    # PS4 for debugging
     PS4='\[${WHITE}\]+\[${NOCOLOR}\] '
 }
 
-# Define the prompt command
-PROMPT_COMMAND='__setprompt'
+# Wrapper to compute duration
+function __prompt_command {
+    local last_exit=$?
+
+    __IN_PROMPT_COMMAND=1
+
+    if [[ -n "${__CMD_START_TIME:-}" && -n "${EPOCHREALTIME:-}" ]]; then
+        __LAST_CMD_DURATION="$(awk -v start="$__CMD_START_TIME" -v end="$EPOCHREALTIME" 'BEGIN { printf "%.1f", (end - start) }')"
+    else
+        __LAST_CMD_DURATION=""
+    fi
+
+    __setprompt "$last_exit"
+
+    unset __IN_PROMPT_COMMAND
+}
+
+# Enable timer
+trap '__prompt_timer_start' DEBUG
+
+PROMPT_COMMAND='__prompt_command'
 
 # Configure dircolors and alias for ls
 if [ -x /usr/bin/dircolors ]; then
