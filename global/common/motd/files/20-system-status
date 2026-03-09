@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# Colors
+RESET="$(printf '\033[0m')"
+GRAY="$(printf '\033[0;90m')"
+WHITE="$(printf '\033[1;37m')"
+RED="$(printf '\033[0;31m')"
+GREEN="$(printf '\033[0;32m')"
+YELLOW="$(printf '\033[0;33m')"
+
+label() {
+    printf "%b%-8s%b %b%s%b\n" "$GRAY" "$1" "$RESET" "$WHITE" "$2" "$RESET"
+}
+
+# Host
+HOST="$(hostname)"
+
+# OS
+if [ -r /etc/os-release ]; then
+    OS="$(. /etc/os-release && echo "$PRETTY_NAME")"
+else
+    OS="$(uname -srm)"
+fi
+
+# Uptime
+UPTIME="$(uptime -p 2>/dev/null | sed 's/^up //')"
+
+# Load average
+LOAD_RAW="$(cut -d ' ' -f1-3 /proc/loadavg 2>/dev/null)"
+LOAD_1="$(printf "%s" "$LOAD_RAW" | awk '{print $1}')"
+
+LOAD_COLOR="$GREEN"
+awk "BEGIN { exit !($LOAD_1 >= 1) }" && LOAD_COLOR="$YELLOW"
+awk "BEGIN { exit !($LOAD_1 >= 2) }" && LOAD_COLOR="$RED"
+
+# Memory
+MEMORY="$(free -h 2>/dev/null | awk '/^Mem:/ {print $3 " / " $2}')"
+
+# Disk
+DISK_USED="$(df -h / 2>/dev/null | awk 'NR==2 {print $3}')"
+DISK_TOTAL="$(df -h / 2>/dev/null | awk 'NR==2 {print $2}')"
+DISK_PCT="$(df -h / 2>/dev/null | awk 'NR==2 {gsub(/%/, "", $5); print $5}')"
+
+DISK_COLOR="$GREEN"
+if [ -n "$DISK_PCT" ]; then
+    [ "$DISK_PCT" -ge 50 ] && DISK_COLOR="$YELLOW"
+    [ "$DISK_PCT" -gt 75 ] && DISK_COLOR="$RED"
+fi
+
+DISK="${DISK_USED} / ${DISK_TOTAL} (${DISK_COLOR}${DISK_PCT}%${RESET})"
+
+# Primary IP
+IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
+[ -z "$IP" ] && IP="N/A"
+
+# Available updates
+if command -v apt >/dev/null 2>&1; then
+    UPDATES="$(apt list --upgradable 2>/dev/null | tail -n +2 | wc -l)"
+    UPDATES="${UPDATES} available"
+else
+    UPDATES="N/A"
+fi
+
+# Connected users
+USERS="$(who 2>/dev/null | wc -l)"
+USERS="${USERS} connected"
+
+printf "\n%b──────────────────────────────────%b\n" "$GRAY" "$RESET"
+printf "%b%-8s%b %b%s%b\n" "$GRAY" "Host" "$RESET" "$RED" "$HOST" "$RESET"
+label "OS" "$OS"
+label "Uptime" "$UPTIME"
+printf "%b%-8s%b %b%s%b\n" "$GRAY" "Load" "$RESET" "$LOAD_COLOR" "$LOAD_RAW" "$RESET"
+label "Memory" "$MEMORY"
+printf "%b%-8s%b %b%s%b\n" "$GRAY" "Disk" "$RESET" "$WHITE" "$DISK" "$RESET"
+label "IP" "$IP"
+label "Updates" "$UPDATES"
+label "Users" "$USERS"
+printf "%b──────────────────────────────────%b\n" "$GRAY" "$RESET"
