@@ -1,0 +1,23 @@
+name: deploy_template
+pack: st2_voidnode
+runner_type: orquesta
+description: Deploy template.
+enabled: true
+entry_point: workflows/deploy_template.yaml
+parameters:
+  distribution:
+    type: string
+    required: true
+    description: Distribution (for bookworm for example distribution = debian).
+  codename:
+    type: string
+    required: true
+    description: Codename (for bookworm for example codename = bookworm).
+  osrelease:
+    type: string
+    required: true
+    description: OS release (for bookworm for example osrelease = 12).
+  vmid:
+    type: string
+    required: true
+    description: Template VMID (for example vmid = "200").
