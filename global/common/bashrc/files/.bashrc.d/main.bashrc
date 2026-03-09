@@ -114,7 +114,7 @@ function __setprompt {
         if git_is_dirty; then
             PS1+=" \[${WHITE}\][\[${CYAN}\]git:${git_branch} \[${RED}\]✗\[${WHITE}\]]\[${NOCOLOR}\]"
         else
-            PS1+=" \[${WHITE}\][\[${CYAN}\]git:${git_branch} \[${GREEN}\]✔\[${WHITE}\]]\[${NOCOLOR}\]"
+            PS1+=" \[${WHITE}\][\[${CYAN}\]git:${git_branch} \[${GREEN}\]✓\[${WHITE}\]]\[${NOCOLOR}\]"
         fi
     fi
 
