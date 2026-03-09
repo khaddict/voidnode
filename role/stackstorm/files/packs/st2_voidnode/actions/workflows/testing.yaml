@@ -1,0 +1,16 @@
+version: 1.0
+description: Test things. Highstate stackstorm.khaddict.lab to reset it.
+
+tasks:
+  do_nothing:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "Done."
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed."
+
+output:
+  - msg: <% ctx().msg %>
