@@ -47,7 +47,7 @@ proxmox:
 
   vms:
     # VLAN ADMIN
-    git:
+    assets:
       ip: 10.20.0.2
       main_iface: *default_iface
       <<: *vlan_admin
