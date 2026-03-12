@@ -65,3 +65,11 @@ service_salt_master:
       - service: salt_master_enabled
     - watch:
       - file: /etc/salt/master
+
+# https://github.com/saltstack/salt/pull/66899/changes Fix Python3.13 compatibility regarding urllib.parse module
+/opt/saltstack/salt/lib/python3.10/site-packages/salt/utils/url.py:
+  file.managed:
+    - source: salt://role/saltmaster/files/url.py
+    - mode: 644
+    - user: root
+    - group: root
