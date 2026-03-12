@@ -42,69 +42,166 @@ proxmox:
   nodes:
     voidnode:
       ip: 10.10.0.2
-      main_iface: *default_iface
+      main_iface: vmbr1.10@vmbr1
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINE01B4TmU98iq6UtE2NfnfG5GHE4SaLpNBj/H36+dXw voidnode@khaddict.lab"
+      hardware:
+        ram_mb: 123904
+        cpu:
+          sockets: 1
+          cores: 12
+          threads_per_core: 2
+        disks:
+          - name: nvme0n1
+            size_gb: 4000
+            type: nvme
       <<: *vlan_core
 
   vms:
+    # VLAN CORE
+    opnsense:
+      vmid: 100
+      description: "OPNsense Firewall/Router"
+      template: null
+      tags: "core"
+      ip: 10.10.0.1
+      main_iface: null
+      ssh: null
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 32
+      <<: *vlan_core
+
     # VLAN ADMIN
     assets:
+      vmid: 101
+      description: "Asset Management System"
+      template: debian-trixie-template
+      tags: "admin,trixie"
       ip: 10.20.0.2
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAnR2TSVsFOLrw7lNG25G+HX8y7XktC6bqZs0RCfyi4V assets@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_admin
 
     saltmaster:
+      vmid: 103
+      description: "Salt Master for Configuration Management"
+      template: debian-trixie-template
+      tags: "admin,trixie"
       ip: 10.20.0.3
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3v0wOk/qb2Bq80EzC+BZMArREUa/6WlIIzav05AQyt saltmaster@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_admin
 
     stackstorm:
+      vmid: 102
+      description: "StackStorm Automation Platform"
+      template: ubuntu-jammy-template
+      tags: "admin,jammy"
       ip: 10.20.0.4
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGrrb3pJzWN7njrlWUE0pPjVD0j1XmJXgrc51FVZqzk stackstorm@khaddict.lab"
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 3
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_admin
 
     vault:
+      vmid: 106
+      description: "HashiCorp Vault for Secrets Management"
+      template: debian-trixie-template
+      tags: "admin,trixie"
       ip: 10.20.0.5
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMQAB3GXUp/Ergl9VhpRkTvNw5tSxD7PzPUPBrH1ygI vault@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_admin
 
     easypki:
+      vmid: 107
+      description: "EasyPKI for Certificate Management"
+      template: debian-trixie-template
+      tags: "admin,trixie"
       ip: 10.20.0.6
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICJdraaRkgzciz65r4ZaA8uVBhnv80CKI49jKEo16sBg easypki@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_admin
 
     pbs:
+      vmid: 104
+      description: "Proxmox Backup Server for VM Backups"
+      template: null
+      tags: "admin"
       ip: 10.20.0.7
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAuBymc/W/lhrIfdYeTw034n/PBjfttkP5W7u/4WlIrT pbs@khaddict.lab"
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 32
+          - name: scsi1
+            size_gb: 500
       <<: *vlan_admin
 
     # VLAN INFRA
     netbox:
+      vmid: 105
+      description: "NetBox for IPAM and DCIM"
+      template: debian-trixie-template
+      tags: "infra,trixie"
       ip: 10.30.0.2
       main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEVxWEewWZGYnRqMtXa3glkQS8AG30gPjhE02Z7237By netbox@khaddict.lab"
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 3
+        disks:
+          - name: scsi0
+            size_gb: 20
       <<: *vlan_infra
-
-    prometheus:
-      ip: 10.30.0.3
-      main_iface: *default_iface
-      <<: *vlan_infra
-
-    grafana:
-      ip: 10.30.0.4
-      main_iface: *default_iface
-      <<: *vlan_infra
-
-    loki:
-      ip: 10.30.0.5
-      main_iface: *default_iface
-      <<: *vlan_infra
-
-    ai:
-      ip: 10.30.0.6
-      main_iface: *default_iface
-      <<: *vlan_infra
-
-    # VLAN EDGE
-    revproxy:
-      ip: 10.40.0.2
-      main_iface: *default_iface
-      <<: *vlan_edge
