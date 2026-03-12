@@ -1,0 +1,6 @@
+name: create_vms
+pack: st2_voidnode
+description: Provision all Proxmox VMs defined in main.yaml.
+runner_type: orquesta
+entry_point: workflows/create_vms.yaml
+enabled: true

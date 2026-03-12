@@ -1,5 +1,5 @@
 version: 1.0
-description: Deploy template.
+description: Deploy a Proxmox VM template from a cloud image.
 
 input:
   - distribution
@@ -8,6 +8,7 @@ input:
   - vmid
 
 vars:
+  - msg: ""
   - node: "voidnode"
   - debian_url: "https://cloud.debian.org/images/cloud/<% ctx().codename %>/latest/debian-<% ctx().osrelease %>-generic-amd64.qcow2"
   - ubuntu_url: "https://cloud-images.ubuntu.com/<% ctx().codename %>/current/<% ctx().codename %>-server-cloudimg-amd64.img"
@@ -30,9 +31,9 @@ tasks:
       - when: <% succeeded() %>
         publish:
           - template_name: "<% ctx().distribution %>-<% ctx().codename %>-template"
-        do: check_template_existence
+        do: check_template_exists
 
-  check_template_existence:
+  check_template_exists:
     action: core.remote
     input:
       cmd: qm list | grep -i "<% ctx().template_name %>"
@@ -42,11 +43,11 @@ tasks:
       - when: <% succeeded() %>
         do: fail
         publish:
-          - msg: "<% ctx().template_name %> is already existing."
+          - msg: "Template '<% ctx().template_name %>' already exists on '<% ctx().node %>'."
       - when: <% failed() %>
-        do: download_iso
+        do: download_image
 
-  download_iso:
+  download_image:
     action: core.remote
     input:
       cmd: wget <% ctx().url %> -O /var/lib/vz/images/<% ctx().template_name %>.img
@@ -57,7 +58,7 @@ tasks:
         do: create_vm
       - when: <% failed() %>
         publish:
-          - msg: "Could not download the ISO."
+          - msg: "Failed to download the cloud image for template '<% ctx().template_name %>'."
 
   create_vm:
     action: core.remote
@@ -70,7 +71,7 @@ tasks:
         do: convert_vm_to_template
       - when: <% failed() %>
         publish:
-          - msg: "Could not create the VM."
+          - msg: "Failed to create VM '<% ctx().template_name %>' (vmid <% ctx().vmid %>) on '<% ctx().node %>'."
 
   convert_vm_to_template:
     action: core.remote
@@ -81,10 +82,10 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - msg: "<% ctx().template_name %> created on <% ctx().node %>."
+          - msg: "Template '<% ctx().template_name %>' was created successfully on '<% ctx().node %>'."
       - when: <% failed() %>
         publish:
-          - msg: "Unable to convert VM to template."
+          - msg: "Failed to convert VM '<% ctx().template_name %>' (vmid <% ctx().vmid %>) into a template."
 
 output:
   - url: <% ctx().url %>

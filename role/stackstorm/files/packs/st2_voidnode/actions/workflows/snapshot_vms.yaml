@@ -1,5 +1,5 @@
 version: 1.0
-description: Sequential snapshot of Proxmox VMs (ID < 200) with memory, cleanup of old automated snapshots, and a final Discord summary.
+description: Create sequential Proxmox snapshots for VMs with vmid < 200, prune old automated snapshots, and send a final summary to Discord.
 
 vars:
   - proxmox_node: voidnode
@@ -44,7 +44,7 @@ vars:
       echo "❌ Failure: $FAILED"
 
 tasks:
-  snapshot_node:
+  create_node_snapshots:
     action: core.remote
     input:
       hosts: "<% ctx().proxmox_node %>"
@@ -56,9 +56,9 @@ tasks:
         <% ctx().snapshot_script %>
     next:
       - when: <% succeeded() or failed() %>
-        do: send_summary_to_discord
         publish:
           - node_stdout: <% result()[ctx().proxmox_node].stdout %>
+        do: send_summary_to_discord
 
   send_summary_to_discord:
     action: core.http

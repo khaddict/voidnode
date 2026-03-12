@@ -1,5 +1,5 @@
 version: 1.0
-description: Test things. Highstate stackstorm.khaddict.lab to reset it.
+description: Test workflow. Run a highstate on stackstorm.khaddict.lab if needed.
 
 tasks:
   do_nothing:
@@ -7,10 +7,10 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - msg: "Done."
+          - msg: "Completed successfully."
       - when: <% failed() %>
         publish:
-          - msg: "Failed."
+          - msg: "Workflow execution failed."
 
 output:
   - msg: <% ctx().msg %>

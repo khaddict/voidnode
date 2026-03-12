@@ -1,6 +1,6 @@
 name: snapshot_vms
 pack: st2_voidnode
 runner_type: orquesta
-description: Sequential snapshot of Proxmox VMs (ID < 200) with memory, cleanup of old automated snapshots, and a final Discord summary.
+description: Create sequential Proxmox snapshots for VMs with vmid < 200, prune old automated snapshots, and send a final summary to Discord.
 entry_point: workflows/snapshot_vms.yaml
 enabled: true

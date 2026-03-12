@@ -1,11 +1,12 @@
 name: decommission_vm
 pack: st2_voidnode
-description: Workflow to decommission Proxmox VMs properly.
+description: Decommission a Proxmox VM and clean up its Salt key.
 runner_type: orquesta
 entry_point: workflows/decommission_vm.yaml
 enabled: true
+
 parameters:
   name:
-    required: true
     type: string
-    description: The VM name.
+    required: true
+    description: The VM name defined in main.yaml.
