@@ -1,5 +1,5 @@
 version: 1.0
-description: Workflow to decommission Proxmox VMs properly.
+description: Decommission a Proxmox VM and clean up its Salt key.
 
 input:
   - name
@@ -11,7 +11,7 @@ vars:
   - node: "voidnode"
 
 tasks:
-  vm_existence:
+  check_vm_exists:
     action: core.remote
     input:
       hosts: "<% ctx().proxmox %>"
@@ -20,14 +20,14 @@ tasks:
         qm list | grep "<% ctx().name %>"
     next:
       - when: <% succeeded() %>
-        do: vm_status
         publish:
           - vmid: <% result()[ctx().proxmox].stdout.split()[0] %>
+        do: check_vm_status
       - when: <% failed() %>
         publish:
-          - msg: "VM <% ctx().name %> not found on Proxmox node <% ctx().proxmox %>."
+          - msg: "VM '<% ctx().name %>' was not found on '<% ctx().proxmox %>'."
 
-  vm_status:
+  check_vm_status:
     action: core.remote
     input:
       hosts: "<% ctx().proxmox %>"
@@ -41,7 +41,7 @@ tasks:
         do: delete_vm
       - when: <% failed() %>
         publish:
-          - msg: "Unable to determine power state for VM <% ctx().vmid %> on <% ctx().proxmox %>."
+          - msg: "Failed to determine the power state of VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
 
   stop_vm:
     action: core.remote
@@ -55,7 +55,7 @@ tasks:
         do: delete_vm
       - when: <% failed() %>
         publish:
-          - msg: "Could not stop VM <% ctx().vmid %> on <% ctx().proxmox %>."
+          - msg: "Failed to stop VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
 
   delete_vm:
     action: core.remote
@@ -66,12 +66,12 @@ tasks:
         qm destroy <% ctx().vmid %>
     next:
       - when: <% succeeded() %>
-        do: delete_saltkey
+        do: delete_salt_key
       - when: <% failed() %>
         publish:
-          - msg: "Could not delete VM <% ctx().vmid %> on <% ctx().proxmox %>."
+          - msg: "Failed to delete VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
 
-  delete_saltkey:
+  delete_salt_key:
     action: core.remote
     input:
       hosts: <% ctx().saltmaster %>
@@ -81,10 +81,10 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - msg: "Decommission complete."
+          - msg: "VM '<% ctx().name %>' was decommissioned successfully."
       - when: <% failed() %>
         publish:
-          - msg: "Could not delete Salt key for <% ctx().name %> on <% ctx().saltmaster %>."
+          - msg: "VM '<% ctx().name %>' was deleted, but its Salt key could not be removed from '<% ctx().saltmaster %>'."
 
 output:
   - msg: <% ctx().msg %>

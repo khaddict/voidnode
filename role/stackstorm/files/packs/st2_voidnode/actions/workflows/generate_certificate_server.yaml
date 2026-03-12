@@ -1,10 +1,11 @@
 version: 1.0
-description: Generate server certificate, send it to the VM & send it to Vault.
+description: Generate a server certificate, copy it to the VM, and store it in Vault.
 
 input:
   - vm_name
 
 vars:
+  - msg: ""
   - domain: "khaddict.lab"
   - fqdn: "<% ctx().vm_name %>.<% ctx().domain %>"
   - easypki_vm: "easypki.<% ctx().domain %>"
@@ -12,7 +13,7 @@ vars:
   - vm_path: "/root/easypki/pki/intermediates/voidnode/issued/<% ctx().vm_name %>.<% ctx().domain %>"
 
 tasks:
-  generate_certificate_server:
+  generate_server_certificate:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
@@ -21,12 +22,12 @@ tasks:
         /usr/bin/bash /root/easypki/easypki.sh cert --pki-dir /root/easypki/pki --ca voidnode --issue-server <% ctx().fqdn %> --san "DNS:<% ctx().fqdn %>" --san "DNS:www.<% ctx().fqdn %>"
     next:
       - when: <% succeeded() %>
-        do: send_files_to_vm
+        do: copy_certificate_files_to_vm
       - when: <% failed() %>
         publish:
-          - msg: "Failed to generate <% ctx().fqdn %> certificate."
+          - msg: "Failed to generate the server certificate for '<% ctx().fqdn %>'."
 
-  send_files_to_vm:
+  copy_certificate_files_to_vm:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
@@ -36,12 +37,12 @@ tasks:
         scp -O <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem root@<% ctx().fqdn %>:/etc/ssl/private
     next:
       - when: <% succeeded() %>
-        do: get_cert
+        do: read_certificate
       - when: <% failed() %>
         publish:
-          - msg: "Failed to transfer <% ctx().fqdn %>.[cert|key].pem to /etc/ssl/[certs|private]."
+          - msg: "Failed to copy certificate files for '<% ctx().fqdn %>' to the target VM."
 
-  get_cert:
+  read_certificate:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
@@ -50,14 +51,14 @@ tasks:
         cat <% ctx().vm_path %>/<% ctx().fqdn %>.cert.pem
     next:
       - when: <% succeeded() %>
-        do: get_fullchain
         publish:
           - cert: <% result()[ctx().easypki_vm].stdout %>
+        do: read_fullchain
       - when: <% failed() %>
         publish:
-          - msg: "Failed to retrieve the certificate file <% ctx().fqdn %>.cert.pem."
+          - msg: "Failed to read the certificate file for '<% ctx().fqdn %>'."
 
-  get_fullchain:
+  read_fullchain:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
@@ -66,14 +67,14 @@ tasks:
         cat <% ctx().vm_path %>/<% ctx().fqdn %>.fullchain.pem
     next:
       - when: <% succeeded() %>
-        do: get_key
         publish:
           - fullchain: <% result()[ctx().easypki_vm].stdout %>
+        do: read_private_key
       - when: <% failed() %>
         publish:
-          - msg: "Failed to retrieve the fullchain file <% ctx().fqdn %>.fullchain.pem."
+          - msg: "Failed to read the full chain file for '<% ctx().fqdn %>'."
 
-  get_key:
+  read_private_key:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
@@ -82,14 +83,14 @@ tasks:
         cat <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem
     next:
       - when: <% succeeded() %>
-        do: send_to_vault
         publish:
           - key: <% result()[ctx().easypki_vm].stdout %>
+        do: store_certificate_in_vault
       - when: <% failed() %>
         publish:
-          - msg: "Failed to retrieve the key file <% ctx().fqdn %>.key.pem."
+          - msg: "Failed to read the private key file for '<% ctx().fqdn %>'."
 
-  send_to_vault:
+  store_certificate_in_vault:
     action: core.remote
     input:
       hosts: "<% ctx().vault_vm %>"
@@ -99,10 +100,10 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - msg: "Certificate files for <% ctx().fqdn %> have been successfully generated, transferred to the VM, and uploaded to Vault."
+          - msg: "Certificate files for '<% ctx().fqdn %>' were generated, copied to the VM, and stored in Vault successfully."
       - when: <% failed() %>
         publish:
-          - msg: "Failed to upload <% ctx().vm_path %>/<% ctx().fqdn %>.[cert|pem|key].pem to Vault."
+          - msg: "Failed to store certificate files for '<% ctx().fqdn %>' in Vault."
 
 output:
   - msg: <% ctx().msg %>

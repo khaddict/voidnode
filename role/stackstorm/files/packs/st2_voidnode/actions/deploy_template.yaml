@@ -1,23 +1,24 @@
 name: deploy_template
 pack: st2_voidnode
 runner_type: orquesta
-description: Deploy template.
+description: Deploy a Proxmox VM template from a cloud image.
 enabled: true
 entry_point: workflows/deploy_template.yaml
+
 parameters:
   distribution:
     type: string
     required: true
-    description: Distribution (for bookworm for example distribution = debian).
+    description: The distribution name, for example 'debian'.
   codename:
     type: string
     required: true
-    description: Codename (for bookworm for example codename = bookworm).
+    description: The distribution codename, for example 'bookworm'.
   osrelease:
     type: string
     required: true
-    description: OS release (for bookworm for example osrelease = 12).
+    description: The OS release version, for example '12'.
   vmid:
     type: string
     required: true
-    description: Template VMID (for example vmid = "200").
+    description: The template VMID, for example '200'.
