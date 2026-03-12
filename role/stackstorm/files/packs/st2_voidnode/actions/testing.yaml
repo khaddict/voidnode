@@ -1,4 +1,3 @@
----
 name: testing
 pack: st2_voidnode
 description: Test things. Highstate stackstorm.khaddict.lab to reset it.
