@@ -1,11 +1,12 @@
 name: create_vm
 pack: st2_voidnode
-description: Create a new Proxmox VM.
+description: Provision and bootstrap a Proxmox VM from main.yaml.
 runner_type: orquesta
 entry_point: workflows/create_vm.yaml
 enabled: true
+
 parameters:
   name:
-    required: true
     type: string
-    description: The VM name.
+    required: true
+    description: The VM name defined in main.yaml.

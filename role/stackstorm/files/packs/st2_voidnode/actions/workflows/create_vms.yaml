@@ -1,0 +1,36 @@
+version: 1.0
+description: Provision all Proxmox VMs defined in main.yaml.
+
+vars:
+  - vms: []
+  - msg: ""
+
+tasks:
+  load_vm_names:
+    action: core.local
+    input:
+      cmd: |
+        yq -r '.proxmox.vms | keys | .[]' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() and result().stdout != "" %>
+        publish:
+          - vms: <% result().stdout.split("\n") %>
+        do:
+          - create_vms
+      - when: <% succeeded() and result().stdout = "" %>
+        publish:
+          - vms: []
+          - msg: "No VM definitions were found in main.yaml."
+
+  create_vms:
+    with: <% ctx().vms %>
+    action: st2_voidnode.create_vm
+    input:
+      name: <% item() %>
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "All VM provisioning workflows completed."
+
+output:
+  - msg: <% ctx().msg %>
