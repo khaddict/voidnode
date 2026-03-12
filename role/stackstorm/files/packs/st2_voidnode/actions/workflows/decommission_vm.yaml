@@ -1,0 +1,90 @@
+version: 1.0
+description: Workflow to decommission Proxmox VMs properly.
+
+input:
+  - name
+
+vars:
+  - msg: ""
+  - proxmox: "voidnode.khaddict.lab"
+  - saltmaster: "saltmaster.khaddict.lab"
+  - node: "voidnode"
+
+tasks:
+  vm_existence:
+    action: core.remote
+    input:
+      hosts: "<% ctx().proxmox %>"
+      username: root
+      cmd: |
+        qm list | grep "<% ctx().name %>"
+    next:
+      - when: <% succeeded() %>
+        do: vm_status
+        publish:
+          - vmid: <% result()[ctx().proxmox].stdout.split()[0] %>
+      - when: <% failed() %>
+        publish:
+          - msg: "VM <% ctx().name %> not found on Proxmox node <% ctx().proxmox %>."
+
+  vm_status:
+    action: core.remote
+    input:
+      hosts: "<% ctx().proxmox %>"
+      username: root
+      cmd: |
+        qm status <% ctx().vmid %> | awk '{print $2}'
+    next:
+      - when: <% succeeded() and result()[ctx().proxmox].stdout = "running" %>
+        do: stop_vm
+      - when: <% succeeded() and result()[ctx().proxmox].stdout = "stopped" %>
+        do: delete_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Unable to determine power state for VM <% ctx().vmid %> on <% ctx().proxmox %>."
+
+  stop_vm:
+    action: core.remote
+    input:
+      hosts: "<% ctx().proxmox %>"
+      username: root
+      cmd: |
+        qm stop <% ctx().vmid %>
+    next:
+      - when: <% succeeded() %>
+        do: delete_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Could not stop VM <% ctx().vmid %> on <% ctx().proxmox %>."
+
+  delete_vm:
+    action: core.remote
+    input:
+      hosts: "<% ctx().proxmox %>"
+      username: root
+      cmd: |
+        qm destroy <% ctx().vmid %>
+    next:
+      - when: <% succeeded() %>
+        do: delete_saltkey
+      - when: <% failed() %>
+        publish:
+          - msg: "Could not delete VM <% ctx().vmid %> on <% ctx().proxmox %>."
+
+  delete_saltkey:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      cmd: |
+        salt-key -d <% ctx().name %> -y
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "Decommission complete."
+      - when: <% failed() %>
+        publish:
+          - msg: "Could not delete Salt key for <% ctx().name %> on <% ctx().saltmaster %>."
+
+output:
+  - msg: <% ctx().msg %>

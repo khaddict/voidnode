@@ -1,0 +1,349 @@
+version: 1.0
+description: Create a new Proxmox VM.
+
+input:
+  - name
+
+vars:
+  - msg: ""
+  - vmid: ""
+  - vm_description: ""
+  - template: ""
+  - ip: ""
+  - ram_mb: ""
+  - cpu_cores: ""
+  - vlan_id: ""
+  - gateway: ""
+  - dns: ""
+  - disk: ""
+  - tags: ""
+  - proxmox: "voidnode.khaddict.lab"
+  - saltmaster: "saltmaster.khaddict.lab"
+  - st2_sshkey: ""
+  - saltmaster_sshkey: ""
+  - node: "voidnode"
+  - storage: "local-lvm"
+  - template_id: ""
+
+tasks:
+  extract_ssh_keys:
+    action: core.local
+    input:
+      cmd: |
+        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) |
+          [
+            .proxmox.vms["stackstorm"].ssh,
+            .proxmox.vms["saltmaster"].ssh
+          ] | @tsv' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() and result().stdout != "" %>
+        do:
+          - extract_vm_fields
+        publish:
+          - st2_sshkey: <% result().stdout.split("\t")[0] %>
+          - saltmaster_sshkey: <% result().stdout.split("\t")[1] %>
+      - when: <% succeeded() and result().stdout = "" %>
+        publish:
+          - msg: "Impossible de récupérer st2_sshkey et saltmaster_sshkey depuis main.yaml"
+
+  extract_vm_fields:
+    action: core.local
+    input:
+      cmd: |
+        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) | .proxmox.vms["<% ctx().name %>"] as $vm |
+          [
+            $vm.vmid,
+            $vm.description,
+            $vm.template,
+            $vm.ip,
+            $vm.hardware.ram_mb,
+            $vm.hardware.cpu.cores,
+            $vm.id,
+            $vm.gateway,
+            $vm.dns,
+            $vm.hardware.disks[0].size_gb,
+            $vm.tags
+          ] | @tsv' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() and result().stdout != "" %>
+        publish:
+          - vmid: <% result().stdout.split("\t")[0] %>
+          - vm_description: <% result().stdout.split("\t")[1] %>
+          - template: <% result().stdout.split("\t")[2] %>
+          - ip: <% result().stdout.split("\t")[3] %>
+          - ram_mb: <% result().stdout.split("\t")[4] %>
+          - cpu_cores: <% result().stdout.split("\t")[5] %>
+          - vlan_id: <% result().stdout.split("\t")[6] %>
+          - gateway: <% result().stdout.split("\t")[7] %>
+          - dns: <% result().stdout.split("\t")[8] %>
+          - disk: <% result().stdout.split("\t")[9] %>
+          - tags: <% result().stdout.split("\t")[10] %>
+        do:
+          - check_vm_existence
+      - when: <% succeeded() and result().stdout = "" %>
+        publish:
+          - msg: "VM <% ctx().name %> introuvable dans main.yaml"
+
+  check_vm_existence:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        pvesh get /cluster/resources --type vm --output-format json | jq -e --arg name '<% ctx().name %>' 'any(.[]; .type=="qemu" and .name==$name)' >/dev/null && echo EXISTS || echo ABSENT
+    next:
+      - when: <% result()[ctx().proxmox].stdout = "EXISTS" %>
+        do: noop
+        publish:
+          - msg: "VM <% ctx().name %> already exists on <% ctx().proxmox %>. Skipping creation."
+      - when: <% result()[ctx().proxmox].stdout = "ABSENT" %>
+        do: get_template_id
+
+  get_template_id:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        pvesh get /nodes/<% ctx().node %>/qemu --output-format json | jq -re --arg name '<% ctx().template %>' 'first(.[] | select(.template==1 and .name==$name)) | .vmid'
+    next:
+      - when: <% succeeded() %>
+        do: clone_vm
+        publish:
+          - template_id: <% result()[ctx().proxmox].stdout %>
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to retrieve template ID for <% ctx().template %> on <% ctx().proxmox %>."
+
+  clone_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm clone <% ctx().template_id %> <% ctx().vmid %> --full --name <% ctx().name %> --storage <% ctx().storage %> --target <% ctx().node %>
+    next:
+      - when: <% succeeded() %>
+        do: configure_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to clone VM <% ctx().name %> (vmid <% ctx().vmid %>) from template <% ctx().template_id %> on <% ctx().proxmox %>."
+
+  configure_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm set <% ctx().vmid %> --tags <% ctx().tags %> --net0 virtio,bridge=vmbr1,tag=<% ctx().vlan_id %> --ciuser root -ipconfig0 ip=<% ctx().ip %>/24,gw=<% ctx().gateway %> --nameserver <% ctx().dns %> --memory <% ctx().ram_mb %> --cores <% ctx().cpu_cores %> --description "<% ctx().vm_description %>" --sshkeys <(echo -e "<% ctx().st2_sshkey %>\n<% ctx().saltmaster_sshkey %>")
+    next:
+      - when: <% succeeded() %>
+        do: resize_disk
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to configure VM <% ctx().name %> (vmid <% ctx().vmid %>) on <% ctx().proxmox %>."
+
+  resize_disk:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm resize <% ctx().vmid %> scsi0 <% ctx().disk %>G
+    next:
+      - when: <% succeeded() %>
+        do: first_start_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Disk resize failed for VM <% ctx().name %> (vmid <% ctx().vmid %>)."
+
+  first_start_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm start <% ctx().vmid %>
+        until nc -z -w1 <% ctx().ip %> 22 >/dev/null 2>&1; do sleep 1; done
+    next:
+      - when: <% succeeded() %>
+        do: set_hostname
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to start VM <% ctx().name %> or SSH (22/tcp) not reachable at <% ctx().ip %>."
+
+  set_hostname:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      cmd: |
+        hostnamectl set-hostname "<% ctx().name %>"
+    next:
+      - when: <% succeeded() %>
+        do: ssh_keygen
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to set hostname <% ctx().name %> on <% ctx().ip %>."
+
+  ssh_keygen:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      cmd: |
+        [ -f /root/.ssh/id_ed25519 ] || ssh-keygen -t ed25519 -C "<% ctx().name %>" -f /root/.ssh/id_ed25519 -q -N ""
+    next:
+      - when: <% succeeded() %>
+        do: independent_minion
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to generate SSH keypair on <% ctx().ip %>."
+
+  independent_minion:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      timeout: 180
+      cmd: |
+        salt-ssh --user=root -i --priv=/root/.ssh/id_ed25519 <% ctx().ip %> state.sls independent
+    next:
+      - when: <% succeeded() %>
+        do: purge_cloudinit_netplan
+      - when: <% failed() %>
+        publish:
+          - msg: "Salt independent minion bootstrap failed for <% ctx().name %>."
+
+  purge_cloudinit_netplan:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      cmd: |
+        set -euxo pipefail
+        mkdir -p /etc/cloud/cloud.cfg.d
+        printf "network:\n  config: disabled\n" > /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+        touch /etc/cloud/cloud-init.disabled || true
+        systemctl mask cloud-init-local.service cloud-init-network.service cloud-config.service cloud-final.service || true
+        apt-get purge -y cloud-init netplan.io netplan-generator libnetplan1 python3-netplan || true
+        rm -f /etc/netplan/* 2>/dev/null || true
+        rm -rf /var/lib/cloud/* /var/log/cloud-init* /run/cloud-init 2>/dev/null || true
+        rm -f /run/systemd/network/10-*.network 2>/dev/null || true
+        apt-get -y autoremove --purge || true
+    next:
+      - when: <% succeeded() %>
+        do: restart_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to purge cloud-init/netplan on <% ctx().name %>."
+
+  restart_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      cmd: |
+        reboot now
+    next:
+      - when: <% succeeded() %>
+        do: accept_salt_key
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to restart <% ctx().name %>."
+
+  accept_salt_key:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      timeout: 180
+      cmd: |
+        until salt-key -l unaccepted | grep -qx "<% ctx().name %>"; do sleep 1; done
+        salt-key -a "<% ctx().name %>" -y
+    next:
+      - when: <% succeeded() %>
+        do: highstate_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to accept Salt key for <% ctx().name %>."
+
+  highstate_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      timeout: 240
+      cmd: |
+        salt-call state.highstate
+    next:
+      - when: <% succeeded() %>
+        do: remove_useless_devices
+      - when: <% failed() %>
+        publish:
+          - msg: "Salt highstate failed on <% ctx().name %>."
+
+  remove_useless_devices:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm set <% ctx().vmid %> --delete efidisk0 --delete ide0
+    next:
+      - when: <% succeeded() %>
+        do: shutdown_vm
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to delete cloud-init/EFI devices (efidisk0, ide0) on VM <% ctx().vmid %>."
+
+  shutdown_vm:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      cmd: |
+        shutdown -h now
+    next:
+      - when: <% succeeded() or failed() %>
+        do: wait_vm_stopped
+
+  wait_vm_stopped:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        until qm status <% ctx().vmid %> | grep -q 'stopped'; do sleep 1; done; qm start <% ctx().vmid %>
+    next:
+      - when: <% succeeded() %>
+        do: delete_unused0
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to stop or restart VM <% ctx().vmid %> on <% ctx().proxmox %>."
+
+  delete_unused0:
+    action: core.remote
+    input:
+      hosts: <% ctx().proxmox %>
+      username: root
+      cmd: |
+        qm set <% ctx().vmid %> --delete unused0
+    next:
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to delete unused0 on VM <% ctx().vmid %>."
+
+output:
+  - msg: <% ctx().msg %>
+  - vmid: <% ctx().vmid %>
+  - vm_description: <% ctx().vm_description %>
+  - template: <% ctx().template %>
+  - ip: <% ctx().ip %>
+  - ram_mb: <% ctx().ram_mb %>
+  - cpu_cores: <% ctx().cpu_cores %>
+  - vlan_id: <% ctx().vlan_id %>
+  - gateway: <% ctx().gateway %>
+  - dns: <% ctx().dns %>
+  - disk: <% ctx().disk %>
+  - tags: <% ctx().tags %>
