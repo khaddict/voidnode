@@ -192,7 +192,7 @@ tasks:
       hosts: <% ctx().ip %>
       username: root
       cmd: |
-        [ -f /root/.ssh/id_ed25519 ] || ssh-keygen -t ed25519 -C "<% ctx().name %>" -f /root/.ssh/id_ed25519 -q -N ""
+        [ -f /root/.ssh/id_ed25519 ] || ssh-keygen -t ed25519 -C "<% ctx().name %>@khaddict.lab" -f /root/.ssh/id_ed25519 -q -N ""
     next:
       - when: <% succeeded() %>
         do: independent_minion
