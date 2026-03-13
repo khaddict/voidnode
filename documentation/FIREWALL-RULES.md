@@ -32,14 +32,18 @@
 | INFRA | 1 | PASS | TCP/UDP | INFRA net | This Firewall | 53 | DNS |
 | INFRA | 2 | PASS | UDP | INFRA net | This Firewall | 123 | NTP |
 | INFRA | 3 | PASS | TCP | PROMETHEUS | CORE net | 9100 | Prometheus scrape |
-| INFRA | 4 | PASS | TCP | PROMETHEUS | ADMIN net | 9100 | Prometheus scrape |
-| INFRA | 5 | PASS | TCP | PROMETHEUS | INFRA net | 9100 | Prometheus scrape |
-| INFRA | 6 | PASS | TCP | PROMETHEUS | EDGE net | 9100 | Prometheus scrape |
-| INFRA | 7 | PASS | TCP | INFRA net | VAULT | 8200 | Vault |
-| INFRA | 8 | PASS | TCP | INFRA net | SALTMASTER | 4505-4506 | Salt |
-| INFRA | 9 | PASS | TCP | INFRA net | LOKI | 3100 | Push logs |
-| INFRA | 10 | PASS | * | INFRA net | EDGE net | any | Access EDGE |
-| INFRA | 11 | PASS | * | INFRA net | !RFC1918 | any | Internet access |
+| INFRA | 4 | PASS | ICMP | PROMETHEUS | CORE net | any | Prometheus ICMP probe |
+| INFRA | 5 | PASS | TCP | PROMETHEUS | ADMIN net | 9100 | Prometheus scrape |
+| INFRA | 6 | PASS | ICMP | PROMETHEUS | ADMIN net | any | Prometheus ICMP probe |
+| INFRA | 7 | PASS | TCP | PROMETHEUS | INFRA net | 9100 | Prometheus scrape |
+| INFRA | 8 | PASS | ICMP | PROMETHEUS | INFRA net | any | Prometheus ICMP probe |
+| INFRA | 9 | PASS | TCP | PROMETHEUS | EDGE net | 9100 | Prometheus scrape |
+| INFRA | 10 | PASS | ICMP | PROMETHEUS | EDGE net | any | Prometheus ICMP probe |
+| INFRA | 11 | PASS | TCP | INFRA net | VAULT | 8200 | Vault |
+| INFRA | 12 | PASS | TCP | INFRA net | SALTMASTER | 4505-4506 | Salt |
+| INFRA | 13 | PASS | TCP | INFRA net | LOKI | 3100 | Push logs |
+| INFRA | 14 | PASS | * | INFRA net | EDGE net | any | Access EDGE |
+| INFRA | 15 | PASS | * | INFRA net | !RFC1918 | any | Internet access |
 
 # VLAN 40 EDGE
 
