@@ -1,7 +1,7 @@
 include:
-  - base.node_exporter
   - .bashrc
   - .ca
+  - .exporters
   - .hostname
   - .hosts
   - .motd
