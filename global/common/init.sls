@@ -1,4 +1,5 @@
 include:
+  - base.node_exporter
   - .bashrc
   - .ca
   - .hostname
