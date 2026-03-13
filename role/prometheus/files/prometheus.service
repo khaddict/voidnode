@@ -1,0 +1,13 @@
+[Unit]
+Description=Prometheus Server
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network-online.target
+
+[Service]
+User=prometheus
+Restart=on-failure
+WorkingDirectory=/etc/prometheus
+ExecStart=/etc/prometheus/prometheus --config.file=/etc/prometheus/prometheus.yml
+
+[Install]
+WantedBy=multi-user.target

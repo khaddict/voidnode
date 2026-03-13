@@ -1,0 +1,48 @@
+---
+groups:
+  - name: global
+    rules:
+      - alert: ExporterDown
+        annotations:
+          summary: "Exporter down (instance {{ $labels.instance }})"
+          description: "Prometheus exporter down (value {{ $value }})"
+        expr: up{instance=~".*khaddict.lab"} == 0
+        for: 3m
+        labels:
+          severity: warning
+
+      - alert: HostOutOfMemory
+        annotations:
+          summary: "Host out of memory (instance {{ $labels.instance }})"
+          description: "Node memory is filling up (< 10% left) (value {{ $value }})"
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+
+      - alert: HostOutOfDisk
+        annotations:
+          summary: "Host out of disk (instance {{ $labels.instance }})"
+          description: "Node disk {{ $labels.device }} is filling up (< 20% left) (value {{ $value }})"
+        expr: node_filesystem_free_bytes / node_filesystem_size_bytes * 100 < 20
+        for: 5m
+        labels:
+          severity: warning
+
+      - alert: ProxmoxNodeHot
+        annotations:
+          summary: "{{ $labels.instance }} is overheating"
+          description: "{{ $labels.instance }} is overheating (> 75°C) (value {{ $value }})"
+        expr: (avg by (instance)(node_hwmon_temp_celsius{instance=~"voidnode.khaddict.lab"}) > 75)
+        for: 5m
+        labels:
+          severity: warning
+
+      - alert: ICMPUnreachable
+        annotations:
+          summary: "ICMP unreachable (instance {{ $labels.instance }})"
+          description: "ICMP is unreachable on {{ $labels.instance }} (value {{ $value }})"
+        expr: probe_success{job="blackbox_icmp"} == 0
+        for: 1m
+        labels:
+          severity: warning
