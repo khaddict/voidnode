@@ -56,7 +56,7 @@ proxmox:
             type: nvme
       <<: *vlan_core
 
-  vms:
+  core:
     # VLAN CORE
     opnsense:
       vmid: 100
@@ -76,6 +76,7 @@ proxmox:
             size_gb: 32
       <<: *vlan_core
 
+  vms:
     # VLAN ADMIN
     assets:
       vmid: 101
