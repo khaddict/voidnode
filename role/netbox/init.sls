@@ -39,12 +39,10 @@ netbox_dependencies:
     - mode: 755
 
 netbox_repo:
-  git.latest:
+  git.cloned:
     - name: https://github.com/netbox-community/netbox.git
     - target: /opt/netbox
     - branch: main
-    - rev: main
-    - depth: 1
     - require:
       - file: /opt/netbox
 
@@ -140,3 +138,17 @@ nginx_service:
     - reload: True
     - watch:
       - file: /etc/nginx/sites-available/netbox
+
+/opt/netbox/netbox/scripts/populate_netbox.py:
+  file.managed:
+    - source: salt://role/netbox/files/populate_netbox.py
+    - mode: 755
+    - user: netbox
+    - group: netbox
+
+/opt/netbox/data/inventory.yaml:
+  file.managed:
+    - source: salt://data/main.yaml
+    - mode: 644
+    - user: netbox
+    - group: netbox
