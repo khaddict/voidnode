@@ -49,3 +49,4 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 **10.40.0.0/24** – *Edge services network. This segment hosts services that are exposed to external networks and act as entry points between the internet and the internal lab infrastructure.*
 - `ai.khaddict.lab`
 - `revproxy.khaddict.lab`
+- `uptimekuma.khaddict.lab`
