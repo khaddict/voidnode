@@ -377,14 +377,18 @@ class PopulateNetBox(Script):
 
     def set_primary_ip_device(self, device, ip_obj):
         if device.primary_ip4_id != ip_obj.id:
+            if device.pk and hasattr(device, "snapshot"):
+                device.snapshot()
             device.primary_ip4 = ip_obj
-            self.snapshot_and_save(device)
+            device.save(update_fields=["primary_ip4"])
             self.log_info(f"Set primary IPv4 for device {device.name}: {ip_obj.address}")
 
     def set_primary_ip_vm(self, vm, ip_obj):
         if vm.primary_ip4_id != ip_obj.id:
+            if vm.pk and hasattr(vm, "snapshot"):
+                vm.snapshot()
             vm.primary_ip4 = ip_obj
-            self.snapshot_and_save(vm)
+            vm.save(update_fields=["primary_ip4"])
             self.log_info(f"Set primary IPv4 for VM {vm.name}: {ip_obj.address}")
 
     def sync_vm_tags(self, vm, tag_names):
