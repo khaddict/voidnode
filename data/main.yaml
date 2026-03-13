@@ -205,3 +205,94 @@ proxmox:
           - name: scsi0
             size_gb: 20
       <<: *vlan_infra
+
+    prometheus:
+      vmid: 110
+      description: "Prometheus for Monitoring"
+      template: debian-trixie-template
+      tags: "infra,trixie"
+      ip: 10.30.0.3
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm7Su4feupVYWqlzHuo1coP5kNS7fNT9uV7qa8TB4QF prometheus@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      <<: *vlan_infra
+
+    grafana:
+      vmid: 111
+      description: "Grafana for Visualization"
+      template: debian-trixie-template
+      tags: "infra,trixie"
+      ip: 10.30.0.4
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN23Mh38z0N0QylJwhKsSkECVF3DOgbvZ8dZHqTh/JtL grafana@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      <<: *vlan_infra
+
+    loki:
+      vmid: 112
+      description: "Loki for Log Aggregation"
+      template: debian-trixie-template
+      tags: "infra,trixie"
+      ip: 10.30.0.5
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBHgGh/4ODt7ZiivX1DW6h3tOYO+5LIPfhdNgFhZXIRb loki@khaddict.lab"
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 20
+      <<: *vlan_infra
+
+    # VLAN EDGE
+    ai:
+      vmid: 108
+      description: "AI to experiment"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      ip: 10.40.0.3
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJxIVCJe98DLGmnJz4IqNWOR7ZX+nb2zQI47qETV7vhB ai@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      <<: *vlan_edge
+
+    revproxy:
+      vmid: 109
+      description: "Reverse Proxy for Edge Services"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      ip: 10.40.0.2
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDKxcsI82GqQBOX1w1b+LqScp9XftXL4kYABgsyiSE2/ revproxy@khaddict.lab"
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      <<: *vlan_edge
