@@ -7,7 +7,8 @@
 | INFRA     | ✖* | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | EDGE      | ✖ | ✖ | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ |
 
-\* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` for node_exporter metrics.
+\* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` for node_exporter metrics.  
+\* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` for blackbox_exporter metrics.
 
 # VLAN 10 CORE
 
