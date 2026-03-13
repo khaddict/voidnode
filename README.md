@@ -1,69 +1,51 @@
-# Voidnode – Single Node, Segmented & Secure
+# Voidnode – Single node, segmented & secure
 
-<img width="512" height="768" alt="image" src="https://github.com/user-attachments/assets/30f17632-b131-45e0-ad49-b0f6131c2d41" />
+![Voidnode architecture](images/khazix-voidnode.png)
 
-# Introduction
-J'ai un homelab full HA, en cluster, 3 nodes avec CEPH etc
-Un noeud tombe, pas de soucis, mais ça demande plus de maintenance, 3 fois plus de matériel = 3 fois plus de possibilités de pannes et mon matériel arrive en fin de garantie.
-On passe donc sur quelque chose de plus simple. Par plus simple, je veux dire moins de haute disponibilité, et je pars du postulat que si le node tombe, c'est pas très grave : c'est un homelab.
-Aussi, sur mon précédent homelab, tout était sur mon réseau LAN (192.168.0.0/24), là l'objectif est d'isoler tout mon homelab dans un autre réseau (10.0.0.0/16) derrière un routeur (OPNsense). Et aussi je vais faire en sorte de siloter mes VMs en fonction de leur utilité : admin, services à exposer sur le net...
+## Introduction
 
-# Matériel
-Concernant le matériel, actuellement les prix des RAM sont abusés, j'ai déjà acheté le mini-pc que je vais upgrade à 4To de SSD NVMe & 128Go de RAM. Dans mon ancien homelab fully HA, j'avais 2To par node mais avec CEPH, la data était répliquée 2 fois sur 3 nodes, donc 3To de stockage utile avec de la redondance ! Donc 4To sans redondance je suis + que large. Simplement que je voulais remplir un slot NVMe dans le cas où mes besoins évoluent. Côté RAM, trop cher actuellement (900€ les 128Go et c'est le prix le moins cher de tout internet). Donc je vais simplement build les fondations avec 32Go de RAM, éteindre les VMs qui ne servent pas une fois configurées, le temps de trouver une bonne offre et/ou que les prix redescendent.
+I used to run a fully HA homelab ([homelab](https://github.com/khaddict/homelab) & [homelab_cloud](https://github.com/khaddict/homelab_cloud)) with a three-node cluster and Ceph. If one node went down, everything kept running without issues. However, it also meant more maintenance and more hardware to manage. With three nodes, there were simply more components that could fail, and my hardware was starting to reach the end of its warranty.
 
-- https://www.geekom.fr/geekom-a9-max-mini-pc -> acheté
-- https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw -> acheté
-- https://www.tp-link.com/fr/business-networking/soho-switch-easy-smart/tl-sg108e -> possédé
-- https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5 -> pas encore acheté, j'attends une baisse des prix
+Because of that, I decided to move to something simpler. By simpler, I mean less high availability. I now assume that if the node goes down, it’s not a big deal. After all, it’s just a homelab.
 
-# Adressage IP
+In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new design, the goal is to isolate the entire homelab into a separate network (10.0.0.0/16) behind a router (OPNsense). I also want to segment the VMs based on their purpose, such as administrative workloads, internal infrastructure, or services exposed to the internet.
 
-192.168.0.0/24 -> WAN
-10.0.0.0/16 -> LAN
+## Hardware
 
-# VMs & VLANs
+- **Mini PC** - https://www.geekom.fr/geekom-a9-max-mini-pc
+- **RAM (128GB DDR5)** – https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5
+- **Storage (4TB NVMe)** – https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw
+- **Switch** – https://www.tp-link.com/fr/business-networking/soho-switch-easy-smart/tl-sg108e
+
+## IP addressing
+
+**WAN** → `192.168.0.0/24`  
+**LAN** → `10.0.0.0/16`
+
+## VMs & VLANs
 
 ### VLAN 10 – CORE
-**10.10.0.0/24** – *opnsense + proxmox node*
+**10.10.0.0/24** – *Core infrastructure network. It contains the main hypervisor and the firewall responsible for routing, segmentation, and security across the lab.*
 - `opnsense.khaddict.lab`
 - `voidnode.khaddict.lab`
 
 ### VLAN 20 – ADMIN
-**10.20.0.0/24** – *Control plane & sensitive tooling*
-- `kcli.khaddict.lab`
+**10.20.0.0/24** – *Administrative infrastructure network. This segment hosts management and automation services used to operate, secure, and maintain the lab environment.*
+- `assets.khaddict.lab`
 - `saltmaster.khaddict.lab`
 - `stackstorm.khaddict.lab`
-- `netbox.khaddict.lab`
-- `easypki.khaddict.lab`
-- `assets.khaddict.lab`
 - `vault.khaddict.lab`
+- `easypki.khaddict.lab`
 - `pbs.khaddict.lab`
 
 ### VLAN 30 – INFRA
-**10.30.0.0/24** – *Workloads & compute*
+**10.30.0.0/24** – *Internal infrastructure services network. This segment hosts observability and operational tools used to monitor, visualize, and manage the lab environment.*
 - `prometheus.khaddict.lab`
 - `grafana.khaddict.lab`
 - `loki.khaddict.lab`
-- `kcontrol.khaddict.lab`
-- `kworker.khaddict.lab`
-- `ia.khaddict.lab`
+- `netbox.khaddict.lab`
 
 ### VLAN 40 – EDGE
-**10.40.0.0/24** – *Exposed entrypoints only*
+**10.40.0.0/24** – *Edge services network. This segment hosts services that are exposed to external networks and act as entry points between the internet and the internal lab infrastructure.*
+- `ai.khaddict.lab`
 - `revproxy.khaddict.lab`
-
-# Plan d'action
-1. Installer l'ISO Proxmox, upgrades, setup thin-lvm
-2. Installer la VM OPNsense & configuration des interfaces, VLANs, DNS, DHCP, NTP, wireguard pour accéder au network 10.0.0.0/16
-3. Installer le saltmaster & stackstorm
-4. Faire un workflow simpliste pour déployer des VMs à la volée
-5. Déployer netbox, easypki, assets, vault avec salt
-6. Compléter le workflow st2 pour faire des déploiements propres avec ajouts vault, netbox
-7. Faire le reste des VMs + configurations salt
-8. Faire un repo `voidnode_cloud` pour la partie k8s
-9. Setup Proxmox Backup server
-
-# Sécurité
-- pas d'accès aux VMs sauf via clé SSH (password disabled)
-- La seule interface qui va vers mon WAN (freebox) c'est l'interface WAN de mon opnsense
-- Pour récupérer accès à mon Proxmox si routeur KO par exemple, je peux y accéder en me branchant directement au node Proxmox
