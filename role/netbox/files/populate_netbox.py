@@ -457,8 +457,21 @@ class PopulateNetBox(Script):
                 ip_obj = self.ensure_ip(address, iface)
                 self.set_primary_ip_device(device, ip_obj)
 
-        vms = config.get("proxmox", {}).get("vms", {})
-        for vm_name, vm_data in vms.items():
+        proxmox = config.get("proxmox", {})
+
+        vm_groups = {
+            "core": proxmox.get("core", {}),
+            "vms": proxmox.get("vms", {}),
+        }
+
+        all_vms = {}
+        for group_name, group_vms in vm_groups.items():
+            for vm_name, vm_data in group_vms.items():
+                if vm_name in all_vms:
+                    raise AbortScript(f"Duplicate VM name '{vm_name}' found in proxmox.{group_name}")
+                all_vms[vm_name] = vm_data
+
+        for vm_name, vm_data in all_vms.items():
             desired_vm_names.add(vm_name)
 
             vm = self.ensure_vm(vm_name, vm_data, site)
