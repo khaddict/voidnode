@@ -3,12 +3,13 @@
 | From → To | CORE | ADMIN | INFRA | EDGE | VAULT | SALTMASTER | LOKI | INTERNET |
 |----------|----|-----|-----|----|-----|----------|----|--------|
 | CORE      | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| ADMIN     | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| ADMIN     | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | INFRA     | ✖* | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | EDGE      | ✖ | ✖ | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ |
 
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` for node_exporter metrics.  
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` for blackbox_exporter metrics.
+\* **Exception**: `STACKSTORM` (`ADMIN`) → `CORE` `SSH` for stackstorm workflows.
 
 # VLAN 10 CORE
 
@@ -22,9 +23,10 @@
 |---|---|---|---|---|---|---|---|
 | ADMIN | 1 | PASS | TCP/UDP | ADMIN net | This Firewall | 53 | DNS |
 | ADMIN | 2 | PASS | UDP | ADMIN net | This Firewall | 123 | NTP |
-| ADMIN | 3 | PASS | * | ADMIN net | INFRA net | any | Access infrastructure services |
-| ADMIN | 4 | PASS | * | ADMIN net | EDGE net | any | Manage edge services |
-| ADMIN | 5 | PASS | * | ADMIN net | !RFC1918 | any | Internet access |
+| ADMIN | 3 | PASS | TCP | STACKSTORM | PROXMOX | 22 | SSH Access for workflows |
+| ADMIN | 4 | PASS | * | ADMIN net | INFRA net | any | Access infrastructure services |
+| ADMIN | 5 | PASS | * | ADMIN net | EDGE net | any | Manage edge services |
+| ADMIN | 6 | PASS | * | ADMIN net | !RFC1918 | any | Internet access |
 
 # VLAN 30 INFRA
 
