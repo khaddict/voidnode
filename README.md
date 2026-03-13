@@ -1,6 +1,6 @@
 # Voidnode – Single node, segmented & secure
 
-![Voidnode architecture](images/khazix-voidnode.png)
+<img src="images/khazix-voidnode.png" alt="Voidnode architecture" style="width:30%;">
 
 ## Introduction
 
@@ -12,10 +12,10 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 
 ## Hardware
 
-- **Mini PC** - https://www.geekom.fr/geekom-a9-max-mini-pc
-- **RAM (128GB DDR5)** – https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5
-- **Storage (4TB NVMe)** – https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw
-- **Switch** – https://www.tp-link.com/fr/business-networking/soho-switch-easy-smart/tl-sg108e
+[GEEKOM A9 Max Mini PC](https://www.geekom.fr/geekom-a9-max-mini-pc)  
+[Crucial 128GB Kit (2x64GB) DDR5-5600 SODIMM](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)  
+[Samsung 990 EVO Plus 4TB NVMe PCIe 4.0 x4 M.2 Internal SSD](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)  
+[TP-Link TL-SG108E 8-Port Gigabit Easy Smart Switch](https://www.tp-link.com/fr/business-networking/soho-switch-easy-smart/tl-sg108e)
 
 ## IP addressing
 
