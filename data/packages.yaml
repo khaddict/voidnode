@@ -19,6 +19,7 @@ common_packages:
     - tcpdump
     - tig
     - iproute2
+    - netcat-openbsd
   debian:
     - yq
   ubuntu: []
