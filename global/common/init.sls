@@ -7,6 +7,7 @@ include:
   - .motd
   - .network
   - .packages
+  - .promtail
   - .salt-minion
   - .sources
   - .ssh

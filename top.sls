@@ -10,6 +10,9 @@
   'grafana':
     - role.grafana
 
+  'loki':
+    - role.loki
+
   'netbox':
     - role.netbox
 
