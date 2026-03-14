@@ -74,6 +74,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 32
+      backup: true
       <<: *vlan_core
 
   vms:
@@ -94,6 +95,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_admin
 
     saltmaster:
@@ -112,6 +114,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_admin
 
     stackstorm:
@@ -130,6 +133,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_admin
 
     vault:
@@ -148,6 +152,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_admin
 
     easypki:
@@ -166,6 +171,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_admin
 
     pbs:
@@ -186,6 +192,7 @@ proxmox:
             size_gb: 32
           - name: scsi1
             size_gb: 500
+      backup: false
       <<: *vlan_admin
 
     # VLAN INFRA
@@ -205,6 +212,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_infra
 
     prometheus:
@@ -223,6 +231,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_infra
 
     grafana:
@@ -241,6 +250,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_infra
 
     loki:
@@ -259,6 +269,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_infra
 
     # VLAN EDGE
@@ -278,6 +289,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_edge
 
     revproxy:
@@ -296,6 +308,7 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_edge
 
     uptimekuma:
@@ -314,4 +327,5 @@ proxmox:
         disks:
           - name: scsi0
             size_gb: 20
+      backup: true
       <<: *vlan_edge
