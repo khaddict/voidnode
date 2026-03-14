@@ -1,13 +1,13 @@
 {% import_yaml 'data/main.yaml' as data %}
-{% set host = grains.get('host', grains.get('id')) %}
+{% set host = grains.get('host') or '' %}
 
 {#
   Determine the type of this host based on data/main.yaml.
   This allows other states to branch consistently (vm vs node) without
   re-implementing the same logic repeatedly.
 #}
-{% set vm = data.proxmox.vms.get(host) %}
-{% set node = data.proxmox.nodes.get(host) %}
+{% set vm = data.get('proxmox', {}).get('vms', {}).get(host) %}
+{% set node = data.get('proxmox', {}).get('nodes', {}).get(host) %}
 
 {% if vm %}
 host_type:
