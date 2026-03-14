@@ -5,6 +5,7 @@ include:
   - global.common.hostname
   - global.common.hosts
   - global.common.motd
+  - global.common.host_type
   - global.common.network
   - global.common.packages
   - global.common.promtail
