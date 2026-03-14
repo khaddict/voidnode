@@ -1,0 +1,2 @@
+include:
+  - base.observability.promtail
