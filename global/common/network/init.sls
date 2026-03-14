@@ -7,7 +7,7 @@ include:
 include:
   - global.common.network.ifupdown2
 {% else %}
-unknown_host:
+network_unknown_host:
   test.fail_without_changes:
     - name: "host_type grain not set (run global.common.host_type)."
 {% endif %}
