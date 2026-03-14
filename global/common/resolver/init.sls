@@ -1,17 +1,13 @@
-{% import_yaml 'data/main.yaml' as data %}
-{% set host = grains.get('host') %}
+{% set host_type = grains.get('host_type') %}
 
-{% set vm = data.proxmox.vms.get(host) %}
-{% set node = data.proxmox.nodes.get(host) %}
-
-{% if vm %}
+{% if host_type == 'vm' %}
 include:
   - global.common.resolver.systemd-resolved
-{% elif node %}
+{% elif host_type == 'node' %}
 include:
   - global.common.resolver.resolvconf
 {% else %}
 unknown_host:
   test.fail_without_changes:
-    - name: "Host '{{ host }}' not found in data/main.yaml."
+    - name: "host_type grain not set (run global.common.host_type)."
 {% endif %}
