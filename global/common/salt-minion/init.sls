@@ -13,7 +13,7 @@ minion_config:
     - user: root
     - group: root
 
-service_salt_minion:
+salt_minion_service:
   service.running:
     - name: salt-minion
     - enable: True

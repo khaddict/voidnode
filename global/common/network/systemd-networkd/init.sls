@@ -20,7 +20,7 @@ systemd:
         ntp: {{ vm.ntp }}
         domain: {{ domain }}
 
-service_systemd_networkd:
+systemd_networkd_service:
   service.running:
     - name: systemd-networkd
     - enable: True

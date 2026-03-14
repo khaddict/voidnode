@@ -9,7 +9,7 @@
 {% do hosts.update(proxmox_vms) %}
 
 include:
-  - base.blackbox_exporter
+  - base.blackbox-exporter
 
 prometheus:
   user.present:
