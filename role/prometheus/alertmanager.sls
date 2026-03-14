@@ -1,17 +1,20 @@
 {% set alertmanager_version = '0.31.1' %}
 {% set webhook_url = salt['vault'].read_secret('kv/prometheus').webhook_url %}
 
+alertmanager_user:
+  user.present:
+    - name: alertmanager
+    - usergroup: True
+    - createhome: False
+    - system: True
+
 /etc/alertmanager:
   file.directory:
     - user: alertmanager
     - group: alertmanager
     - mode: 755
-
-alertmanager:
-  user.present:
-    - usergroup: True
-    - createhome: False
-    - system: True
+    - require:
+      - user: alertmanager_user
 
 alertmanager_archive:
   archive.extracted:
@@ -26,7 +29,7 @@ alertmanager_archive:
     - skip_verify: True
     - require:
       - file: /etc/alertmanager
-      - user: alertmanager
+      - user: alertmanager_user
 
 /etc/alertmanager/alertmanager.yml:
   file.managed:
@@ -47,7 +50,7 @@ alertmanager_archive:
     - mode: 755
     - makedirs: True
     - require:
-      - user: alertmanager
+      - user: alertmanager_user
 
 /etc/systemd/system/alertmanager.service:
   file.managed:
