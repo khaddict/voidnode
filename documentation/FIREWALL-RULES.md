@@ -8,7 +8,7 @@
 | EDGE      | ✖ | ✖ | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ |
 
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` for node_exporter metrics.  
-\* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` for blackbox_exporter metrics.
+\* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` for blackbox_exporter metrics.  
 \* **Exception**: `STACKSTORM` (`ADMIN`) → `CORE` `SSH` for stackstorm workflows.
 
 # VLAN 10 CORE
@@ -44,9 +44,8 @@
 | INFRA | 10 | PASS | ICMP | PROMETHEUS | EDGE net | any | Prometheus ICMP probe |
 | INFRA | 11 | PASS | TCP | INFRA net | VAULT | 8200 | Vault |
 | INFRA | 12 | PASS | TCP | INFRA net | SALTMASTER | 4505-4506 | Salt |
-| INFRA | 13 | PASS | TCP | INFRA net | LOKI | 3100 | Push logs |
-| INFRA | 14 | PASS | * | INFRA net | EDGE net | any | Access EDGE |
-| INFRA | 15 | PASS | * | INFRA net | !RFC1918 | any | Internet access |
+| INFRA | 13 | PASS | * | INFRA net | EDGE net | any | Access EDGE |
+| INFRA | 14 | PASS | * | INFRA net | !RFC1918 | any | Internet access |
 
 # VLAN 40 EDGE
 
