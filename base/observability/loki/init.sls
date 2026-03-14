@@ -22,7 +22,7 @@ loki_user:
       - group: loki_group
       - pkg: loki_pkg
 
-service_loki:
+loki_service:
   service.running:
     - name: loki
     - enable: True

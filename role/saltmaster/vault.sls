@@ -10,7 +10,7 @@
     - context:
         vault_token: {{ vault_token }}
     - watch_in:
-      - service: service_salt_master
+      - service: salt_master_service
 
 /etc/salt/master.d/peer_run.conf:
   file.managed:
@@ -19,7 +19,7 @@
     - user: salt
     - group: salt
     - watch_in:
-      - service: service_salt_master
+      - service: salt_master_service
 
 saltmaster_policy:
   module.run:

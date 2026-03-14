@@ -1,3 +1,3 @@
 include:
-  - .vault
-  - .saltmaster
+  - role.saltmaster.vault
+  - role.saltmaster.saltmaster
