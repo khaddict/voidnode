@@ -8,6 +8,10 @@
 {% set host_entry = data.proxmox.vms.get(host) %}
 {% set ip = host_entry.get('ip') %}
 
+netbox:
+  user.present:
+    - usergroup: True
+
 netbox_dependencies:
   pkg.installed:
     - pkgs:
@@ -26,6 +30,8 @@ netbox_dependencies:
       - libssl-dev
       - zlib1g-dev
       - git
+    - require:
+      - user: netbox
 
 /opt/netbox_db.sh:
   file.managed:
@@ -45,10 +51,6 @@ netbox_repo:
     - branch: main
     - require:
       - file: /opt/netbox
-
-netbox:
-  user.present:
-    - usergroup: True
 
 /opt/netbox/netbox/media:
   file.directory:

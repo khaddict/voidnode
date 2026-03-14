@@ -8,14 +8,6 @@ alertmanager_user:
     - createhome: False
     - system: True
 
-/etc/alertmanager:
-  file.directory:
-    - user: alertmanager
-    - group: alertmanager
-    - mode: 755
-    - require:
-      - user: alertmanager_user
-
 alertmanager_archive:
   archive.extracted:
     - name: /etc/alertmanager
@@ -29,6 +21,14 @@ alertmanager_archive:
     - skip_verify: True
     - require:
       - file: /etc/alertmanager
+      - user: alertmanager_user
+
+/etc/alertmanager:
+  file.directory:
+    - user: alertmanager
+    - group: alertmanager
+    - mode: 755
+    - require:
       - user: alertmanager_user
 
 /etc/alertmanager/alertmanager.yml:
