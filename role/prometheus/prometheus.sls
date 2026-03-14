@@ -11,8 +11,9 @@
 include:
   - base.blackbox-exporter
 
-prometheus:
+prometheus_user:
   user.present:
+    - name: prometheus
     - usergroup: True
     - createhome: False
     - system: True
@@ -22,6 +23,8 @@ prometheus:
     - user: prometheus
     - group: prometheus
     - mode: 755
+    - require:
+      - user: prometheus_user
 
 prometheus_archive:
   archive.extracted:
@@ -36,7 +39,7 @@ prometheus_archive:
     - skip_verify: True
     - require:
       - file: /etc/prometheus
-      - user: prometheus
+      - user: prometheus_user
 
 /etc/prometheus/prometheus.yml:
   file.managed:
@@ -50,6 +53,7 @@ prometheus_archive:
         domain: "{{ domain }}"
     - require:
       - archive: prometheus_archive
+      - user: prometheus_user
 
 /etc/prometheus/rules:
   file.recurse:
@@ -61,6 +65,7 @@ prometheus_archive:
     - file_mode: 644
     - require:
       - archive: prometheus_archive
+      - user: prometheus_user
 
 /etc/systemd/system/prometheus.service:
   file.managed:

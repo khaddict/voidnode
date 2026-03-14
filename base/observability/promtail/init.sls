@@ -7,22 +7,15 @@ promtail_pkg:
     - require:
       - sls: base.observability
 
-promtail_group:
-  group.present:
-    - name: promtail
-    - system: True
-
 promtail_user:
   user.present:
     - name: promtail
+    - usergroup: True
+    - createhome: False
     - system: True
-    - gid: promtail
     - allow_gid_change: True
     - groups:
       - systemd-journal
-    - require:
-      - group: promtail_group
-      - pkg: promtail_pkg
 
 /var/lib/promtail:
   file.directory:
@@ -32,7 +25,6 @@ promtail_user:
     - makedirs: True
     - require:
       - pkg: promtail_pkg
-      - group: promtail_group
       - user: promtail_user
 
 /etc/promtail/config.yml:
@@ -43,7 +35,6 @@ promtail_user:
     - group: promtail
     - require:
       - pkg: promtail_pkg
-      - group: promtail_group
       - user: promtail_user
       - file: /var/lib/promtail
     - listen_in:

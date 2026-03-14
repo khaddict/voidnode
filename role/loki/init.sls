@@ -1,6 +1,14 @@
 include:
   - base.observability.loki
 
+loki_user:
+  user.present:
+    - name: loki
+    - usergroup: True
+    - createhome: False
+    - system: True
+    - allow_gid_change: True
+
 /var/lib/loki:
   file.directory:
     - user: loki
@@ -9,7 +17,6 @@ include:
     - makedirs: True
     - require:
       - pkg: loki_pkg
-      - group: loki_group
       - user: loki_user
 
 /etc/loki/config.yml:
@@ -20,7 +27,6 @@ include:
     - group: loki
     - require:
       - pkg: loki_pkg
-      - group: loki_group
       - user: loki_user
       - file: /var/lib/loki
     - listen_in:
