@@ -5,9 +5,10 @@ input:
   - name
 
 vars:
+  - domain: "khaddict.lab"
   - msg: ""
-  - proxmox: "voidnode.khaddict.lab"
-  - saltmaster: "saltmaster.khaddict.lab"
+  - proxmox: "voidnode.<% ctx().domain %>"
+  - saltmaster: "saltmaster.<% ctx().domain %>"
   - node: "voidnode"
 
 tasks:
