@@ -1,4 +1,5 @@
 {% set fqdn = grains["fqdn"] %}
+{% set host_type = grains.get('host_type') or '' %}
 
 openssh-server:
   pkg.installed
@@ -11,7 +12,7 @@ openssh-server:
     - group: root
     - template: jinja
 
-{% if fqdn == "voidnode.khaddict.lab" %}
+{% if host_type == 'node' %}
 /etc/pve/priv/authorized_keys:
   file.managed:
     - group: www-data
@@ -45,7 +46,7 @@ ssh_service:
     - watch:
       - file: /etc/ssh/sshd_config
       - file: /root/.ssh/config
-      {% if fqdn == "voidnode.khaddict.lab" %}
+      {% if host_type == 'node' %}
       - file: /etc/pve/priv/authorized_keys
       {% else %}
       - file: /root/.ssh/authorized_keys
