@@ -315,21 +315,3 @@ proxmox:
           - name: scsi0
             size_gb: 20
       <<: *vlan_edge
-
-    testing:
-      vmid: 114
-      description: "Testing VM for Development"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      ip: 10.40.0.5
-      main_iface: *default_iface
-      ssh: ""
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      <<: *vlan_edge
