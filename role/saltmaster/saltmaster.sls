@@ -27,7 +27,7 @@ salt-ssh:
 salt-syndic:
   pkg.installed
 
-service_salt_syndic:
+salt_syndic_service:
   service.dead:
     - name: salt-syndic
     - enable: False
@@ -44,7 +44,7 @@ salt_api_enabled:
     - require:
       - pkg: salt-api
 
-service_salt_api:
+salt_api_service:
   service.running:
     - name: salt-api
     - require:
@@ -57,7 +57,7 @@ salt_master_enabled:
     - require:
       - pkg: salt-master
 
-service_salt_master:
+salt_master_service:
   service.running:
     - name: salt-master
     - require:

@@ -10,4 +10,4 @@ include:
     - require:
       - pkg: grafana_pkg
     - listen_in:
-      - service: service_grafana
+      - service: grafana_service

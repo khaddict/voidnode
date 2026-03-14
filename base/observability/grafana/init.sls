@@ -15,7 +15,7 @@ grafana_pkg:
       - sls: base.observability
       - pkg: grafana_dependencies
 
-service_grafana:
+grafana_service:
   service.running:
     - name: grafana-server
     - enable: True

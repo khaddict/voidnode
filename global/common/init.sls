@@ -1,14 +1,14 @@
 include:
-  - .bashrc
-  - .ca
-  - .exporters
-  - .hostname
-  - .hosts
-  - .motd
-  - .network
-  - .packages
-  - .promtail
-  - .salt-minion
-  - .sources
-  - .ssh
-  - .users
+  - global.common.bashrc
+  - global.common.ca
+  - global.common.exporters
+  - global.common.hostname
+  - global.common.hosts
+  - global.common.motd
+  - global.common.network
+  - global.common.packages
+  - global.common.promtail
+  - global.common.salt-minion
+  - global.common.sources
+  - global.common.ssh
+  - global.common.users

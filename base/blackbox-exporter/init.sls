@@ -1,7 +1,7 @@
 prometheus-blackbox-exporter:
   pkg.installed
 
-service_prometheus_blackbox_exporter:
+blackbox_exporter_service:
   service.running:
     - name: prometheus-blackbox-exporter
     - enable: True

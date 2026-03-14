@@ -1,7 +1,7 @@
 systemd-resolved:
   pkg.installed
 
-service_systemd_resolved:
+systemd_resolved_service:
   service.running:
     - name: systemd-resolved
     - enable: True

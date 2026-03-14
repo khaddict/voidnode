@@ -1,3 +1,3 @@
 include:
-  - .prometheus
-  - .alertmanager
+  - role.prometheus.prometheus
+  - role.prometheus.alertmanager

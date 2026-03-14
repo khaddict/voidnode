@@ -24,4 +24,4 @@ include:
       - user: loki_user
       - file: /var/lib/loki
     - listen_in:
-      - service: service_loki
+      - service: loki_service

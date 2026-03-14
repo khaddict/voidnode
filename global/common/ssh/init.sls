@@ -37,7 +37,7 @@ openssh-server:
     - context:
         fqdn: {{ fqdn }}
 
-service_ssh:
+ssh_service:
   service.running:
     - name: ssh
     - enable: True

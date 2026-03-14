@@ -47,9 +47,9 @@ promtail_user:
       - user: promtail_user
       - file: /var/lib/promtail
     - listen_in:
-      - service: service_promtail
+      - service: promtail_service
 
-service_promtail:
+promtail_service:
   service.running:
     - name: promtail
     - enable: True

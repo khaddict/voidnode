@@ -1,2 +1,2 @@
 include:
-  - base.node_exporter
+  - base.node-exporter
