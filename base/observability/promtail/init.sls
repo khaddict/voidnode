@@ -1,12 +1,6 @@
 include:
   - base.observability
 
-promtail_pkg:
-  pkg.installed:
-    - name: promtail
-    - require:
-      - sls: base.observability
-
 promtail_user:
   user.present:
     - name: promtail
@@ -16,6 +10,13 @@ promtail_user:
     - allow_gid_change: True
     - groups:
       - systemd-journal
+
+promtail_pkg:
+  pkg.installed:
+    - name: promtail
+    - require:
+      - user: promtail_user
+      - sls: base.observability
 
 /var/lib/promtail:
   file.directory:

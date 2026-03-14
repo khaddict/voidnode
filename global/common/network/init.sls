@@ -1,13 +1,16 @@
-{% set host_type = grains.get('host_type') %}
+{% import_yaml 'data/main.yaml' as data %}
+{% set host = grains.get('host') or '' %}
+{% set vm = data.get('proxmox', {}).get('vms', {}).get(host) %}
+{% set node = data.get('proxmox', {}).get('nodes', {}).get(host) %}
 
-{% if host_type == 'vm' %}
+{% if vm %}
 include:
   - global.common.network.systemd-networkd
-{% elif host_type == 'node' %}
+{% elif node %}
 include:
   - global.common.network.ifupdown2
 {% else %}
 network_unknown_host:
   test.fail_without_changes:
-    - name: "host_type grain not set (run global.common.host_type)."
+    - name: "host not found in data/main.yaml (add the host to data)."
 {% endif %}
