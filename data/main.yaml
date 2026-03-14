@@ -105,7 +105,7 @@ proxmox:
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3v0wOk/qb2Bq80EzC+BZMArREUa/6WlIIzav05AQyt saltmaster@khaddict.lab"
       hardware:
-        ram_mb: 2048
+        ram_mb: 4096
         cpu:
           sockets: 1
           cores: 2
