@@ -5,6 +5,7 @@ input:
   - name
 
 vars:
+  - domain: "khaddict.lab"
   - msg: ""
   - vmid: ""
   - vm_description: ""
@@ -17,8 +18,8 @@ vars:
   - dns: ""
   - disk: ""
   - tags: ""
-  - proxmox: "voidnode.khaddict.lab"
-  - saltmaster: "saltmaster.khaddict.lab"
+  - proxmox: "voidnode.<% ctx().domain %>"
+  - saltmaster: "saltmaster.<% ctx().domain %>"
   - st2_sshkey: ""
   - saltmaster_sshkey: ""
   - node: "voidnode"
@@ -192,7 +193,7 @@ tasks:
       hosts: <% ctx().ip %>
       username: root
       cmd: |
-        [ -f /root/.ssh/id_ed25519 ] || ssh-keygen -t ed25519 -C "<% ctx().name %>@khaddict.lab" -f /root/.ssh/id_ed25519 -q -N ""
+        [ -f /root/.ssh/id_ed25519 ] || ssh-keygen -t ed25519 -C "<% ctx().name %>@<% ctx().domain %>" -f /root/.ssh/id_ed25519 -q -N ""
     next:
       - when: <% succeeded() %>
         do: independent_minion
