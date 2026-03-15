@@ -329,3 +329,79 @@ proxmox:
             size_gb: 20
       backup: true
       <<: *vlan_edge
+
+    kcontrol:
+      vmid: 114
+      description: "Kubernetes Control Plane"
+      template: null
+      tags: "edge,talos"
+      ip: 10.40.0.5
+      main_iface: *default_iface
+      ssh: ""
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 60
+      backup: false
+      <<: *vlan_edge
+
+    kworker01:
+      vmid: 115
+      description: "Kubernetes Worker Node 1"
+      template: null
+      tags: "edge,talos"
+      ip: 10.40.0.6
+      main_iface: *default_iface
+      ssh: ""
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 60
+      backup: false
+      <<: *vlan_edge
+
+    kworker02:
+      vmid: 116
+      description: "Kubernetes Worker Node 2"
+      template: null
+      tags: "edge,talos"
+      ip: 10.40.0.7
+      main_iface: *default_iface
+      ssh: ""
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 60
+      backup: false
+      <<: *vlan_edge
+
+    kcli:
+      vmid: 117
+      description: "Kubernetes CLI"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      ip: 10.40.0.8
+      main_iface: *default_iface
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEgER/cAhU00TOXEQTmEHdPSHMTx8E5Oy/RTMRyjQuAL kcli@khaddict.lab"
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 40
+      backup: true
+      <<: *vlan_edge

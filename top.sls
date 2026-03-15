@@ -10,6 +10,15 @@
   'grafana':
     - role.grafana
 
+  'kcli':
+    - role.kcli
+
+  'kcontrol*':
+    - role.kcontrol
+
+  'kworker*':
+    - role.kworker
+
   'loki':
     - role.loki
 
