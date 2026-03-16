@@ -1,16 +1,17 @@
 version: 1.0
-description: Generate a server certificate, copy it to the VM, and store it in Vault.
+description: Generate a server certificate, optionally deploy it to the target host, and store it in Vault.
 
 input:
-  - vm_name
+  - name
+  - send_to_vm
 
 vars:
   - msg: ""
   - domain: "khaddict.lab"
-  - fqdn: "<% ctx().vm_name %>.<% ctx().domain %>"
+  - fqdn: "<% ctx().name %>.<% ctx().domain %>"
   - easypki_vm: "easypki.<% ctx().domain %>"
   - vault_vm: "vault.<% ctx().domain %>"
-  - vm_path: "/root/easypki/pki/intermediates/voidnode/issued/<% ctx().vm_name %>.<% ctx().domain %>"
+  - cert_path: "/root/easypki/pki/intermediates/voidnode/issued/<% ctx().name %>.<% ctx().domain %>"
 
 tasks:
   generate_server_certificate:
@@ -19,28 +20,35 @@ tasks:
       hosts: "<% ctx().easypki_vm %>"
       username: root
       cmd: |
-        /usr/bin/bash /root/easypki/easypki.sh cert --pki-dir /root/easypki/pki --ca voidnode --issue-server <% ctx().fqdn %> --san "DNS:<% ctx().fqdn %>" --san "DNS:www.<% ctx().fqdn %>"
+        /usr/bin/bash /root/easypki/easypki.sh cert \
+          --pki-dir /root/easypki/pki \
+          --ca voidnode \
+          --issue-server <% ctx().fqdn %> \
+          --san "DNS:<% ctx().fqdn %>" \
+          --san "DNS:www.<% ctx().fqdn %>"
     next:
-      - when: <% succeeded() %>
-        do: copy_certificate_files_to_vm
+      - when: <% succeeded() and ctx().send_to_vm %>
+        do: copy_certificate_files_to_host
+      - when: <% succeeded() and not ctx().send_to_vm %>
+        do: read_certificate
       - when: <% failed() %>
         publish:
           - msg: "Failed to generate the server certificate for '<% ctx().fqdn %>'."
 
-  copy_certificate_files_to_vm:
+  copy_certificate_files_to_host:
     action: core.remote
     input:
       hosts: "<% ctx().easypki_vm %>"
       username: root
       cmd: |
-        scp -O <% ctx().vm_path %>/<% ctx().fqdn %>.cert.pem root@<% ctx().fqdn %>:/etc/ssl/certs
-        scp -O <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem root@<% ctx().fqdn %>:/etc/ssl/private
+        scp -O <% ctx().cert_path %>/<% ctx().fqdn %>.cert.pem root@<% ctx().fqdn %>:/etc/ssl/certs/
+        scp -O <% ctx().cert_path %>/<% ctx().fqdn %>.key.pem root@<% ctx().fqdn %>:/etc/ssl/private/
     next:
       - when: <% succeeded() %>
         do: read_certificate
       - when: <% failed() %>
         publish:
-          - msg: "Failed to copy certificate files for '<% ctx().fqdn %>' to the target VM."
+          - msg: "Failed to copy certificate files for '<% ctx().fqdn %>' to the target host."
 
   read_certificate:
     action: core.remote
@@ -48,7 +56,7 @@ tasks:
       hosts: "<% ctx().easypki_vm %>"
       username: root
       cmd: |
-        cat <% ctx().vm_path %>/<% ctx().fqdn %>.cert.pem
+        cat <% ctx().cert_path %>/<% ctx().fqdn %>.cert.pem
     next:
       - when: <% succeeded() %>
         publish:
@@ -64,7 +72,7 @@ tasks:
       hosts: "<% ctx().easypki_vm %>"
       username: root
       cmd: |
-        cat <% ctx().vm_path %>/<% ctx().fqdn %>.fullchain.pem
+        cat <% ctx().cert_path %>/<% ctx().fqdn %>.fullchain.pem
     next:
       - when: <% succeeded() %>
         publish:
@@ -80,7 +88,7 @@ tasks:
       hosts: "<% ctx().easypki_vm %>"
       username: root
       cmd: |
-        cat <% ctx().vm_path %>/<% ctx().fqdn %>.key.pem
+        cat <% ctx().cert_path %>/<% ctx().fqdn %>.key.pem
     next:
       - when: <% succeeded() %>
         publish:
@@ -98,9 +106,12 @@ tasks:
       cmd: |
         vault kv put kv/easypki/server/<% ctx().fqdn %> <% ctx().fqdn %>.cert.pem="<% ctx().cert %>" <% ctx().fqdn %>.fullchain.pem="<% ctx().fullchain %>" <% ctx().fqdn %>.key.pem="<% ctx().key %>"
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx().send_to_vm %>
         publish:
-          - msg: "Certificate files for '<% ctx().fqdn %>' were generated, copied to the VM, and stored in Vault successfully."
+          - msg: "Certificate files for '<% ctx().fqdn %>' were generated, deployed to the target host, and stored in Vault successfully."
+      - when: <% succeeded() and not ctx().send_to_vm %>
+        publish:
+          - msg: "Certificate files for '<% ctx().fqdn %>' were generated and stored in Vault successfully."
       - when: <% failed() %>
         publish:
           - msg: "Failed to store certificate files for '<% ctx().fqdn %>' in Vault."

@@ -1,12 +1,16 @@
 name: generate_certificate_server
 pack: st2_voidnode
 runner_type: orquesta
-description: Generate a server certificate, copy it to the VM, and store it in Vault.
+description: Generate a server certificate, optionally deploy it to the target host, and store it in Vault.
 entry_point: workflows/generate_certificate_server.yaml
 enabled: true
-
 parameters:
-  vm_name:
+  name:
     type: string
     required: true
-    description: The VM name defined in main.yaml.
+    description: The VM, application, or service name.
+  send_to_vm:
+    type: boolean
+    required: false
+    default: true
+    description: Whether to copy the generated certificate and private key to the target host.
