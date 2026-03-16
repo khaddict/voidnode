@@ -1,0 +1,47 @@
+app: homepage
+namespace: homepage
+
+deployment:
+  replicas: 1
+  image: ghcr.io/gethomepage/homepage:latest
+
+service:
+  name: homepage
+  type: ClusterIP
+  port: 3000
+  targetPort: http
+  protocol: TCP
+
+secret:
+  name: homepage
+
+service_account:
+  name: homepage
+
+config_map:
+  name: homepage
+
+cluster_role:
+  name: homepage
+
+cluster_role_binding:
+  name: homepage
+
+httproute:
+  host: homepage.khaddict.lab
+  gatewayName: envoy-gateway
+
+services:
+  pve:
+    password: <path:kv/data/kubernetes#homepage_pve_token>
+  argocd:
+    password: <path:kv/data/kubernetes#homepage_argocd_token>
+  pbs:
+    password: <path:kv/data/kubernetes#homepage_pbs_token>
+  changedetection:
+    password: <path:kv/data/kubernetes#homepage_changedetection_token>
+  grafana:
+    password: <path:kv/data/kubernetes#homepage_grafana_password>
+  opnsense:
+    password: <path:kv/data/kubernetes#homepage_opnsense_password>
+    username: <path:kv/data/kubernetes#homepage_opnsense_username>

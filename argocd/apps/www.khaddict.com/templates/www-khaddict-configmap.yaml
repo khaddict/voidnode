@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.name }}-html
+  namespace: {{ .Values.namespace }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Khaddict hub</title>
+        <link
+          rel="icon"
+          href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/khazix_pc.png"
+          type="image/png"
+        />
+
+        <style>
+          :root {
+            --bg: #0f172a;
+            --card: #111827;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --line: #ffffff22;
+            --accent: #7c3aed;
+            --page-pad: clamp(16px, 4vw, 48px);
+            --gap: clamp(12px, 2vw, 28px);
+          }
+
+          * {
+            box-sizing: border-box;
+            margin: 0;
+          }
+
+          body {
+            min-height: 100vh;
+            background:
+              radial-gradient(1200px 600px at 70% -10%, #312e81 10%, transparent 60%),
+              radial-gradient(900px 500px at -10% 110%, #581c87 10%, transparent 60%),
+              #0a0a1a;
+            color: var(--text);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+            padding: var(--page-pad);
+            display: grid;
+          }
+
+          .wrap {
+            width: 100%;
+            height: calc(100vh - (var(--page-pad) * 2));
+            background: var(--card);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, .35);
+
+            display: grid;
+            gap: var(--gap);
+
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            padding: var(--gap);
+          }
+
+          @media (max-width: 720px) {
+            .wrap {
+              height: auto;
+              grid-template-columns: 1fr;
+              grid-template-rows: none;
+            }
+          }
+
+          .card {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, .02);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--text);
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 24px;
+
+            transition:
+              transform .2s ease,
+              box-shadow .2s ease,
+              background .2s ease,
+              border-color .2s ease;
+          }
+
+          .card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, .4);
+            background: rgba(255, 255, 255, .05);
+            border-color: var(--accent);
+          }
+
+          .card img {
+            width: 56px;
+            height: 56px;
+          }
+
+          .card h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-align: center;
+          }
+
+          .card p {
+            max-width: none;
+            color: var(--muted);
+            font-size: .98rem;
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        <main class="wrap" aria-label="Khaddict links">
+          <a class="card" href="https://site.khaddict.com" target="_blank" rel="noopener">
+            <img
+              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/www.png"
+              alt="Website"
+            />
+            <h2>Website</h2>
+            <p>Nothing special here.</p>
+          </a>
+
+          <a class="card" href="https://homepage.khaddict.com" target="_blank" rel="noopener">
+            <img
+              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/homepage.png"
+              alt="Homepage"
+            />
+            <h2>Homepage</h2>
+            <p>Dashboard with shortcuts and widgets.</p>
+          </a>
+
+          <a class="card" href="https://github.com/khaddict" target="_blank" rel="noopener">
+            <img
+              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/github.png"
+              alt="GitHub"
+            />
+            <h2>GitHub</h2>
+            <p>Code, experiments and small projects.</p>
+          </a>
+
+          <a class="card" href="https://status.khaddict.com" target="_blank" rel="noopener">
+            <img
+              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/status.png"
+              alt="Status"
+            />
+            <h2>Status</h2>
+            <p>Status page.</p>
+          </a>
+        </main>
+      </body>
+    </html>

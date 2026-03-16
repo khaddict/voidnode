@@ -1,0 +1,5 @@
+apiVersion: v2
+name: uptime-kuma-chart
+description: A Helm chart for Uptime Kuma
+type: application
+version: 0.1.0

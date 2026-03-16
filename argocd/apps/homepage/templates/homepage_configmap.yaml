@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config_map.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.app }}
+data:
+  kubernetes.yaml: |
+    mode: cluster
+  settings.yaml: |
+    title: Khaddict homepage
+    background:
+      image: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix.jpg?raw=true
+      opacity: 30
+    favicon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix_pc.png?raw=true
+    language: en
+    headerStyle: boxed
+    quicklaunch:
+      searchDescriptions: true
+      hideInternetSearch: false
+      showSearchSuggestions: true
+      hideVisitURL: true
+      provider: google
+    hideVersion: true
+  custom.css: ""
+  custom.js: ""
+  bookmarks.yaml: |
+    - Developer:
+        - Github:
+            - icon: github
+              href: https://github.com/khaddict
+              description: khaddict
+        - khaddict.com:
+            - icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix_pc.png?raw=true
+              href: https://khaddict.com
+              description: khaddict.com
+    - Socials:
+        - Discord:
+            - icon: discord
+              description: khaddict
+        - Reddit:
+            - icon: reddit
+              href: https://www.reddit.com/user/khadddict/
+              description: khadddict
+  services.yaml: |
+    - Virtualization & Backups:
+        - Proxmox:
+            icon: proxmox
+            href: https://voidnode.khaddict.lab:8006
+            description: voidnode.khaddict.lab
+            widget:
+              type: proxmox
+              url: https://voidnode.khaddict.lab:8006
+              username: api@pam!homepage
+              password: {{ .Values.services.pve.password }}
+              node: voidnode
+        - Proxmox Backup Server:
+            icon: proxmox.png
+            href: https://pbs.khaddict.lab:8007
+            description: pbs.khaddict.lab
+            widget:
+              type: proxmoxbackupserver
+              url: https://pbs.khaddict.lab:8007
+              username: api-ro-user@pbs!homepage
+              password: {{ .Values.services.pbs.password }}
+    - Configuration Management & Automation:
+        - Saltmaster:
+            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/saltstack.png?raw=true
+            href: https://saltmaster.khaddict.lab:8000
+            description: saltmaster.khaddict.lab
+        - Stackstorm:
+            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/stackstorm.png?raw=true
+            href: https://stackstorm.khaddict.lab
+            description: stackstorm.khaddict.lab
+    - Kubernetes tools:
+        - ArgoCD:
+            icon: argo-cd
+            href: https://argocd.khaddict.lab
+            description: argocd.khaddict.lab
+            widget:
+              type: argocd
+              url: https://argocd.khaddict.lab
+              key: {{ .Values.services.argocd.password }}
+    - Monitoring & Logs:
+        - Prometheus:
+            icon: prometheus
+            href: http://prometheus.khaddict.lab:9090
+            description: prometheus.khaddict.lab
+            widget:
+              type: prometheus
+              url: http://prometheus.khaddict.lab:9090
+        - Alert Manager:
+            icon: alertmanager
+            href: http://alertmanager.khaddict.lab:9093
+            description: alertmanager.khaddict.lab
+        - Grafana:
+            icon: grafana
+            href: https://grafana.khaddict.lab:3000
+            description: grafana.khaddict.lab
+            widget:
+              type: grafana
+              version: 2
+              url: https://grafana.khaddict.lab:3000
+              username: admin
+              password: {{ .Values.services.grafana.password }}
+        - ChangeDetection.io:
+            icon: changedetection
+            href: https://changedetection.khaddict.lab
+            description: changedetection.khaddict.lab
+            widget:
+              type: changedetectionio
+              url: https://changedetection.khaddict.lab
+              key: {{ .Values.services.changedetection.password }}
+        - Uptime Kuma:
+            icon: uptime-kuma
+            href: https://uptimekuma.khaddict.lab
+            description: uptimekuma.khaddict.lab
+            widget:
+              type: uptimekuma
+              url: https://uptimekuma.khaddict.lab
+              slug: khaddict
+    - Management & network:
+        - OPNsense:
+            icon: opnsense
+            href: https://opnsense.khaddict.lab
+            description: opnsense.khaddict.lab
+            widget:
+              type: opnsense
+              url: https://opnsense.khaddict.lab
+              username: {{ .Values.services.opnsense.username }}
+              password: {{ .Values.services.opnsense.password }}
+              wan: opt1 # optional, defaults to wan
+        - TP-Link:
+            icon: tp-link
+            href: http://tplink.khaddict.lab
+            description: tplink.khaddict.lab
+        - Freebox:
+            icon: freebox-revolution
+            href: http://mafreebox.freebox.fr
+            description: mafreebox.freebox.fr
+    - Tools:
+        - YAML Lint:
+            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/yaml.png?raw=true
+            href: https://www.yamllint.com
+            description: yamllint.com
+        - JSON Lint:
+            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/json.png?raw=true
+            href: https://jsonlint.com
+            description: jsonlint.com
+        - Regex101:
+            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/regex101.png?raw=true
+            href: https://regex101.com
+            description: regex101.com
+    - Inventory & Vault:
+        - NetBox:
+            icon: netbox
+            href: https://netbox.khaddict.lab
+            description: netbox.khaddict.lab
+        - Vault:
+            icon: hashicorp-vault
+            href: https://vault.khaddict.lab:8200
+            description: vault.khaddict.lab
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "cluster"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - resources:
+        cpu: true
+        memory: true
+        uptime: true
+        refresh: 3000
+        network: true
+    - search:
+        provider: google
+        showSearchSuggestions: true
+        target: _blank
+  docker.yaml: ""

@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.name }}-html
+  namespace: {{ .Values.namespace }}
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Khaddict website</title>
+        <link rel="icon" href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png" type="image/png" />
+
+        <style>
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                font-family: Arial, sans-serif;
+                background:
+                    radial-gradient(1200px 600px at 70% -10%, #312e81 10%, transparent 60%),
+                    radial-gradient(900px 500px at -10% 110%, #581c87 10%, transparent 60%),
+                    #0a0a1a;
+            }
+
+            .container {
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+                color: #fff;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                cursor: pointer;
+                background-color: #f44336;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                transition: background-color 2s ease, opacity 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #e53935;
+            }
+
+            button.deploying {
+                background-color: #22c55e;
+            }
+
+            button.deploying:hover {
+                background-color: #16a34a;
+            }
+
+            button:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+            }
+
+            .spinner {
+                width: 16px;
+                height: 16px;
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin 0.7s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h1>🚨 The project is on hold. Do NOT press the red button. 💥</h1>
+            <button id="deploy-btn">
+                Deploy to production
+            </button>
+        </div>
+
+        <script>
+            const btn = document.getElementById('deploy-btn');
+
+            function resetButton() {
+                btn.disabled = false;
+                btn.classList.remove('deploying');
+                btn.innerHTML = 'Deploy to production';
+            }
+
+            btn.addEventListener('click', () => {
+                btn.disabled = true;
+                btn.classList.add('deploying');
+
+                btn.innerHTML = `
+                    <div class="spinner"></div>
+                    Deploying...
+                `;
+
+                setTimeout(() => {
+                    window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+                }, 3000);
+            });
+
+            window.addEventListener('pageshow', () => {
+                resetButton();
+            });
+        </script>
+    </body>
+
+    </html>

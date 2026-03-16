@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: wildcard-khaddict-lab
+  namespace: envoy-gateway-system
+type: kubernetes.io/tls
+stringData:
+  tls.crt: |
+    <path:kv/data/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.cert.pem>
+  tls.key: |
+    <path:kv/data/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.key.pem>

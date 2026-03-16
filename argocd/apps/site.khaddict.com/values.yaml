@@ -1,0 +1,20 @@
+app: site-khaddict
+namespace: site-khaddict
+
+deployment:
+  name: site-khaddict
+  replicas: 3
+  image: nginx:stable
+
+service:
+  name: site-khaddict
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+secret:
+  name: site-khaddict
+
+httproute:
+  host: site.khaddict.lab
+  gatewayName: envoy-gateway

@@ -1,0 +1,25 @@
+global:
+   enabled: true
+   tlsDisable: false
+injector:
+   enabled: true
+server:
+   extraEnvironmentVars:
+      VAULT_CACERT: /ca/voidnode.chain.pem
+   volumes:
+      - name: ca-voidnode-volume
+        secret:
+         defaultMode: 420
+         secretName: ca-voidnode-secret
+   volumeMounts:
+      - mountPath: /ca
+        name: ca-voidnode-volume
+        readOnly: true
+   standalone:
+      enabled: false
+
+configs:
+  cm:
+    accounts.readonly: apiKey
+  rbac:
+    policy.csv: "g, readonly, role:readonly"

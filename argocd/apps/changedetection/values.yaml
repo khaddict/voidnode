@@ -1,0 +1,20 @@
+app: changedetection
+namespace: changedetection
+
+deployment:
+  replicas: 1
+  image: ghcr.io/dgtlmoon/changedetection.io:latest
+
+service:
+  name: changedetection
+  type: ClusterIP
+  port: 5000
+  targetPort: 5000
+  protocol: TCP
+
+httproute:
+  host: changedetection.khaddict.lab
+  gatewayName: envoy-gateway
+
+pvc:
+  storage: 5Gi

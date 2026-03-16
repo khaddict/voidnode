@@ -1,3 +1,8 @@
+{% set vault_token = salt['vault'].read_secret('kv/kubernetes').vault_token %}
+
+include:
+  - base.vault
+
 kubectl_dependencies:
   pkg.installed:
     - pkgs:
@@ -58,3 +63,18 @@ k9s_pkg:
   pkg.installed:
     - sources:
       - k9s: https://github.com/derailed/k9s/releases/download/v0.50.18/k9s_linux_amd64.deb
+
+/root/.bashrc.d/kcli.bashrc:
+  file.managed:
+    - source: salt://role/kcli/files/kcli.bashrc
+    - mode: 644
+    - user: root
+    - group: root
+    - template: jinja
+    - context:
+        vault_token: {{ vault_token }}
+
+/root/bootstrap:
+  file.recurse:
+    - source: salt://role/kcli/files/bootstrap
+    - include_empty: True
