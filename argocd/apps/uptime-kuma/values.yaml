@@ -1,0 +1,21 @@
+app: uptime-kuma
+namespace: uptime-kuma
+
+deployment:
+  replicas: 1
+  image: louislam/uptime-kuma:2
+
+service:
+  name: uptime-kuma
+  type: ClusterIP
+  port: 3001
+  targetPort: 3001
+  protocol: TCP
+
+httproute:
+  host: uptimekuma.khaddict.lab
+  gatewayName: envoy-gateway
+
+pvc:
+  storage: 10Gi
+  storageClassName: local-path

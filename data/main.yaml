@@ -311,25 +311,6 @@ proxmox:
       backup: true
       <<: *vlan_edge
 
-    uptimekuma:
-      vmid: 113
-      description: "Uptime Kuma for Monitoring"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      ip: 10.40.0.4
-      main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA+o3uz5TfbxBRiy9LNo+hdM3kCnWMeWkh3dLgs2YDfl uptimekuma@khaddict.lab"
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: true
-      <<: *vlan_edge
-
     kcontrol:
       vmid: 114
       description: "Kubernetes Control Plane"

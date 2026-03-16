@@ -1,0 +1,5 @@
+apiVersion: v2
+name: www-khaddict-chart
+description: A Helm chart for www.khaddict.com
+type: application
+version: 0.1.0
