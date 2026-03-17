@@ -4,6 +4,14 @@ namespace: uptime-kuma
 deployment:
   replicas: 1
   image: louislam/uptime-kuma:2
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
 
 service:
   name: uptime-kuma

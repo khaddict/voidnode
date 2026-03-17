@@ -19,6 +19,9 @@ spec:
       containers:
         - name: {{ .Values.app }}
           image: {{ .Values.deployment.image }}
+          imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           volumeMounts:

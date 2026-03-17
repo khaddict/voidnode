@@ -25,7 +25,9 @@ spec:
       containers:
         - name: homepage
           image: "{{ .Values.deployment.image }}"
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: "*"
