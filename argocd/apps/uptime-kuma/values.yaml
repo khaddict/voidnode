@@ -42,3 +42,4 @@ httproute:
 pvc:
   storage: 10Gi
   storageClassName: local-path
+  volumeName: pvc-775a83e3-0bcd-47fc-81c1-b48b0f2fb7bd
