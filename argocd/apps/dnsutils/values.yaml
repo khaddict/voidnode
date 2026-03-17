@@ -1,0 +1,32 @@
+app: dnsutils
+namespace: tools
+
+deployment:
+  replicas: 1
+  image: registry.k8s.io/e2e-test-images/agnhost:2.56
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
+  fsGroup: 65534
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  enabled: false
+  name: dnsutils
+  type: ClusterIP
+  port: 53
+  targetPort: 53
