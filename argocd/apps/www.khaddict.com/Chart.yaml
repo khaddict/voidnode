@@ -1,5 +1,12 @@
 apiVersion: v2
-name: www-khaddict-chart
+name: www-khaddict
 description: A Helm chart for www.khaddict.com
 type: application
-version: 0.1.0
+version: 0.2.0
+appVersion: "stable"
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/www.khaddict.com
+maintainers:
+  - name: platform
+

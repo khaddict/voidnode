@@ -1,5 +1,12 @@
 apiVersion: v2
-name: homepage-chart
+name: homepage
 description: A Helm chart for the homepage
 type: application
-version: 0.1.0
+version: 0.2.0
+appVersion: "latest"
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/homepage
+maintainers:
+  - name: platform
+

@@ -1,5 +1,12 @@
 apiVersion: v2
-name: changedetection-chart
+name: changedetection
 description: A Helm chart for changedetection
 type: application
-version: 0.1.0
+version: 0.2.0
+appVersion: "latest"
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/changedetection
+maintainers:
+  - name: platform
+

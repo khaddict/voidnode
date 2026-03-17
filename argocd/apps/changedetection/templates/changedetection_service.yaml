@@ -4,11 +4,11 @@ metadata:
   name: {{ .Values.app }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.app }}
+    {{- include "changedetection.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: {{ .Values.app }}
+    {{- include "changedetection.selectorLabels" . | nindent 4 }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}

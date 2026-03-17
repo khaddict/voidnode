@@ -3,10 +3,13 @@ kind: Service
 metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "site-khaddict.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
-    app: {{ .Values.app }}
+    {{- include "site-khaddict.selectorLabels" . | nindent 4 }}
+
