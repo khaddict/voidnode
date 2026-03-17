@@ -13,7 +13,7 @@ data:
         <title>khaddict's website</title>
         <link
           rel="icon"
-          href="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/site.khaddict.com/images/khazix_pc.png"
+          href="/images/khazix_pc.png"
           type="image/png"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -270,7 +270,7 @@ data:
         <header>
           <img
             class="hero-img"
-            src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/site.khaddict.com/images/khazix_pc.png"
+            src="/images/khazix_pc.png"
             alt=""
             aria-hidden="true"
           />
