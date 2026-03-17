@@ -3,7 +3,7 @@ kind: ClusterRole
 metadata:
   name: {{ .Values.cluster_role.name }}
   labels:
-    app.kubernetes.io/name: {{ .Values.app }}
+    {{- include "homepage.labels" . | nindent 4 }}
 rules:
   - apiGroups:
       - ""
@@ -51,7 +51,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Values.cluster_role_binding.name }}
   labels:
-    app.kubernetes.io/name: {{ .Values.app }}
+    {{- include "homepage.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

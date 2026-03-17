@@ -4,7 +4,7 @@ metadata:
   name: {{ .Values.config_map.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app.kubernetes.io/name: {{ .Values.app }}
+    {{- include "homepage.labels" . | nindent 4 }}
 data:
   kubernetes.yaml: |
     mode: cluster
