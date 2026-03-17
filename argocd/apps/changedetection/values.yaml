@@ -41,3 +41,5 @@ httproute:
 
 pvc:
   storage: 5Gi
+  storageClassName: local-path
+  volumeName: pvc-58393ad2-b6bf-4fe6-8034-2694626ee97b
