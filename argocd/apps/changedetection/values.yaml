@@ -20,6 +20,21 @@ service:
   targetPort: 5000
   protocol: TCP
 
+probes:
+  enabled: false
+  liveness:
+    httpGet:
+      path: /
+      port: 5000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /
+      port: 5000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
 httproute:
   host: changedetection.khaddict.lab
   gatewayName: envoy-gateway
