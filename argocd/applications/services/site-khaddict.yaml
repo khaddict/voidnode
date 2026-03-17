@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/khaddict/voidnode.git
-    targetRevision: HEAD
+    targetRevision: main
     path: argocd/apps/site.khaddict.com
     plugin:
       name: argocd-vault-plugin-helm
