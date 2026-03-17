@@ -11,9 +11,9 @@ data:
   settings.yaml: |
     title: Khaddict's homepage
     background:
-      image: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix.jpg?raw=true
+      image: https://www.khaddict.com/images/khazix.jpg
       opacity: 30
-    favicon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix_pc.png?raw=true
+    favicon: https://www.khaddict.com/images/khazix_pc.png
     language: en
     headerStyle: boxed
     quicklaunch:
@@ -32,7 +32,7 @@ data:
               href: https://github.com/khaddict
               description: khaddict
         - khaddict.com:
-            - icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix_pc.png?raw=true
+            - icon: https://www.khaddict.com/images/khazix_pc.png
               href: https://khaddict.com
               description: khaddict.com
     - Socials:
@@ -66,11 +66,11 @@ data:
               password: {{ .Values.services.pbs.password }}
     - Configuration Management & Automation:
         - Saltmaster:
-            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/saltstack.png?raw=true
+            icon: https://www.khaddict.com/images/saltstack.png
             href: https://saltmaster.khaddict.lab:8000
             description: saltmaster.khaddict.lab
         - Stackstorm:
-            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/stackstorm.png?raw=true
+            icon: https://www.khaddict.com/images/stackstorm.png
             href: https://stackstorm.khaddict.lab
             description: stackstorm.khaddict.lab
     - Kubernetes tools:
@@ -141,15 +141,15 @@ data:
             description: mafreebox.freebox.fr
     - Tools:
         - YAML Lint:
-            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/yaml.png?raw=true
+            icon: https://www.khaddict.com/images/yaml.png
             href: https://www.yamllint.com
             description: yamllint.com
         - JSON Lint:
-            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/json.png?raw=true
+            icon: https://www.khaddict.com/images/json.png
             href: https://jsonlint.com
             description: jsonlint.com
         - Regex101:
-            icon: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/regex101.png?raw=true
+            icon: https://www.khaddict.com/images/regex101.png
             href: https://regex101.com
             description: regex101.com
     - Inventory & Vault:

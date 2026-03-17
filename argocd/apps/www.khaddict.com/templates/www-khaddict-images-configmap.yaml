@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.name }}-images
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "www-khaddict.labels" . | nindent 4 }}
+binaryData:
+  github.png: {{ .Files.Get "images/github.png" | b64enc }}
+  homepage.png: {{ .Files.Get "images/homepage.png" | b64enc }}
+  khazix_pc.png: {{ .Files.Get "images/khazix_pc.png" | b64enc }}
+  khazix.jpg: {{ .Files.Get "images/khazix.jpg" | b64enc }}
+  status.png: {{ .Files.Get "images/status.png" | b64enc }}
+  www.png: {{ .Files.Get "images/www.png" | b64enc }}
+  json.png: {{ .Files.Get "images/json.png" | b64enc }}
+  regex101.png: {{ .Files.Get "images/regex101.png" | b64enc }}
+  saltstack.png: {{ .Files.Get "images/saltstack.png" | b64enc }}
+  stackstorm.png: {{ .Files.Get "images/stackstorm.png" | b64enc }}
+  yaml.png: {{ .Files.Get "images/yaml.png" | b64enc }}

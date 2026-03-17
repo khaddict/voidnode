@@ -33,7 +33,12 @@ spec:
         volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html
+        - name: images-volume
+          mountPath: /usr/share/nginx/html/images
       volumes:
       - name: html-volume
         configMap:
           name: {{ .Values.deployment.name }}-html
+      - name: images-volume
+        configMap:
+          name: {{ .Values.deployment.name }}-images
