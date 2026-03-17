@@ -73,9 +73,16 @@
 | Order | Action | Protocol | Source | Destination | Port | Description |
 |---|---|---|---|---|---|---|
 | 1 | PASS | UDP | any | WAN address | 51820 | Allow VPN |
+| 2 | PASS | TCP | any | REVPROXY | HTTPS | Allow REVPROXY (HTTPS) |
 
 # VPN
 
 | Order | Action | Protocol | Source | Destination | Port | Description |
 |---|---|---|---|---|---|---|
 | 1 | PASS | * | VPN net | any | any | Allow VPN full access |
+
+# NAT
+
+| Order | Protocol | Source | Port | Destination | Port | Redirect target IP | Port | Description |
+|---|---|---|---|---|---|---|---|---|
+| 1 | TCP | any | any | WAN address | HTTPS | REVPROXY | 443 | WAN HTTPS DNAT to REVPROXY |
