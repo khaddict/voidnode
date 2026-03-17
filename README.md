@@ -32,7 +32,6 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 
 ### VLAN 20 – ADMIN
 **10.20.0.0/24** – *Administrative infrastructure network. This segment hosts management and automation services used to operate, secure, and maintain the lab environment.*
-- `assets.khaddict.lab`
 - `saltmaster.khaddict.lab`
 - `stackstorm.khaddict.lab`
 - `vault.khaddict.lab`
