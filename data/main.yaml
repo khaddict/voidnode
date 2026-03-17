@@ -79,26 +79,6 @@ proxmox:
       <<: *vlan_core
 
     # VLAN ADMIN
-    assets:
-      vmid: 101
-      description: "Asset Management System"
-      template: debian-trixie-template
-      tags: "admin,trixie"
-      scrape: true
-      ip: 10.20.0.2
-      main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAnR2TSVsFOLrw7lNG25G+HX8y7XktC6bqZs0RCfyi4V assets@khaddict.lab"
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: true
-      <<: *vlan_admin
-
     saltmaster:
       vmid: 103
       description: "Salt Master for Configuration Management"
