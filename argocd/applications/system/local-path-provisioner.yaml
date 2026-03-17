@@ -3,6 +3,13 @@ kind: Application
 metadata:
   name: local-path-provisioner
   namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/part-of: voidnode
+    app.kubernetes.io/component: system
+  annotations:
+    owner: platform
+    repo: khaddict/voidnode
 spec:
   project: default
   source:

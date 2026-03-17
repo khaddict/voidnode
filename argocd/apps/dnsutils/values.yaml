@@ -23,10 +23,3 @@ containerSecurityContext:
   capabilities:
     drop:
       - ALL
-
-service:
-  enabled: false
-  name: dnsutils
-  type: ClusterIP
-  port: 53
-  targetPort: 53
