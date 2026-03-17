@@ -1,17 +1,12 @@
 {% import_yaml 'data/main.yaml' as data %}
 
-{% set proxmox_core = data.get('proxmox', {}).get('core', {}) %}
 {% set proxmox_vms = data.get('proxmox', {}).get('vms', {}) %}
 
 {% set storage = data.get('proxmox', {}).get('backups', {}).get('storage') %}
 
-{% set hosts = {} %}
-{% do hosts.update(proxmox_core) %}
-{% do hosts.update(proxmox_vms) %}
-
 {% set backup_vmids = [] %}
 
-{% for name, vm in hosts.items() %}
+{% for name, vm in proxmox_vms.items() %}
   {% if vm.get('backup') %}
     {% do backup_vmids.append(vm.vmid) %}
   {% endif %}

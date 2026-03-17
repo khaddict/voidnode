@@ -4,9 +4,16 @@
 {% set proxmox_nodes = data.get('proxmox').get('nodes') %}
 {% set proxmox_vms = data.get('proxmox').get('vms') %}
 {% set domain = data.get('network').get('domain') %}
-{% set hosts = {} %}
-{% do hosts.update(proxmox_nodes) %}
-{% do hosts.update(proxmox_vms) %}
+{% set node_hosts = {} %}
+{% set blackbox_hosts = {} %}
+{% do node_hosts.update(proxmox_nodes) %}
+{% do blackbox_hosts.update(proxmox_nodes) %}
+{% for hostname, host in proxmox_vms.items() %}
+{%   do blackbox_hosts.update({hostname: host}) %}
+{%   if host.get('scrape', True) %}
+{%     do node_hosts.update({hostname: host}) %}
+{%   endif %}
+{% endfor %}
 
 include:
   - base.blackbox-exporter
@@ -49,7 +56,8 @@ prometheus_archive:
     - group: prometheus
     - template: jinja
     - context:
-        hosts: {{ hosts }}
+        node_hosts: {{ node_hosts }}
+        blackbox_hosts: {{ blackbox_hosts }}
         domain: "{{ domain }}"
     - require:
       - archive: prometheus_archive
