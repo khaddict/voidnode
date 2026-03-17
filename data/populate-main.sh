@@ -227,6 +227,13 @@ if [[ -z "$default_ip" ]]; then
 fi
 ip="$(prompt "IP address" "$default_ip")"
 
+if [[ ! "$ip" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+  fail "IP address '$ip' is not a valid IPv4 address."
+fi
+if [[ "$ip" != "${vlan_subnet}."* ]]; then
+  fail "IP address '$ip' does not belong to subnet ${vlan_subnet}.0/24."
+fi
+
 main_iface_mode="$(prompt "main_iface mode (default|null|custom)" "default")"
 case "${main_iface_mode,,}" in
   default) main_iface_value="*default_iface" ;;

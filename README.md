@@ -8,7 +8,7 @@ I used to run a fully HA homelab ([homelab](https://github.com/khaddict/homelab)
 
 Because of that, I decided to move to something simpler. By simpler, I mean less high availability. I now assume that if the node goes down, it’s not a big deal. After all, it’s just a homelab.
 
-In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new design, the goal is to isolate the entire homelab into a separate network (10.0.0.0/16) behind a router (OPNsense). I also want to segment the VMs based on their purpose, such as administrative workloads, internal infrastructure, or services exposed to the internet.
+In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new design, the goal is to isolate the entire homelab behind OPNsense on a dedicated LAN global (`10.0.0.0/16`), split into VLAN subnets (`10.10.0.0/24`, `10.20.0.0/24`, `10.30.0.0/24`, `10.40.0.0/24`). This allows clear workload separation between core services, administration, internal infrastructure, and edge-facing services.
 
 ## Hardware
 
@@ -20,9 +20,10 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 ## IP addressing
 
 **WAN** → `192.168.0.0/24`  
-**LAN** → `10.0.0.0/16`
+**LAN global** → `10.0.0.0/16`  
+**VLAN subnets** → `10.10.0.0/24`, `10.20.0.0/24`, `10.30.0.0/24`, `10.40.0.0/24`
 
-## VMs & VLANs
+## Hosts & VLANs
 
 ### VLAN 10 – CORE
 **10.10.0.0/24** – *Core infrastructure network. It contains the main hypervisor and the firewall responsible for routing, segmentation, and security across the lab.*
@@ -49,4 +50,11 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 **10.40.0.0/24** – *Edge services network. This segment hosts services that are exposed to external networks and act as entry points between the internet and the internal lab infrastructure.*
 - `ai.khaddict.lab`
 - `revproxy.khaddict.lab`
-- `uptimekuma.khaddict.lab`
+- `kcontrol.khaddict.lab`
+- `kworker01.khaddict.lab`
+- `kworker02.khaddict.lab`
+- `kcli.khaddict.lab`
+
+## Inventory source of truth
+
+For the current and authoritative infrastructure inventory (VMs, node, VLAN/IP data, hardware details, tags, backup flags), refer to [data/main.yaml](data/main.yaml).

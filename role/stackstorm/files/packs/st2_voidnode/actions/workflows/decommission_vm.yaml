@@ -18,11 +18,11 @@ tasks:
       hosts: "<% ctx().proxmox %>"
       username: root
       cmd: |
-        qm list | grep "<% ctx().name %>"
+        pvesh get /nodes/<% ctx().node %>/qemu --output-format json | jq -re --arg name '<% ctx().name %>' 'first(.[] | select(.name == $name)) | .vmid | tostring'
     next:
       - when: <% succeeded() %>
         publish:
-          - vmid: <% result()[ctx().proxmox].stdout.split()[0] %>
+          - vmid: <% result()[ctx().proxmox].stdout %>
         do: check_vm_status
       - when: <% failed() %>
         publish:
