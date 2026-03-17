@@ -24,6 +24,12 @@ spec:
           {{- toYaml .Values.deployment.resources | nindent 10 }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        {{- if .Values.probes.enabled }}
+        livenessProbe:
+          {{- toYaml .Values.probes.liveness | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.probes.readiness | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html

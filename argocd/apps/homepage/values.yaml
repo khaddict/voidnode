@@ -20,6 +20,21 @@ service:
   targetPort: http
   protocol: TCP
 
+probes:
+  enabled: false
+  liveness:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
 secret:
   name: homepage
 

@@ -20,6 +20,21 @@ service:
   port: 80
   targetPort: 80
 
+probes:
+  enabled: false
+  liveness:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
 secret:
   name: www-khaddict
 

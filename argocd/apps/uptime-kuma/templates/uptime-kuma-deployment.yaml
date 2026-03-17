@@ -24,6 +24,12 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}
+          {{- if .Values.probes.enabled }}
+          livenessProbe:
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: data
               mountPath: /app/data

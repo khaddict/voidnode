@@ -35,6 +35,12 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
+          {{- if .Values.probes.enabled }}
+          livenessProbe:
+            {{- toYaml .Values.probes.liveness | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.probes.readiness | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /app/config/custom.js
               name: homepage-config
