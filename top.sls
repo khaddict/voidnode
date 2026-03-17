@@ -34,9 +34,6 @@
   'stackstorm':
     - role.stackstorm
 
-  'uptimekuma':
-    - role.uptimekuma
-
   'vault':
     - role.vault
 
