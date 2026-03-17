@@ -7,121 +7,304 @@ data:
   index.html: |
     <!DOCTYPE html>
     <html lang="en">
-
-    <head>
+      <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Khaddict website</title>
-        <link rel="icon" href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png" type="image/png" />
-
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>khaddict — site</title>
+        <link
+          rel="icon"
+          href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png"
+          type="image/png"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />
+    
         <style>
-            body {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                font-family: Arial, sans-serif;
-                background:
-                    radial-gradient(1200px 600px at 70% -10%, #312e81 10%, transparent 60%),
-                    radial-gradient(900px 500px at -10% 110%, #581c87 10%, transparent 60%),
-                    #0a0a1a;
-            }
-
-            .container {
-                text-align: center;
-            }
-
-            h1 {
-                font-size: 2rem;
-                margin-bottom: 20px;
-                color: #fff;
-            }
-
-            button {
-                padding: 10px 20px;
-                font-size: 1rem;
-                cursor: pointer;
-                background-color: #f44336;
-                color: #fff;
-                border: none;
-                border-radius: 5px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                transition: background-color 2s ease, opacity 0.3s ease;
-            }
-
-            button:hover {
-                background-color: #e53935;
-            }
-
-            button.deploying {
-                background-color: #22c55e;
-            }
-
-            button.deploying:hover {
-                background-color: #16a34a;
-            }
-
-            button:disabled {
-                opacity: 0.7;
-                cursor: not-allowed;
-            }
-
-            .spinner {
-                width: 16px;
-                height: 16px;
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                border-top-color: #fff;
-                border-radius: 50%;
-                animation: spin 0.7s linear infinite;
-            }
-
-            @keyframes spin {
-                to {
-                    transform: rotate(360deg);
-                }
-            }
+          :root {
+            --bg:           #080810;
+            --surface:      rgba(255, 255, 255, .032);
+            --border:       rgba(255, 255, 255, .07);
+            --text:         #f1f5f9;
+            --muted:        #64748b;
+            --accent:       #06b6d4;
+            --danger:       #ef4444;
+            --danger-dim:   rgba(239, 68, 68, .12);
+            --radius:       16px;
+          }
+    
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+          /* ── Grain overlay ───────────────────────────────────── */
+          body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+          }
+    
+          body {
+            min-height: 100dvh;
+            background:
+              radial-gradient(ellipse 900px 500px at 85% 5%,  rgba(6, 182, 212, .07), transparent 70%),
+              radial-gradient(ellipse 700px 700px at -5% 95%, rgba(6, 182, 212, .05), transparent 65%),
+              var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            gap: 1.75rem;
+          }
+    
+          body > * { position: relative; z-index: 1; }
+    
+          /* ── Header ─────────────────────────────────────────── */
+          header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .6rem;
+            text-align: center;
+            animation: fade-up .5s ease both;
+          }
+    
+          /* ── Hero image ───────────────────────────────────── */
+          .hero-img {
+            width: clamp(70px, 9vw, 96px);
+            height: auto;
+            object-fit: contain;
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+            user-select: none;
+          }
+    
+          header h1 {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.65rem;
+            font-weight: 600;
+            letter-spacing: -.02em;
+            color: var(--text);
+          }
+    
+          header h1::before,
+          header h1::after {
+            content: '';
+            display: block;
+            width: 28px;
+            height: 1px;
+            background: var(--accent);
+            opacity: .5;
+          }
+    
+          header h1 .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 3px;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+          }
+    
+          /* ── Panel ───────────────────────────────────────────── */
+          .panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.1rem;
+            padding: 1.75rem 2rem;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            max-width: 420px;
+            width: 100%;
+            overflow: hidden;
+            animation: fade-up .5s .08s ease both;
+          }
+    
+          /* Top danger line */
+          .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--danger), transparent);
+          }
+    
+          /* Inner danger glow on hover */
+          .panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, var(--danger-dim), transparent 70%);
+            opacity: 0;
+            transition: opacity .4s ease;
+            pointer-events: none;
+          }
+    
+          .panel:has(#deploy-btn.deploying)::after { opacity: 1; }
+    
+          .panel-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            font-weight: 600;
+            color: var(--danger);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            opacity: .8;
+          }
+    
+          .panel-title {
+            font-size: .95rem;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1.5;
+            letter-spacing: -.01em;
+          }
+    
+          .panel-title strong {
+            color: #f87171;
+            font-weight: 800;
+          }
+    
+          .panel-sub {
+            font-size: .75rem;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.6;
+          }
+    
+          /* ── Deploy button ───────────────────────────────────── */
+          .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            margin-top: .25rem;
+            padding: .6rem 1.4rem;
+            border-radius: 10px;
+            border: 1px solid rgba(239, 68, 68, .35);
+            background: rgba(239, 68, 68, .08);
+            color: var(--danger);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .82rem;
+            font-weight: 600;
+            letter-spacing: .03em;
+            cursor: pointer;
+            transition:
+              background .2s ease,
+              border-color .2s ease,
+              box-shadow .2s ease,
+              transform .15s cubic-bezier(.34, 1.56, .64, 1);
+          }
+    
+          .btn:hover:not(:disabled) {
+            background: rgba(239, 68, 68, .16);
+            border-color: rgba(239, 68, 68, .65);
+            box-shadow: 0 0 24px rgba(239, 68, 68, .2);
+            transform: translateY(-3px);
+          }
+    
+          .btn.deploying {
+            border-color: rgba(74, 222, 128, .4);
+            background: rgba(74, 222, 128, .08);
+            color: #4ade80;
+            cursor: not-allowed;
+            transform: none;
+          }
+    
+          .btn:disabled { opacity: .75; }
+    
+          .spinner {
+            width: 13px;
+            height: 13px;
+            border: 2px solid rgba(255, 255, 255, .2);
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+          }
+    
+          /* ── Footer ──────────────────────────────────────────── */
+          footer {
+            color: var(--muted);
+            font-size: .7rem;
+            letter-spacing: .06em;
+            opacity: .4;
+            animation: fade-up .5s .2s ease both;
+          }
+    
+          /* ── Animations ──────────────────────────────────────── */
+          @keyframes fade-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0);    }
+          }
+    
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+          }
+    
+          @keyframes float {
+            0%, 100% { transform: translateY(0);   }
+            50%       { transform: translateY(-6px); }
+          }
+    
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
         </style>
-    </head>
-
-    <body>
-        <div class="container">
-            <h1>🚨 The project is on hold. Do NOT press the red button. 💥</h1>
-            <button id="deploy-btn">
-                Deploy to production
-            </button>
+      </head>
+    
+      <body>
+        <header>
+          <img
+            class="hero-img"
+            src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <h1>khaddict<span class="cursor"></span></h1>
+        </header>
+    
+        <div class="panel">
+          <span class="panel-label">⚠ Warning</span>
+          <p class="panel-title">The project is on hold.<br/>Do <strong>NOT</strong> press the red button.</p>
+          <p class="panel-sub">This is a controlled environment.<br/>Any action may have irreversible consequences.</p>
+          <button class="btn" id="deploy-btn">Deploy to production</button>
         </div>
-
+    
+        <footer>© 2026 khaddict</footer>
+    
         <script>
-            const btn = document.getElementById('deploy-btn');
-
-            function resetButton() {
-                btn.disabled = false;
-                btn.classList.remove('deploying');
-                btn.innerHTML = 'Deploy to production';
-            }
-
-            btn.addEventListener('click', () => {
-                btn.disabled = true;
-                btn.classList.add('deploying');
-
-                btn.innerHTML = `
-                    <div class="spinner"></div>
-                    Deploying...
-                `;
-
-                setTimeout(() => {
-                    window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-                }, 3000);
-            });
-
-            window.addEventListener('pageshow', () => {
-                resetButton();
-            });
+          const btn = document.getElementById('deploy-btn');
+    
+          function resetButton() {
+            btn.disabled = false;
+            btn.classList.remove('deploying');
+            btn.innerHTML = 'Deploy to production';
+          }
+    
+          btn.addEventListener('click', () => {
+            btn.disabled = true;
+            btn.classList.add('deploying');
+            btn.innerHTML = '<div class="spinner"></div>Deploying...';
+            setTimeout(() => {
+              window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            }, 3000);
+          });
+    
+          window.addEventListener('pageshow', () => resetButton());
         </script>
-    </body>
-
+      </body>
     </html>

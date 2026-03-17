@@ -10,152 +10,348 @@ data:
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Khaddict hub</title>
+        <title>khaddict</title>
         <link
           rel="icon"
           href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/khazix_pc.png"
           type="image/png"
         />
-
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />
+    
         <style>
           :root {
-            --bg: #0f172a;
-            --card: #111827;
-            --text: #e5e7eb;
-            --muted: #94a3b8;
-            --line: #ffffff22;
-            --accent: #7c3aed;
-            --page-pad: clamp(16px, 4vw, 48px);
-            --gap: clamp(12px, 2vw, 28px);
+            --bg:           #080810;
+            --surface:      rgba(255, 255, 255, .032);
+            --border:       rgba(255, 255, 255, .07);
+            --border-hov:   rgba(6, 182, 212, .5);
+            --text:         #f1f5f9;
+            --muted:        #64748b;
+            --accent:       #06b6d4;
+            --accent-dim:   rgba(6, 182, 212, .15);
+            --radius:       16px;
           }
-
-          * {
-            box-sizing: border-box;
-            margin: 0;
+    
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+          /* ── Grain overlay ───────────────────────────────────── */
+          body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
           }
-
+    
           body {
-            min-height: 100vh;
+            min-height: 100dvh;
             background:
-              radial-gradient(1200px 600px at 70% -10%, #312e81 10%, transparent 60%),
-              radial-gradient(900px 500px at -10% 110%, #581c87 10%, transparent 60%),
-              #0a0a1a;
+              radial-gradient(ellipse 900px 500px at 85% 5%,  rgba(6, 182, 212, .07), transparent 70%),
+              radial-gradient(ellipse 700px 700px at -5% 95%, rgba(6, 182, 212, .05), transparent 65%),
+              var(--bg);
             color: var(--text);
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-            padding: var(--page-pad);
-            display: grid;
-          }
-
-          .wrap {
-            width: 100%;
-            height: calc(100vh - (var(--page-pad) * 2));
-            background: var(--card);
-            border-radius: 18px;
-            border: 1px solid var(--line);
-            box-shadow: 0 24px 48px rgba(0, 0, 0, .35);
-
-            display: grid;
-            gap: var(--gap);
-
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            padding: var(--gap);
-          }
-
-          @media (max-width: 720px) {
-            .wrap {
-              height: auto;
-              grid-template-columns: 1fr;
-              grid-template-rows: none;
-            }
-          }
-
-          .card {
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, .02);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            text-decoration: none;
-            color: var(--text);
-
+            font-family: 'Inter', system-ui, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 24px;
-
-            transition:
-              transform .2s ease,
-              box-shadow .2s ease,
-              background .2s ease,
-              border-color .2s ease;
+            padding: 1.5rem;
+            gap: 1.75rem;
           }
-
-          .card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, .4);
-            background: rgba(255, 255, 255, .05);
-            border-color: var(--accent);
-          }
-
-          .card img {
-            width: 56px;
-            height: 56px;
-          }
-
-          .card h2 {
-            font-size: 1.25rem;
-            font-weight: 800;
+    
+          body > * { position: relative; z-index: 1; }
+    
+          /* ── Header ─────────────────────────────────────────── */
+          header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .6rem;
             text-align: center;
+            animation: fade-up .5s ease both;
           }
-
-          .card p {
-            max-width: none;
+    
+          /* ── Hero image ───────────────────────────────────── */
+          .hero-img {
+            width: clamp(70px, 9vw, 96px);
+            height: auto;
+            object-fit: contain;
+            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            animation: float 6s ease-in-out infinite;
+            pointer-events: none;
+            user-select: none;
+          }
+    
+          header h1 {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.65rem;
+            font-weight: 600;
+            letter-spacing: -.02em;
+            color: var(--text);
+          }
+    
+          header h1::before,
+          header h1::after {
+            content: '';
+            display: block;
+            width: 28px;
+            height: 1px;
+            background: var(--accent);
+            opacity: .5;
+          }
+    
+          header h1 .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 3px;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+          }
+    
+          .tagline {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
             color: var(--muted);
-            font-size: .98rem;
-            text-align: center;
+            font-size: .78rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+          }
+    
+          .tagline span::before {
+            content: '·';
+            margin-right: .55rem;
+            color: var(--accent);
+            opacity: .6;
+          }
+    
+          .tagline span:first-child::before { display: none; }
+    
+          /* ── Grid ────────────────────────────────────────────── */
+          .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: .6rem;
+            width: 100%;
+            max-width: 560px;
+          }
+    
+          @media (max-width: 440px) {
+            .grid { grid-template-columns: 1fr; }
+          }
+    
+          /* ── Card ────────────────────────────────────────────── */
+          .card {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: .85rem;
+            padding: .85rem 1rem;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text);
+            overflow: hidden;
+            transition:
+              transform .2s cubic-bezier(.34, 1.56, .64, 1),
+              border-color .2s ease,
+              box-shadow .2s ease;
+            animation: fade-up .5s ease both;
+          }
+    
+          .card:nth-child(1) { animation-delay: .08s; }
+          .card:nth-child(2) { animation-delay: .13s; }
+          .card:nth-child(3) { animation-delay: .18s; }
+          .card:nth-child(4) { animation-delay: .23s; }
+    
+          /* Top accent line */
+          .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity .25s ease;
+          }
+    
+          /* Inner glow */
+          .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-dim), transparent 70%);
+            opacity: 0;
+            transition: opacity .25s ease;
+            pointer-events: none;
+          }
+    
+          .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--border-hov);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .5), 0 0 0 1px rgba(6, 182, 212, .15);
+          }
+    
+          .card:hover::before,
+          .card:hover::after { opacity: 1; }
+    
+          .card-icon {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
+            position: relative;
+            z-index: 1;
+            transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
+          }
+    
+          .card:hover .card-icon { transform: scale(1.12) rotate(-3deg); }
+    
+          .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: .15rem;
+            flex: 1;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+          }
+    
+          .card-title {
+            font-size: .88rem;
+            font-weight: 700;
+            letter-spacing: -.01em;
+          }
+    
+          .card-desc {
+            font-size: .73rem;
+            color: var(--muted);
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+    
+          .card-arrow {
+            flex-shrink: 0;
+            font-size: .8rem;
+            color: var(--accent);
+            opacity: 0;
+            transform: translate(-4px, 4px);
+            transition: opacity .2s ease, transform .2s ease;
+            z-index: 1;
+          }
+    
+          .card:hover .card-arrow {
+            opacity: 1;
+            transform: translate(0, 0);
+          }
+    
+          /* ── Footer ──────────────────────────────────────────── */
+          footer {
+            color: var(--muted);
+            font-size: .7rem;
+            letter-spacing: .06em;
+            opacity: .4;
+            animation: fade-up .5s .3s ease both;
+          }
+    
+          /* ── Animations ──────────────────────────────────────── */
+          @keyframes fade-up {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0);    }
+          }
+    
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+          }
+    
+          @keyframes float {
+            0%, 100% { transform: translateY(0);   }
+            50%       { transform: translateY(-6px); }
           }
         </style>
       </head>
+    
       <body>
-        <main class="wrap" aria-label="Khaddict links">
+        <header>
+          <img
+            class="hero-img"
+            src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/khazix_pc.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <h1>khaddict<span class="cursor"></span></h1>
+          <p class="tagline">
+            <span>homelab</span>
+            <span>code</span>
+            <span>infrastructure</span>
+          </p>
+        </header>
+    
+        <main class="grid" aria-label="Khaddict links">
           <a class="card" href="https://site.khaddict.com" target="_blank" rel="noopener">
-            <img
+            <img class="card-icon"
               src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/www.png"
-              alt="Website"
+              alt=""
             />
-            <h2>Website</h2>
-            <p>Nothing special here.</p>
+            <span class="card-body">
+              <span class="card-title">Website</span>
+              <span class="card-desc">You won't regret this.</span>
+            </span>
+            <span class="card-arrow">↗</span>
           </a>
-
+    
           <a class="card" href="https://homepage.khaddict.com" target="_blank" rel="noopener">
-            <img
+            <img class="card-icon"
               src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/homepage.png"
-              alt="Homepage"
+              alt=""
             />
-            <h2>Homepage</h2>
-            <p>Dashboard with shortcuts and widgets.</p>
+            <span class="card-body">
+              <span class="card-title">Homepage</span>
+              <span class="card-desc">Everything in one place.</span>
+            </span>
+            <span class="card-arrow">↗</span>
           </a>
-
+    
           <a class="card" href="https://github.com/khaddict" target="_blank" rel="noopener">
-            <img
+            <img class="card-icon"
               src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/github.png"
-              alt="GitHub"
+              alt=""
             />
-            <h2>GitHub</h2>
-            <p>Code, experiments and small projects.</p>
+            <span class="card-body">
+              <span class="card-title">GitHub</span>
+              <span class="card-desc">Where the magic happens.</span>
+            </span>
+            <span class="card-arrow">↗</span>
           </a>
-
+    
           <a class="card" href="https://status.khaddict.com" target="_blank" rel="noopener">
-            <img
+            <img class="card-icon"
               src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/status.png"
-              alt="Status"
+              alt=""
             />
-            <h2>Status</h2>
-            <p>Status page.</p>
+            <span class="card-body">
+              <span class="card-title">Status</span>
+              <span class="card-desc">All green. Probably.</span>
+            </span>
+            <span class="card-arrow">↗</span>
           </a>
         </main>
+    
+        <footer>© 2026 khaddict</footer>
       </body>
     </html>
