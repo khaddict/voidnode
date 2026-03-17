@@ -10,10 +10,10 @@ data:
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>khaddict — site</title>
+        <title>khaddict's website</title>
         <link
           rel="icon"
-          href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png"
+          href="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/site.khaddict.com/images/khazix_pc.png"
           type="image/png"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -270,7 +270,7 @@ data:
         <header>
           <img
             class="hero-img"
-            src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/site.khaddict.com/images/khazix_pc.png"
+            src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/site.khaddict.com/images/khazix_pc.png"
             alt=""
             aria-hidden="true"
           />
