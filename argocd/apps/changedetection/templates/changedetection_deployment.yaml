@@ -4,16 +4,17 @@ metadata:
   name: {{ .Values.app }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.app }}
+    {{- include "changedetection.labels" . | nindent 4 }}
 spec:
+  revisionHistoryLimit: 3
   replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.app }}
+      {{- include "changedetection.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.app }}
+        {{- include "changedetection.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: {{ .Values.app }}
