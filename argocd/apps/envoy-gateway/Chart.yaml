@@ -1,8 +1,15 @@
 apiVersion: v2
 name: envoy-gateway
-description: Chart for Envoy Gateway
+description: A Helm chart for envoy-gateway
 type: application
 version: 0.1.0
+appVersion: "v1.7.1"
+home: https://github.com/envoyproxy/gateway
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/envoy-gateway
+  - https://github.com/envoyproxy/gateway
+maintainers:
+  - name: platform
 
 dependencies:
   - name: gateway-helm

@@ -1,8 +1,8 @@
 apiVersion: v2
 name: uptime-kuma
-description: A Helm chart for Uptime Kuma
+description: A Helm chart for uptime-kuma
 type: application
-version: 0.2.0
+version: 0.1.0
 appVersion: "2"
 home: https://github.com/khaddict/voidnode
 sources:

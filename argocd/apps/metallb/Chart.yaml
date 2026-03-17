@@ -1,8 +1,15 @@
 apiVersion: v2
 name: metallb
-description: Chart for MetalLB + pool configuration
+description: A Helm chart for metallb
 type: application
 version: 0.1.0
+appVersion: "0.15.3"
+home: https://metallb.universe.tf
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/metallb
+  - https://github.com/metallb/metallb
+maintainers:
+  - name: platform
 
 dependencies:
   - name: metallb
