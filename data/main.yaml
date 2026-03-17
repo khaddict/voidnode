@@ -56,13 +56,14 @@ proxmox:
             type: nvme
       <<: *vlan_core
 
-  core:
+  vms:
     # VLAN CORE
     opnsense:
       vmid: 100
       description: "OPNsense Firewall/Router"
       template: null
       tags: "core"
+      scrape: false
       ip: 10.10.0.1
       main_iface: null
       ssh: null
@@ -77,13 +78,13 @@ proxmox:
       backup: true
       <<: *vlan_core
 
-  vms:
     # VLAN ADMIN
     assets:
       vmid: 101
       description: "Asset Management System"
       template: debian-trixie-template
       tags: "admin,trixie"
+      scrape: true
       ip: 10.20.0.2
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAnR2TSVsFOLrw7lNG25G+HX8y7XktC6bqZs0RCfyi4V assets@khaddict.lab"
@@ -103,6 +104,7 @@ proxmox:
       description: "Salt Master for Configuration Management"
       template: debian-trixie-template
       tags: "admin,trixie"
+      scrape: true
       ip: 10.20.0.3
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3v0wOk/qb2Bq80EzC+BZMArREUa/6WlIIzav05AQyt saltmaster@khaddict.lab"
@@ -122,6 +124,7 @@ proxmox:
       description: "StackStorm Automation Platform"
       template: ubuntu-jammy-template
       tags: "admin,jammy"
+      scrape: true
       ip: 10.20.0.4
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGrrb3pJzWN7njrlWUE0pPjVD0j1XmJXgrc51FVZqzk stackstorm@khaddict.lab"
@@ -141,6 +144,7 @@ proxmox:
       description: "HashiCorp Vault for Secrets Management"
       template: debian-trixie-template
       tags: "admin,trixie"
+      scrape: true
       ip: 10.20.0.5
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMQAB3GXUp/Ergl9VhpRkTvNw5tSxD7PzPUPBrH1ygI vault@khaddict.lab"
@@ -160,6 +164,7 @@ proxmox:
       description: "EasyPKI for Certificate Management"
       template: debian-trixie-template
       tags: "admin,trixie"
+      scrape: true
       ip: 10.20.0.6
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICJdraaRkgzciz65r4ZaA8uVBhnv80CKI49jKEo16sBg easypki@khaddict.lab"
@@ -179,6 +184,7 @@ proxmox:
       description: "Proxmox Backup Server for VM Backups"
       template: null
       tags: "admin"
+      scrape: true
       ip: 10.20.0.7
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAuBymc/W/lhrIfdYeTw034n/PBjfttkP5W7u/4WlIrT pbs@khaddict.lab"
@@ -201,6 +207,7 @@ proxmox:
       description: "NetBox for IPAM and DCIM"
       template: debian-trixie-template
       tags: "infra,trixie"
+      scrape: true
       ip: 10.30.0.2
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEVxWEewWZGYnRqMtXa3glkQS8AG30gPjhE02Z7237By netbox@khaddict.lab"
@@ -220,6 +227,7 @@ proxmox:
       description: "Prometheus for Monitoring"
       template: debian-trixie-template
       tags: "infra,trixie"
+      scrape: true
       ip: 10.30.0.3
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm7Su4feupVYWqlzHuo1coP5kNS7fNT9uV7qa8TB4QF prometheus@khaddict.lab"
@@ -239,6 +247,7 @@ proxmox:
       description: "Grafana for Visualization"
       template: debian-trixie-template
       tags: "infra,trixie"
+      scrape: true
       ip: 10.30.0.4
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN23Mh38z0N0QylJwhKsSkECVF3DOgbvZ8dZHqTh/JtL grafana@khaddict.lab"
@@ -258,6 +267,7 @@ proxmox:
       description: "Loki for Log Aggregation"
       template: debian-trixie-template
       tags: "infra,trixie"
+      scrape: true
       ip: 10.30.0.5
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBHgGh/4ODt7ZiivX1DW6h3tOYO+5LIPfhdNgFhZXIRb loki@khaddict.lab"
@@ -278,6 +288,7 @@ proxmox:
       description: "AI to experiment"
       template: debian-trixie-template
       tags: "edge,trixie"
+      scrape: true
       ip: 10.40.0.3
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJxIVCJe98DLGmnJz4IqNWOR7ZX+nb2zQI47qETV7vhB ai@khaddict.lab"
@@ -297,6 +308,7 @@ proxmox:
       description: "Reverse Proxy for Edge Services"
       template: debian-trixie-template
       tags: "edge,trixie"
+      scrape: true
       ip: 10.40.0.2
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDKxcsI82GqQBOX1w1b+LqScp9XftXL4kYABgsyiSE2/ revproxy@khaddict.lab"
@@ -316,6 +328,7 @@ proxmox:
       description: "Kubernetes Control Plane"
       template: null
       tags: "edge,talos"
+      scrape: false
       ip: 10.40.0.5
       main_iface: *default_iface
       ssh: ""
@@ -335,6 +348,7 @@ proxmox:
       description: "Kubernetes Worker Node 1"
       template: null
       tags: "edge,talos"
+      scrape: false
       ip: 10.40.0.6
       main_iface: *default_iface
       ssh: ""
@@ -354,6 +368,7 @@ proxmox:
       description: "Kubernetes Worker Node 2"
       template: null
       tags: "edge,talos"
+      scrape: false
       ip: 10.40.0.7
       main_iface: *default_iface
       ssh: ""
@@ -373,6 +388,7 @@ proxmox:
       description: "Kubernetes CLI"
       template: debian-trixie-template
       tags: "edge,trixie"
+      scrape: true
       ip: 10.40.0.8
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEgER/cAhU00TOXEQTmEHdPSHMTx8E5Oy/RTMRyjQuAL kcli@khaddict.lab"

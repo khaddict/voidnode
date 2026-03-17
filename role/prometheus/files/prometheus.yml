@@ -23,7 +23,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-{%- for hostname, host in hosts.items() %}
+{%- for hostname, host in node_hosts.items() %}
           - '{{ hostname }}.{{ domain }}:9100'
 {%- endfor %}
     relabel_configs:
@@ -39,7 +39,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets:
-{%- for hostname, host in hosts.items() %}
+{%- for hostname, host in blackbox_hosts.items() %}
           - '{{ hostname }}.{{ domain }}'
 {%- endfor %}
     relabel_configs:
