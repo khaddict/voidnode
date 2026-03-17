@@ -9,7 +9,7 @@ data:
   kubernetes.yaml: |
     mode: cluster
   settings.yaml: |
-    title: Khaddict homepage
+    title: Khaddict's homepage
     background:
       image: https://github.com/khaddict/voidnode/blob/main/argocd/apps/homepage/images/khazix.jpg?raw=true
       opacity: 30

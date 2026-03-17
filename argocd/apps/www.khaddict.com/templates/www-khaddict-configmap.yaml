@@ -13,7 +13,7 @@ data:
         <title>khaddict</title>
         <link
           rel="icon"
-          href="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/khazix_pc.png"
+          href="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/khazix_pc.png"
           type="image/png"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -290,7 +290,7 @@ data:
         <header>
           <img
             class="hero-img"
-            src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/khazix_pc.png"
+            src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/khazix_pc.png"
             alt=""
             aria-hidden="true"
           />
@@ -305,7 +305,7 @@ data:
         <main class="grid" aria-label="Khaddict links">
           <a class="card" href="https://site.khaddict.com" target="_blank" rel="noopener">
             <img class="card-icon"
-              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/www.png"
+              src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/www.png"
               alt=""
             />
             <span class="card-body">
@@ -317,7 +317,7 @@ data:
     
           <a class="card" href="https://homepage.khaddict.com" target="_blank" rel="noopener">
             <img class="card-icon"
-              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/homepage.png"
+              src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/homepage.png"
               alt=""
             />
             <span class="card-body">
@@ -329,7 +329,7 @@ data:
     
           <a class="card" href="https://github.com/khaddict" target="_blank" rel="noopener">
             <img class="card-icon"
-              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/github.png"
+              src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/github.png"
               alt=""
             />
             <span class="card-body">
@@ -341,7 +341,7 @@ data:
     
           <a class="card" href="https://status.khaddict.com" target="_blank" rel="noopener">
             <img class="card-icon"
-              src="https://raw.githubusercontent.com/khaddict/homelab_cloud/refs/heads/main/apps/www.khaddict.com/images/status.png"
+              src="https://raw.githubusercontent.com/khaddict/voidnode/refs/heads/main/argocd/apps/www.khaddict.com/images/status.png"
               alt=""
             />
             <span class="card-body">
