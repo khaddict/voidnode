@@ -18,7 +18,7 @@ vars:
   - dns: ""
   - disk: ""
   - tags: ""
-  - proxmox: "voidnode.<% ctx().domain %>"
+  - pve: "voidnode.<% ctx().domain %>"
   - saltmaster: "saltmaster.<% ctx().domain %>"
   - st2_sshkey: ""
   - saltmaster_sshkey: ""
@@ -31,7 +31,7 @@ tasks:
     action: core.local
     input:
       cmd: |
-        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) | .proxmox.vms["<% ctx().name %>"] as $vm |
+        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) | .pve.vms["<% ctx().name %>"] as $vm |
           [
             $vm.vmid,
             $vm.description,
@@ -68,16 +68,16 @@ tasks:
   check_vm_exists:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         pvesh get /cluster/resources --type vm --output-format json | jq -e --arg name '<% ctx().name %>' 'any(.[]; .type=="qemu" and .name==$name)' >/dev/null && echo EXISTS || echo ABSENT
     next:
-      - when: <% result()[ctx().proxmox].stdout = "EXISTS" %>
+      - when: <% result()[ctx().pve].stdout = "EXISTS" %>
         do: noop
         publish:
-          - msg: "VM '<% ctx().name %>' already exists on '<% ctx().proxmox %>'. Skipping provisioning."
-      - when: <% result()[ctx().proxmox].stdout = "ABSENT" %>
+          - msg: "VM '<% ctx().name %>' already exists on '<% ctx().pve %>'. Skipping provisioning."
+      - when: <% result()[ctx().pve].stdout = "ABSENT" %>
         do: extract_ssh_keys
 
   extract_ssh_keys:
@@ -86,8 +86,8 @@ tasks:
       cmd: |
         yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) |
           [
-            .proxmox.vms["stackstorm"].ssh,
-            .proxmox.vms["saltmaster"].ssh
+            .pve.vms["stackstorm"].ssh,
+            .pve.vms["saltmaster"].ssh
           ] | @tsv' /opt/stackstorm/data/main.yaml
     next:
       - when: <% succeeded() and result().stdout != "" %>
@@ -103,23 +103,23 @@ tasks:
   get_template_id:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         pvesh get /nodes/<% ctx().node %>/qemu --output-format json | jq -re --arg name '<% ctx().template %>' 'first(.[] | select(.template==1 and .name==$name)) | .vmid'
     next:
       - when: <% succeeded() %>
         publish:
-          - template_id: <% result()[ctx().proxmox].stdout %>
+          - template_id: <% result()[ctx().pve].stdout %>
         do: clone_vm
       - when: <% failed() %>
         publish:
-          - msg: "Failed to retrieve the template ID for '<% ctx().template %>' on '<% ctx().proxmox %>'."
+          - msg: "Failed to retrieve the template ID for '<% ctx().template %>' on '<% ctx().pve %>'."
 
   clone_vm:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm clone <% ctx().template_id %> <% ctx().vmid %> --full --name <% ctx().name %> --storage <% ctx().storage %> --target <% ctx().node %>
@@ -128,12 +128,12 @@ tasks:
         do: configure_vm
       - when: <% failed() %>
         publish:
-          - msg: "Failed to clone VM '<% ctx().name %>' (vmid <% ctx().vmid %>) from template '<% ctx().template_id %>' on '<% ctx().proxmox %>'."
+          - msg: "Failed to clone VM '<% ctx().name %>' (vmid <% ctx().vmid %>) from template '<% ctx().template_id %>' on '<% ctx().pve %>'."
 
   configure_vm:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm set <% ctx().vmid %> --tags <% ctx().tags %> --net0 virtio,bridge=vmbr1,tag=<% ctx().vlan_id %> --ciuser root -ipconfig0 ip=<% ctx().ip %>/24,gw=<% ctx().gateway %> --nameserver <% ctx().dns %> --memory <% ctx().ram_mb %> --cores <% ctx().cpu_cores %> --description "<% ctx().vm_description %>" --sshkeys <(echo -e "<% ctx().st2_sshkey %>\n<% ctx().saltmaster_sshkey %>")
@@ -142,12 +142,12 @@ tasks:
         do: resize_disk
       - when: <% failed() %>
         publish:
-          - msg: "Failed to configure VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
+          - msg: "Failed to configure VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
 
   resize_disk:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm resize <% ctx().vmid %> scsi0 <% ctx().disk %>G
@@ -161,7 +161,7 @@ tasks:
   start_vm:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm start <% ctx().vmid %>
@@ -279,15 +279,15 @@ tasks:
         salt-call state.highstate
     next:
       - when: <% succeeded() %>
-        do: cleanup_proxmox_devices
+        do: cleanup_pve_devices
       - when: <% failed() %>
         publish:
           - msg: "Failed to apply Salt highstate on VM '<% ctx().name %>'."
 
-  cleanup_proxmox_devices:
+  cleanup_pve_devices:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm set <% ctx().vmid %> --delete efidisk0 --delete ide0
@@ -312,7 +312,7 @@ tasks:
   wait_vm_stopped:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         until qm status <% ctx().vmid %> | grep -q 'stopped'; do sleep 1; done; qm start <% ctx().vmid %>
@@ -321,12 +321,12 @@ tasks:
         do: delete_unused0
       - when: <% failed() %>
         publish:
-          - msg: "Failed to stop or restart VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
+          - msg: "Failed to stop or restart VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
 
   delete_unused0:
     action: core.remote
     input:
-      hosts: <% ctx().proxmox %>
+      hosts: <% ctx().pve %>
       username: root
       cmd: |
         qm set <% ctx().vmid %> --delete unused0

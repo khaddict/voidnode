@@ -35,7 +35,7 @@ network:
       dns: *edge_router
       ntp: *edge_router
 
-proxmox:
+pve:
   backups:
     storage: pbs
 
@@ -62,7 +62,7 @@ proxmox:
       vmid: 100
       description: "OPNsense Firewall/Router"
       template: null
-      tags: "core"
+      tags: "core,opnsense"
       scrape: false
       ip: 10.10.0.1
       main_iface: null
@@ -163,7 +163,7 @@ proxmox:
       vmid: 104
       description: "Proxmox Backup Server for VM Backups"
       template: null
-      tags: "admin"
+      tags: "admin,pbs"
       scrape: true
       ip: 10.20.0.7
       main_iface: *default_iface

@@ -1,14 +1,14 @@
 {% set prometheus_version = '3.10.0' %}
 {% import_yaml 'data/main.yaml' as data %}
 
-{% set proxmox_nodes = data.get('proxmox').get('nodes') %}
-{% set proxmox_vms = data.get('proxmox').get('vms') %}
+{% set pve_nodes = data.get('pve').get('nodes') %}
+{% set pve_vms = data.get('pve').get('vms') %}
 {% set domain = data.get('network').get('domain') %}
 {% set node_hosts = {} %}
 {% set blackbox_hosts = {} %}
-{% do node_hosts.update(proxmox_nodes) %}
-{% do blackbox_hosts.update(proxmox_nodes) %}
-{% for hostname, host in proxmox_vms.items() %}
+{% do node_hosts.update(pve_nodes) %}
+{% do blackbox_hosts.update(pve_nodes) %}
+{% for hostname, host in pve_vms.items() %}
 {%   do blackbox_hosts.update({hostname: host}) %}
 {%   if host.get('scrape', True) %}
 {%     do node_hosts.update({hostname: host}) %}

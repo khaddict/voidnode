@@ -2,7 +2,7 @@
 {% set domain = data.network.domain %}
 {% set host = grains['host'] %}
 
-{% set vm = data.proxmox.vms.get(host) %}
+{% set vm = data.pve.vms.get(host) %}
 
 systemd:
   pkg.installed

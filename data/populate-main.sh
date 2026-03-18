@@ -61,11 +61,11 @@ prompt() {
   local value
 
   if [[ -n "$default" ]]; then
-    printf "%s%-${PROMPT_WIDTH}s%s %s[%s]%s: " "$BOLD" "$message" "$RESET" "$DIM" "$default" "$RESET" >&2
+    printf "%s%-${PROMPT_WIDTH}s%s : %s[%s]%s " "$BOLD" "$message" "$RESET" "$DIM" "$default" "$RESET" >&2
     read -r value
     echo "${value:-$default}"
   else
-    printf "%s%-${PROMPT_WIDTH}s%s: " "$BOLD" "$message" "$RESET" >&2
+    printf "%s%-${PROMPT_WIDTH}s%s : " "$BOLD" "$message" "$RESET" >&2
     read -r value
     echo "$value"
   fi
@@ -78,11 +78,11 @@ yes_no() {
 
   while true; do
     if [[ "$default" == "y" ]]; then
-      printf "%s%-${PROMPT_WIDTH}s%s %s[Y/n]%s: " "$BOLD" "$message" "$RESET" "$DIM" "$RESET" >&2
+      printf "%s%-${PROMPT_WIDTH}s%s : %s[Y/n]%s " "$BOLD" "$message" "$RESET" "$DIM" "$RESET" >&2
       read -r ans
       ans="${ans:-y}"
     else
-      printf "%s%-${PROMPT_WIDTH}s%s %s[y/N]%s: " "$BOLD" "$message" "$RESET" "$DIM" "$RESET" >&2
+      printf "%s%-${PROMPT_WIDTH}s%s : %s[y/N]%s " "$BOLD" "$message" "$RESET" "$DIM" "$RESET" >&2
       read -r ans
       ans="${ans:-n}"
     fi
@@ -193,7 +193,7 @@ printf "  %s1%s CORE\n" "$CYAN" "$RESET"
 printf "  %s2%s ADMIN\n" "$CYAN" "$RESET"
 printf "  %s3%s INFRA\n" "$CYAN" "$RESET"
 printf "  %s4%s EDGE\n" "$CYAN" "$RESET"
-vlan_choice="$(prompt "VLAN number" "2")"
+vlan_choice="$(prompt "VLAN number" "4")"
 
 case "$vlan_choice" in
   1) vlan_name="core"; vlan_anchor="*vlan_core"; vlan_label="CORE"; vlan_subnet="10.10.0" ;;
@@ -234,16 +234,15 @@ if [[ "$ip" != "${vlan_subnet}."* ]]; then
   fail "IP address '$ip' does not belong to subnet ${vlan_subnet}.0/24."
 fi
 
-main_iface_mode="$(prompt "main_iface mode (default|null|custom)" "default")"
+main_iface_mode="$(prompt "main_iface (default|custom)" "default")"
 case "${main_iface_mode,,}" in
   default) main_iface_value="*default_iface" ;;
-  null) main_iface_value="null" ;;
   custom)
     main_iface_value="$(prompt "main_iface custom value")"
     require_non_empty "main_iface custom value" "$main_iface_value"
     ;;
   *)
-    fail "main_iface mode must be default, null or custom"
+    fail "main_iface must be default or custom"
     ;;
 esac
 
@@ -256,7 +255,7 @@ require_int "RAM" "$ram_mb"
 cpu_cores="$(prompt "CPU cores" "2")"
 require_int "CPU cores" "$cpu_cores"
 
-scrape="$(yes_no "Enable scrape (node exporter)?" "y")"
+scrape="$(yes_no "Enable scrape?" "y")"
 backup="$(yes_no "Enable backup?" "y")"
 
 section "Storage"

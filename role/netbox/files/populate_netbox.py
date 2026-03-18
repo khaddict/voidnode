@@ -54,8 +54,8 @@ class PopulateNetBox(Script):
             if not data:
                 raise AbortScript("YAML file is empty.")
 
-            if "network" not in data or "proxmox" not in data:
-                raise AbortScript("YAML must contain at least 'network' and 'proxmox' sections.")
+            if "network" not in data or "pve" not in data:
+                raise AbortScript("YAML must contain at least 'network' and 'pve' sections.")
 
             return data
 
@@ -445,7 +445,7 @@ class PopulateNetBox(Script):
             vlan = self.ensure_vlan(vlan_name, vlan_data)
             self.ensure_prefix(vlan_data["cidr"], vlan)
 
-        nodes = config.get("proxmox", {}).get("nodes", {})
+        nodes = config.get("pve", {}).get("nodes", {})
         for node_name, node in nodes.items():
             desired_device_names.add(node_name)
 
@@ -461,18 +461,18 @@ class PopulateNetBox(Script):
                 ip_obj = self.ensure_ip(address, iface)
                 self.set_primary_ip_device(device, ip_obj)
 
-        proxmox = config.get("proxmox", {})
+        pve = config.get("pve", {})
 
         vm_groups = {
-            "core": proxmox.get("core", {}),
-            "vms": proxmox.get("vms", {}),
+            "core": pve.get("core", {}),
+            "vms": pve.get("vms", {}),
         }
 
         all_vms = {}
         for group_name, group_vms in vm_groups.items():
             for vm_name, vm_data in group_vms.items():
                 if vm_name in all_vms:
-                    raise AbortScript(f"Duplicate VM name '{vm_name}' found in proxmox.{group_name}")
+                    raise AbortScript(f"Duplicate VM name '{vm_name}' found in pve.{group_name}")
                 all_vms[vm_name] = vm_data
 
         for vm_name, vm_data in all_vms.items():

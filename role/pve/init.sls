@@ -1,12 +1,12 @@
 {% import_yaml 'data/main.yaml' as data %}
 
-{% set proxmox_vms = data.get('proxmox', {}).get('vms', {}) %}
+{% set pve_vms = data.get('pve', {}).get('vms', {}) %}
 
-{% set storage = data.get('proxmox', {}).get('backups', {}).get('storage') %}
+{% set storage = data.get('pve', {}).get('backups', {}).get('storage') %}
 
 {% set backup_vmids = [] %}
 
-{% for name, vm in proxmox_vms.items() %}
+{% for name, vm in pve_vms.items() %}
   {% if vm.get('backup') %}
     {% do backup_vmids.append(vm.vmid) %}
   {% endif %}
@@ -14,7 +14,7 @@
 
 /etc/pve/jobs.cfg:
   file.managed:
-    - source: salt://role/proxmox/files/jobs.cfg
+    - source: salt://role/pve/files/jobs.cfg
     - user: root
     - group: www-data
     - mode: 640

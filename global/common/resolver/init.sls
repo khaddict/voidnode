@@ -1,7 +1,7 @@
 {% import_yaml 'data/main.yaml' as data %}
 {% set host = grains.get('host') or '' %}
-{% set vm = data.get('proxmox', {}).get('vms', {}).get(host) %}
-{% set node = data.get('proxmox', {}).get('nodes', {}).get(host) %}
+{% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
+{% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
 
 {% if vm %}
 include:

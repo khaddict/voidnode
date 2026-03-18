@@ -7,7 +7,7 @@ input:
 vars:
   - domain: "khaddict.lab"
   - msg: ""
-  - proxmox: "voidnode.<% ctx().domain %>"
+  - pve: "voidnode.<% ctx().domain %>"
   - saltmaster: "saltmaster.<% ctx().domain %>"
   - node: "voidnode"
 
@@ -15,39 +15,39 @@ tasks:
   check_vm_exists:
     action: core.remote
     input:
-      hosts: "<% ctx().proxmox %>"
+      hosts: "<% ctx().pve %>"
       username: root
       cmd: |
         pvesh get /nodes/<% ctx().node %>/qemu --output-format json | jq -re --arg name '<% ctx().name %>' 'first(.[] | select(.name == $name)) | .vmid | tostring'
     next:
       - when: <% succeeded() %>
         publish:
-          - vmid: <% result()[ctx().proxmox].stdout %>
+          - vmid: <% result()[ctx().pve].stdout %>
         do: check_vm_status
       - when: <% failed() %>
         publish:
-          - msg: "VM '<% ctx().name %>' was not found on '<% ctx().proxmox %>'."
+          - msg: "VM '<% ctx().name %>' was not found on '<% ctx().pve %>'."
 
   check_vm_status:
     action: core.remote
     input:
-      hosts: "<% ctx().proxmox %>"
+      hosts: "<% ctx().pve %>"
       username: root
       cmd: |
         qm status <% ctx().vmid %> | awk '{print $2}'
     next:
-      - when: <% succeeded() and result()[ctx().proxmox].stdout = "running" %>
+      - when: <% succeeded() and result()[ctx().pve].stdout = "running" %>
         do: stop_vm
-      - when: <% succeeded() and result()[ctx().proxmox].stdout = "stopped" %>
+      - when: <% succeeded() and result()[ctx().pve].stdout = "stopped" %>
         do: delete_vm
       - when: <% failed() %>
         publish:
-          - msg: "Failed to determine the power state of VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
+          - msg: "Failed to determine the power state of VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
 
   stop_vm:
     action: core.remote
     input:
-      hosts: "<% ctx().proxmox %>"
+      hosts: "<% ctx().pve %>"
       username: root
       cmd: |
         qm stop <% ctx().vmid %>
@@ -56,12 +56,12 @@ tasks:
         do: delete_vm
       - when: <% failed() %>
         publish:
-          - msg: "Failed to stop VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
+          - msg: "Failed to stop VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
 
   delete_vm:
     action: core.remote
     input:
-      hosts: "<% ctx().proxmox %>"
+      hosts: "<% ctx().pve %>"
       username: root
       cmd: |
         qm destroy <% ctx().vmid %>
@@ -70,7 +70,7 @@ tasks:
         do: delete_salt_key
       - when: <% failed() %>
         publish:
-          - msg: "Failed to delete VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().proxmox %>'."
+          - msg: "Failed to delete VM '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
 
   delete_salt_key:
     action: core.remote

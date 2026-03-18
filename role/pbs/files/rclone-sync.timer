@@ -1,0 +1,11 @@
+[Unit]
+Description=Timer to run rclone-sync.service weekly at 00:00 UTC
+Requires=network-online.target
+After=network-online.target
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
