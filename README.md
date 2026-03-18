@@ -8,7 +8,7 @@ I used to run a fully HA homelab ([homelab](https://github.com/khaddict/homelab)
 
 Because of that, I decided to move to something simpler. By simpler, I mean less high availability. I now assume that if the node goes down, it’s not a big deal. After all, it’s just a homelab.
 
-In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new design, the goal is to isolate the entire homelab behind OPNsense on a dedicated LAN global (`10.0.0.0/16`), split into VLAN subnets (`10.10.0.0/24`, `10.20.0.0/24`, `10.30.0.0/24`, `10.40.0.0/24`). This allows clear workload separation between core services, administration, internal infrastructure, and edge-facing services.
+In my previous setup, everything ran on my main LAN (`192.168.0.0/24`). In the new design, the goal is to isolate the entire homelab behind OPNsense on a dedicated LAN global (`10.0.0.0/16`), split into VLAN subnets (`10.10.0.0/24`, `10.20.0.0/24`, `10.30.0.0/24`, `10.40.0.0/24`). This allows clear workload separation between core services, administration, internal infrastructure, and edge-facing services.
 
 ## Hardware
 
@@ -47,7 +47,6 @@ In my previous setup, everything ran on my main LAN (192.168.0.0/24). In the new
 
 ### VLAN 40 – EDGE
 **10.40.0.0/24** – *Edge services network. This segment hosts services that are exposed to external networks and act as entry points between the internet and the internal lab infrastructure.*
-- `ai.khaddict.lab`
 - `revproxy.khaddict.lab`
 - `kcontrol.khaddict.lab`
 - `kworker01.khaddict.lab`

@@ -263,26 +263,6 @@ proxmox:
       <<: *vlan_infra
 
     # VLAN EDGE
-    ai:
-      vmid: 108
-      description: "AI to experiment"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      scrape: true
-      ip: 10.40.0.3
-      main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJxIVCJe98DLGmnJz4IqNWOR7ZX+nb2zQI47qETV7vhB ai@khaddict.lab"
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: true
-      <<: *vlan_edge
-
     revproxy:
       vmid: 109
       description: "Reverse Proxy for Edge Services"
