@@ -7,9 +7,14 @@ input:
 vars:
   - domain: "khaddict.lab"
   - msg: ""
+  - dns_record_uuid: ""
   - pve: "voidnode.<% ctx().domain %>"
   - saltmaster: "saltmaster.<% ctx().domain %>"
   - node: "voidnode"
+  - opnsense_url: "https://opnsense.<% ctx().domain %>"
+  - opnsense_api_key: "{{ dns_api_key }}"
+  - opnsense_api_secret: "{{ dns_api_secret }}"
+  - opnsense_verify_ssl_cert: false
 
 tasks:
   check_vm_exists:
@@ -81,11 +86,69 @@ tasks:
         salt-key -d <% ctx().name %> -y
     next:
       - when: <% succeeded() %>
-        publish:
-          - msg: "VM '<% ctx().name %>' was decommissioned successfully."
+        do: find_dns_record
       - when: <% failed() %>
         publish:
           - msg: "VM '<% ctx().name %>' was deleted, but its Salt key could not be removed from '<% ctx().saltmaster %>'."
+
+  find_dns_record:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/settings/search_host_override/"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      body: "current=1&rowCount=-1&searchPhrase=<% ctx().name %>"
+    next:
+      - when: <% succeeded() and result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).len() > 0 %>
+        publish:
+          - dns_record_uuid: <% result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).select($.uuid).first() %>
+        do: delete_dns_record
+      - when: <% succeeded() and result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).len() = 0 %>
+        publish:
+          - msg: "VM '<% ctx().name %>' was decommissioned successfully. No DNS record was found in Unbound."
+      - when: <% failed() %>
+        publish:
+          - msg: "VM '<% ctx().name %>' was decommissioned, but DNS record lookup failed."
+
+  delete_dns_record:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/settings/del_host_override/<% ctx().dns_record_uuid %>"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/json
+    next:
+      - when: <% succeeded() %>
+        do: reconfigure_unbound_delete
+      - when: <% failed() %>
+        publish:
+          - msg: "VM '<% ctx().name %>' was decommissioned, but DNS record deletion failed."
+
+  reconfigure_unbound_delete:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/service/reconfigure"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/json
+      body: "{}"
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "VM '<% ctx().name %>' was decommissioned successfully. DNS record deleted and Unbound reconfigured."
+      - when: <% failed() %>
+        publish:
+          - msg: "VM '<% ctx().name %>' was decommissioned, DNS record deleted, but Unbound reconfigure failed."
 
 output:
   - msg: <% ctx().msg %>
