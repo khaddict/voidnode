@@ -3,6 +3,10 @@
 {% set mongodb_password  = st2_secrets.get('mongodb_password') %}
 {% set snapshot_vms_discord_webhook = salt['vault'].read_secret('kv/stackstorm/st2_voidnode').snapshot_vms_discord_webhook %}
 
+{% set opnsense_secrets = salt['vault'].read_secret('kv/opnsense') %}
+{% set dns_api_key  = opnsense_secrets.get('dns_api_key') %}
+{% set dns_api_secret  = opnsense_secrets.get('dns_api_secret') %}
+
 /etc/default/st2actionrunner:
   file.managed:
     - source: salt://role/stackstorm/files/st2actionrunner
@@ -30,6 +34,8 @@
     - template: jinja
     - context:
         snapshot_vms_discord_webhook: {{ snapshot_vms_discord_webhook }}
+        dns_api_key: {{ dns_api_key }}
+        dns_api_secret: {{ dns_api_secret }}
 
 # Data
 
