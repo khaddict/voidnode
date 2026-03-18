@@ -4,8 +4,9 @@ include:
   - global.common.exporters
   - global.common.hostname
   - global.common.hosts
-  - global.common.motd
   - global.common.host_type
+  - global.common.locale
+  - global.common.motd
   - global.common.network
   - global.common.packages
   - global.common.promtail
