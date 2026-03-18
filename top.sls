@@ -38,4 +38,4 @@
     - role.vault
 
   'voidnode':
-    - role.proxmox
+    - role.pve

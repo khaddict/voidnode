@@ -2,7 +2,7 @@
 {% set domain = data.network.domain %}
 {% set host = grains['host'] %}
 
-{% set node = data.proxmox.nodes.get(host) %}
+{% set node = data.pve.nodes.get(host) %}
 
 /etc/resolv.conf:
   file.managed:

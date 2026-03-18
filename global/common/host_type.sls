@@ -6,8 +6,8 @@
   This allows other states to branch consistently (vm vs node) without
   re-implementing the same logic repeatedly.
 #}
-{% set vm = data.get('proxmox', {}).get('vms', {}).get(host) %}
-{% set node = data.get('proxmox', {}).get('nodes', {}).get(host) %}
+{% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
+{% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
 
 {% if vm %}
 host_type:

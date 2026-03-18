@@ -10,7 +10,7 @@ tasks:
     action: core.local
     input:
       cmd: |
-        yq -r '.proxmox.vms | keys | .[]' /opt/stackstorm/data/main.yaml
+        yq -r '.pve.vms | keys | .[]' /opt/stackstorm/data/main.yaml
     next:
       - when: <% succeeded() and result().stdout != "" %>
         publish:

@@ -1,0 +1,10 @@
+[Unit]
+Description=Sync /datastore to ShadowDrive
+After=network-online.target
+Wants=network-online.target
+ConditionPathIsDirectory=/datastore
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /usr/local/bin/pbs-datastore-sync.sh
+Restart=no

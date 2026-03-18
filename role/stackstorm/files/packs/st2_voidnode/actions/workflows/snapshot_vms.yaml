@@ -2,7 +2,7 @@ version: 1.0
 description: Create sequential Proxmox snapshots for VMs with vmid < 200, prune old automated snapshots, and send a final summary to Discord.
 
 vars:
-  - proxmox_node: voidnode
+  - pve_node: voidnode
   - snapshot_name: "<% 'auto_snapshot_' + str(now().year) + str(now().month) + str(now().day) + '_' + str(now().hour + 1) + str(now().minute) + str(now().second) %>"
   - snapshot_script: |
       SUCCESS=0
@@ -47,17 +47,17 @@ tasks:
   create_node_snapshots:
     action: core.remote
     input:
-      hosts: "<% ctx().proxmox_node %>"
+      hosts: "<% ctx().pve_node %>"
       username: root
       timeout: 3600
       cmd: |
-        export NODE="<% ctx().proxmox_node %>"
+        export NODE="<% ctx().pve_node %>"
         export SNAPNAME="<% ctx().snapshot_name %>"
         <% ctx().snapshot_script %>
     next:
       - when: <% succeeded() or failed() %>
         publish:
-          - node_stdout: <% result()[ctx().proxmox_node].stdout %>
+          - node_stdout: <% result()[ctx().pve_node].stdout %>
         do: send_summary_to_discord
 
   send_summary_to_discord:
