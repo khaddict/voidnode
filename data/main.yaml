@@ -181,6 +181,26 @@ pve:
       backup: false
       <<: *vlan_admin
 
+    registry:
+      vmid: 101
+      description: "Registry VM"
+      template: debian-trixie-template
+      tags: "admin,trixie"
+      scrape: true
+      ip: 10.20.0.2
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 3
+        disks:
+          - name: scsi0
+            size_gb: 30
+      backup: true
+      <<: *vlan_admin
+
     # VLAN INFRA
     netbox:
       vmid: 105

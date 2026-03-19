@@ -10,6 +10,9 @@
   'grafana':
     - role.grafana
 
+  'registry':
+    - role.registry
+
   'kcli':
     - role.kcli
 
