@@ -1,4 +1,4 @@
-{% set vault_token = salt['vault'].read_secret('kv/kubernetes').vault_token %}
+{% set vault_token = salt['vault'].read_secret('kv/kubernetes/vault').vault_token %}
 
 include:
   - base.vault

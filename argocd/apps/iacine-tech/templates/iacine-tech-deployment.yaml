@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "iacine-tech.labels" . | nindent 4 }}
+spec:
+  revisionHistoryLimit: 3
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "iacine-tech.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "iacine-tech.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: {{ .Values.app }}
+        image: {{ .Values.deployment.image }}
+        imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 10 }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        {{- if .Values.probes.enabled }}
+        livenessProbe:
+          {{- toYaml .Values.probes.liveness | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.probes.readiness | nindent 10 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.secret.name }}
