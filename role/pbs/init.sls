@@ -1,5 +1,5 @@
-{% set shadowdrive_user = salt['vault'].read_secret('kv/proxmox').shadowdrive_user %}
-{% set shadowdrive_encrypted_password = salt['vault'].read_secret('kv/proxmox').shadowdrive_encrypted_password %}
+{% set shadowdrive_user = salt['vault'].read_secret('kv/proxmox/pbs').shadowdrive_user %}
+{% set shadowdrive_encrypted_password = salt['vault'].read_secret('kv/proxmox/pbs').shadowdrive_encrypted_password %}
 
 rclone_pkg:
   pkg.installed:
