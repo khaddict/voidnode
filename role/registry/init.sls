@@ -117,3 +117,24 @@ trivy_archive:
     - force: True
     - require:
       - archive: trivy_archive
+
+# https://github.com/goharbor/harbor/issues/7008
+/etc/systemd/system/harbor.service:
+  file.managed:
+    - source: salt://role/registry/files/harbor.service
+    - mode: 644
+    - user: root
+    - group: root
+    - require:
+      - archive: harbor_archive
+      - file: /etc/harbor/harbor.yml
+
+harbor:
+  service.running:
+    - enable: True
+    - require:
+      - pkg: docker_packages_pkg
+      - file: /etc/systemd/system/harbor.service
+    - watch:
+      - file: /etc/systemd/system/harbor.service
+      - file: /etc/harbor/harbor.yml
