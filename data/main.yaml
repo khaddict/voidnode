@@ -189,7 +189,7 @@ pve:
       scrape: true
       ip: 10.20.0.2
       main_iface: *default_iface
-      ssh: null
+      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSFcXtIu2isa6ve519qB6K/SePQ0yBb0aSIpmjjgZ5J registry@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -311,7 +311,7 @@ pve:
       scrape: false
       ip: 10.40.0.5
       main_iface: *default_iface
-      ssh: ""
+      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -331,7 +331,7 @@ pve:
       scrape: false
       ip: 10.40.0.6
       main_iface: *default_iface
-      ssh: ""
+      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -351,7 +351,7 @@ pve:
       scrape: false
       ip: 10.40.0.7
       main_iface: *default_iface
-      ssh: ""
+      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
