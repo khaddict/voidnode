@@ -82,15 +82,14 @@ prometheus_archive:
     - user: root
     - group: root
 
-systemd_reload_prometheus:
+systemd_reload_prometheus_cmd:
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: /etc/systemd/system/prometheus.service
 
-prometheus_service:
+prometheus:
   service.running:
-    - name: prometheus
     - enable: True
     - require:
       - archive: prometheus_archive

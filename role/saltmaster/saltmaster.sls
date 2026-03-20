@@ -13,56 +13,47 @@ include:
     - source: salt://role/saltmaster/files/saltgui
     - include_empty: True
 
-saltgui:
+saltgui_user:
   user.present:
+    - name: saltgui
     - usergroup: True
     - createhome: False
 
-salt-master:
-  pkg.installed
+salt_master_pkg:
+  pkg.installed:
+    - name: salt-master
 
-salt-ssh:
-  pkg.installed
+salt_ssh_pkg:
+  pkg.installed:
+    - name: salt-ssh
+
+salt_syndic_pkg:
+  pkg.installed:
+    - name: salt-syndic
 
 salt-syndic:
-  pkg.installed
-
-salt_syndic_service:
   service.dead:
-    - name: salt-syndic
     - enable: False
 
-salt-cloud:
-  pkg.installed
+salt_cloud_pkg:
+  pkg.installed:
+    - name: salt-cloud
+
+salt_api_pkg:
+  pkg.installed:
+    - name: salt-api
 
 salt-api:
-  pkg.installed
-
-salt_api_enabled:
-  service.enabled:
-    - name: salt-api
-    - require:
-      - pkg: salt-api
-
-salt_api_service:
   service.running:
-    - name: salt-api
+    - enable: True
     - require:
-      - pkg: salt-api
-      - service: salt_api_enabled
+      - pkg: salt_api_pkg
 
-salt_master_enabled:
-  service.enabled:
-    - name: salt-master
-    - require:
-      - pkg: salt-master
-
-salt_master_service:
+salt-master:
   service.running:
-    - name: salt-master
+    - enable: True
     - require:
-      - pkg: salt-master
-      - service: salt_master_enabled
+      - pkg: salt_master_pkg
     - watch:
       - file: /etc/salt/master
 

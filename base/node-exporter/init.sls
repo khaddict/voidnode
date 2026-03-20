@@ -1,7 +1,7 @@
-prometheus-node-exporter:
-  pkg.installed
-
-node_exporter_service:
-  service.running:
+prometheus_node_exporter_pkg:
+  pkg.installed:
     - name: prometheus-node-exporter
+
+prometheus-node-exporter:
+  service.running:
     - enable: True

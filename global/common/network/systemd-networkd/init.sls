@@ -4,8 +4,9 @@
 
 {% set vm = data.pve.vms.get(host) %}
 
-systemd:
-  pkg.installed
+systemd_pkg:
+  pkg.installed:
+    - name: systemd
 
 {{ host }}_network_conf:
   file.managed:
@@ -20,9 +21,8 @@ systemd:
         ntp: {{ vm.ntp }}
         domain: {{ domain }}
 
-systemd_networkd_service:
+systemd-networkd:
   service.running:
-    - name: systemd-networkd
     - enable: True
     - require:
       - file: {{ host }}_network_conf

@@ -19,9 +19,8 @@ include:
     - require:
       - file: /etc/vault.d/vault.hcl
 
-vault_service:
+vault:
   service.running:
-    - name: vault
     - enable: True
     - require:
       - file: /etc/systemd/system/vault.service

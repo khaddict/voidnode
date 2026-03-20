@@ -14,7 +14,7 @@
     - group: root
     - mode: 644
 
-saltext_vault:
+saltext_vault_pip:
   pip.installed:
     - name: saltext.vault
     - bin_env: /opt/saltstack/salt/bin/pip3

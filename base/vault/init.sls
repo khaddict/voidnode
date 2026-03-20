@@ -1,7 +1,7 @@
 {% set osarch = grains["osarch"] %}
 {% set oscodename = grains["oscodename"] %}
 
-vault_dependencies:
+vault_dependencies_pkg:
   pkg.installed:
     - pkgs:
       - gpg
@@ -22,5 +22,6 @@ vault_dependencies:
     - require:
       - file: /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
-vault:
-  pkg.installed
+vault_pkg:
+  pkg.installed:
+    - name: vault

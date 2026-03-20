@@ -3,7 +3,7 @@
 include:
   - base.vault
 
-kubectl_dependencies:
+kubectl_dependencies_pkg:
   pkg.installed:
     - pkgs:
       - apt-transport-https
@@ -47,7 +47,7 @@ kubectl_pkg:
   pkg.installed:
     - name: kubectl
     - require:
-      - pkg: kubectl_dependencies
+      - pkg: kubectl_dependencies_pkg
       - file: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
       - file: /etc/apt/sources.list.d/kubernetes.sources
 
@@ -55,12 +55,13 @@ helm_pkg:
   pkg.installed:
     - name: helm
     - require:
-      - pkg: kubectl_dependencies
+      - pkg: kubectl_dependencies_pkg
       - file: /usr/share/keyrings/helm.gpg
       - file: /etc/apt/sources.list.d/helm.sources
 
 k9s_pkg:
   pkg.installed:
+    - name: k9s
     - sources:
       - k9s: https://github.com/derailed/k9s/releases/download/v0.50.18/k9s_linux_amd64.deb
 

@@ -61,15 +61,14 @@ alertmanager_archive:
     - require:
       - archive: alertmanager_archive
 
-systemd_reload_alertmanager:
+systemd_reload_alertmanager_cmd:
   cmd.run:
     - name: systemctl daemon-reload
     - onchanges:
       - file: /etc/systemd/system/alertmanager.service
 
-alertmanager_service:
+alertmanager:
   service.running:
-    - name: alertmanager
     - enable: True
     - require:
       - archive: alertmanager_archive

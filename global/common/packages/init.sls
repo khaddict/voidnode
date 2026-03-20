@@ -12,7 +12,7 @@ purged_packages:
 {% endif %}
 
 {% if install_pkgs %}
-common_packages:
+common_packages_pkg:
   pkg.installed:
     - pkgs: {{ install_pkgs }}
     {% if purge_pkgs %}

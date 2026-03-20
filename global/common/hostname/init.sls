@@ -7,7 +7,7 @@
     - group: root
     - contents: {{ host }}
 
-set_hostname:
+set_hostname_cmd:
   cmd.run:
     - name: hostnamectl set-hostname {{ host }}
     - unless: test "$(hostnamectl --static)" = "{{ host }}"

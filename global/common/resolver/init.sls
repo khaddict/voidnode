@@ -10,7 +10,7 @@ include:
 include:
   - global.common.resolver.resolvconf
 {% else %}
-resolver_unknown_host:
+resolver_unknown_host_test:
   test.fail_without_changes:
     - name: "host not found in data/main.yaml (add the host to data)."
 {% endif %}

@@ -5,7 +5,7 @@
     - user: root
     - group: root
 
-update-certificates:
+update_ca_certificates_cmd:
   cmd.run :
     - name: /usr/sbin/update-ca-certificates
     - onchanges:

@@ -5,7 +5,7 @@
 {% set harbor_admin_password = harbor_creds.admin_password %}
 {% set database_password = harbor_creds.database_password %}
 
-docker_base_packages:
+docker_base_packages_pkg:
   pkg.installed:
     - pkgs:
       - ca-certificates
@@ -18,7 +18,7 @@ docker_base_packages:
     - group: root
     - makedirs: True
     - require:
-      - pkg: docker_base_packages
+      - pkg: docker_base_packages_pkg
 
 /etc/apt/keyrings/docker.asc:
   file.managed:
@@ -29,9 +29,8 @@ docker_base_packages:
     - require:
       - file: /etc/apt/keyrings
 
-docker_apt_sources:
+/etc/apt/sources.list.d/docker.sources:
   file.managed:
-    - name: /etc/apt/sources.list.d/docker.sources
     - contents: |
         Types: deb
         URIs: https://download.docker.com/linux/debian
@@ -44,7 +43,7 @@ docker_apt_sources:
     - require:
       - file: /etc/apt/keyrings/docker.asc
 
-docker_packages:
+docker_packages_pkg:
   pkg.installed:
     - pkgs:
       - docker-ce
@@ -53,7 +52,7 @@ docker_packages:
       - docker-buildx-plugin
       - docker-compose-plugin
     - require:
-      - file: docker_apt_sources
+      - file: /etc/apt/sources.list.d/docker.sources
 
 podman_pkg:
   pkg.installed:

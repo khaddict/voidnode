@@ -1,8 +1,9 @@
 Europe/Paris:
   timezone.system
 
-locales:
-  pkg.installed
+locales_pkg:
+  pkg.installed:
+    - name: locales
 
 en_US.UTF-8 UTF-8:
   locale.present
@@ -21,10 +22,12 @@ en_US.UTF-8 UTF-8:
     - group: root
     - mode: 644
     - require:
-      - pkg: keyboard-configuration
+      - pkg: keyboard_configuration_pkg
 
-console-setup:
-  pkg.installed
+console_setup_pkg:
+  pkg.installed:
+    - name: console-setup
 
-keyboard-configuration:
-  pkg.installed
+keyboard_configuration_pkg:
+  pkg.installed:
+    - name: keyboard-configuration

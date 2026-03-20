@@ -1,8 +1,9 @@
 {% set fqdn = grains["fqdn"] %}
 {% set host_type = grains.get('host_type') or '' %}
 
-openssh-server:
-  pkg.installed
+openssh_server_pkg:
+  pkg.installed:
+    - name: openssh-server
 
 /etc/ssh/sshd_config:
   file.managed:
@@ -38,9 +39,8 @@ openssh-server:
     - context:
         fqdn: {{ fqdn }}
 
-ssh_service:
+ssh:
   service.running:
-    - name: ssh
     - enable: True
     - reload: True
     - watch:
