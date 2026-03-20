@@ -39,11 +39,10 @@ promtail_pkg:
       - user: promtail_user
       - file: /var/lib/promtail
     - listen_in:
-      - service: promtail_service
+      - service: promtail
 
-promtail_service:
+promtail:
   service.running:
-    - name: promtail
     - enable: True
     - require:
       - pkg: promtail_pkg

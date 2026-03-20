@@ -1,8 +1,9 @@
 {% set shadowdrive_user = salt['vault'].read_secret('kv/proxmox').shadowdrive_user %}
 {% set shadowdrive_encrypted_password = salt['vault'].read_secret('kv/proxmox').shadowdrive_encrypted_password %}
 
-rclone:
-  pkg.installed
+rclone_pkg:
+  pkg.installed:
+    - name: rclone
 
 /usr/local/bin/pbs-datastore-sync.sh:
   file.managed:
@@ -38,21 +39,19 @@ rclone:
     - user: root
     - group: root
 
-rclone_sync_service:
-  service.disabled:
-    - name: rclone-sync.service
+rclone-sync.service:
+  service.dead:
     - require:
-      - pkg: rclone
+      - pkg: rclone_pkg
       - file: /usr/local/bin/pbs-datastore-sync.sh
       - file: /root/.config/rclone/rclone.conf
       - file: /etc/systemd/system/rclone-sync.service
 
-rclone_sync_timer:
+rclone-sync.timer:
   service.running:
-    - name: rclone-sync.timer
     - enable: True
     - require:
-      - pkg: rclone
+      - pkg: rclone_pkg
       - file: /usr/local/bin/pbs-datastore-sync.sh
       - file: /root/.config/rclone/rclone.conf
       - file: /etc/systemd/system/rclone-sync.service

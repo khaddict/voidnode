@@ -1,13 +1,16 @@
 {% set root_hash = salt['vault'].read_secret('kv/system').root_hash %}
 
-debian:
+debian_user:
   user.absent:
+    - name: debian
     - purge: True
 
-ubuntu:
+ubuntu_user:
   user.absent:
+    - name: ubuntu
     - purge: True
 
-root:
+root_user:
   user.present:
+    - name: root
     - password: '{{ root_hash }}'

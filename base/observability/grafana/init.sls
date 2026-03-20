@@ -1,7 +1,7 @@
 include:
   - base.observability
 
-grafana_dependencies:
+grafana_dependencies_pkg:
   pkg.installed:
     - pkgs:
       - apt-transport-https
@@ -13,11 +13,10 @@ grafana_pkg:
     - name: grafana
     - require:
       - sls: base.observability
-      - pkg: grafana_dependencies
+      - pkg: grafana_dependencies_pkg
 
-grafana_service:
+grafana-server:
   service.running:
-    - name: grafana-server
     - enable: True
     - require:
       - pkg: grafana_pkg

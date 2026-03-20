@@ -49,7 +49,7 @@
 
 # Installations
 
-st2_voidnode_installation:
+st2_voidnode_installation_cmd:
   cmd.run:
     - name: "st2 pack install file:///opt/stackstorm/packs/st2_voidnode/"
     - require: 

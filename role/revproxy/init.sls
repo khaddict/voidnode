@@ -11,11 +11,10 @@ haproxy_pkg:
     - require:
       - pkg: haproxy_pkg
     - listen_in:
-        - service: haproxy_service
+        - service: haproxy
 
-haproxy_service:
+haproxy:
   service.running:
-    - name: haproxy
     - enable: True
     - require:
       - pkg: haproxy_pkg

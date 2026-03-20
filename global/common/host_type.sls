@@ -10,18 +10,18 @@
 {% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
 
 {% if vm %}
-host_type:
+host_type_grain:
   grains.present:
     - name: host_type
     - value: vm
 {% elif node %}
-host_type:
+host_type_grain:
   grains.present:
     - name: host_type
     - value: node
 {% else %}
 # Host not found in data/main.yaml: remove the grain to avoid accidental default behavior.
-host_type:
+host_type_grain:
   grains.absent:
     - name: host_type
 {% endif %}

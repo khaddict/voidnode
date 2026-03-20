@@ -8,11 +8,12 @@
 {% set host_entry = data.pve.vms.get(host) %}
 {% set ip = host_entry.get('ip') %}
 
-netbox:
+netbox_user:
   user.present:
+    - name: netbox
     - usergroup: True
 
-netbox_dependencies:
+netbox_dependencies_pkg:
   pkg.installed:
     - pkgs:
       - postgresql
@@ -31,7 +32,7 @@ netbox_dependencies:
       - zlib1g-dev
       - git
     - require:
-      - user: netbox
+      - user: netbox_user
 
 /opt/netbox_db.sh:
   file.managed:
@@ -44,7 +45,7 @@ netbox_dependencies:
   file.directory:
     - mode: 755
 
-netbox_repo:
+netbox_repo_git:
   git.cloned:
     - name: https://github.com/netbox-community/netbox.git
     - target: /opt/netbox
@@ -102,16 +103,14 @@ netbox_repo:
     - user: root
     - group: root
 
-netbox_service:
+netbox:
   service.running:
-    - name: netbox
     - enable: True
     - watch:
       - file: /etc/systemd/system/netbox.service
 
-netbox_rq_service:
+netbox-rq:
   service.running:
-    - name: netbox-rq
     - enable: True
     - watch:
       - file: /etc/systemd/system/netbox-rq.service
@@ -133,9 +132,8 @@ netbox_rq_service:
   file.symlink:
     - target: /etc/nginx/sites-available/netbox
 
-nginx_service:
+nginx:
   service.running:
-    - name: nginx
     - enable: True
     - reload: True
     - watch:

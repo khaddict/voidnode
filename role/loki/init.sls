@@ -30,4 +30,4 @@ loki_user:
       - user: loki_user
       - file: /var/lib/loki
     - listen_in:
-      - service: loki_service
+      - service: loki

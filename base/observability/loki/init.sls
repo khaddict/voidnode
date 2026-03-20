@@ -8,9 +8,8 @@ loki_pkg:
       - user: loki_user
       - sls: base.observability
 
-loki_service:
+loki:
   service.running:
-    - name: loki
     - enable: True
     - require:
       - pkg: loki_pkg

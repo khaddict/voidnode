@@ -1,19 +1,17 @@
 include:
   - base.saltstack
 
-install_salt_minion:
+salt_minion_pkg:
   pkg.installed:
     - name: salt-minion
 
-minion_config:
+/etc/salt/minion:
   file.managed:
-    - name: /etc/salt/minion
     - source: salt://global/common/salt-minion/files/minion
     - mode: 644
     - user: root
     - group: root
 
-salt_minion_service:
+salt-minion:
   service.running:
-    - name: salt-minion
     - enable: True

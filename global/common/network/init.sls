@@ -10,7 +10,7 @@ include:
 include:
   - global.common.network.ifupdown2
 {% else %}
-network_unknown_host:
+network_unknown_host_test:
   test.fail_without_changes:
     - name: "host not found in data/main.yaml (add the host to data)."
 {% endif %}
