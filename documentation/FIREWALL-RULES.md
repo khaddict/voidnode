@@ -50,7 +50,7 @@
 | INFRA | 9 | PASS | TCP | PROMETHEUS | EDGE net | 9100 | Allow Prometheus node_exporter scraping on EDGE |
 | INFRA | 10 | PASS | ICMP | PROMETHEUS | EDGE net | any | Allow Prometheus ICMP probing on EDGE |
 | INFRA | 11 | PASS | TCP | INFRA net | VAULT | 8200 | Allow access to Vault |
-| INFRA | 12 | PASS | TCP | INFRA net | SALTMASTER | 4505-4506 | Allow access to the Salt master |
+| INFRA | 12 | PASS | TCP | INFRA net | SALTMASTER | 4505-4506 | Allow access to the Saltmaster |
 | INFRA | 13 | PASS | * | INFRA net | EDGE net | any | Allow access to edge services |
 | INFRA | 14 | PASS | * | INFRA net | !RFC1918 | any | Allow internet access |
 
@@ -61,7 +61,7 @@
 | EDGE | 1 | PASS | TCP/UDP | EDGE net | This Firewall | 53 | Allow DNS access to the firewall |
 | EDGE | 2 | PASS | UDP | EDGE net | This Firewall | 123 | Allow NTP access to the firewall |
 | EDGE | 3 | PASS | TCP | EDGE net | VAULT | 8200 | Allow access to Vault |
-| EDGE | 4 | PASS | TCP | EDGE net | SALTMASTER | 4505-4506 | Allow access to the Salt master |
+| EDGE | 4 | PASS | TCP | EDGE net | SALTMASTER | 4505-4506 | Allow access to the Saltmaster |
 | EDGE | 5 | PASS | TCP | EDGE net | LOKI | 3100 | Allow log shipping to Loki |
 | EDGE | 6 | PASS | TCP | K8S | PVE | 8006 | Allow Homepage widget access to PVE |
 | EDGE | 7 | PASS | TCP | K8S | PBS | 8007 | Allow Homepage widget access to PBS |
