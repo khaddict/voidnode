@@ -1,0 +1,55 @@
+app: iacine-tech
+namespace: iacine-tech
+
+deployment:
+  name: iacine-tech
+  replicas: 3
+  image: registry.khaddict.lab/voidnode/website-iacine:latest
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 300m
+      memory: 384Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+service:
+  name: iacine-tech
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+probes:
+  enabled: false
+  liveness:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+secret:
+  name: iacine-tech-env
+
+httproute:
+  host: iacine-tech.khaddict.lab
+  gatewayName: envoy-gateway
+
+env:
+  NEXT_PUBLIC_SITE_URL: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_SITE_URL>
+  EMAIL_USER: <path:kv/data/kubernetes/iacine-tech#EMAIL_USER>
+  EMAIL_PASS: <path:kv/data/kubernetes/iacine-tech#EMAIL_PASS>
+  WEBHOOK_URL: <path:kv/data/kubernetes/iacine-tech#WEBHOOK_URL>
+  NEXT_PUBLIC_FIREBASE_API_KEY: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_API_KEY>
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN>
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_PROJECT_ID>
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET>
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID>
+  NEXT_PUBLIC_FIREBASE_APP_ID: <path:kv/data/kubernetes/iacine-tech#NEXT_PUBLIC_FIREBASE_APP_ID>

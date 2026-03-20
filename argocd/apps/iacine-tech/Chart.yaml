@@ -1,0 +1,12 @@
+apiVersion: v2
+name: iacine-tech
+description: A Helm chart for iacine.tech
+type: application
+version: 0.1.0
+appVersion: "stable"
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/iacine-tech
+maintainers:
+  - name: platform
+

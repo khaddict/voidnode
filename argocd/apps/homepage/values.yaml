@@ -56,15 +56,15 @@ httproute:
 
 services:
   pve:
-    password: <path:kv/data/kubernetes#homepage_pve_token>
+    password: <path:kv/data/kubernetes/homepage#homepage_pve_token>
   argocd:
-    password: <path:kv/data/kubernetes#homepage_argocd_token>
+    password: <path:kv/data/kubernetes/homepage#homepage_argocd_token>
   pbs:
-    password: <path:kv/data/kubernetes#homepage_pbs_token>
+    password: <path:kv/data/kubernetes/homepage#homepage_pbs_token>
   changedetection:
-    password: <path:kv/data/kubernetes#homepage_changedetection_token>
+    password: <path:kv/data/kubernetes/homepage#homepage_changedetection_token>
   grafana:
-    password: <path:kv/data/kubernetes#homepage_grafana_password>
+    password: <path:kv/data/kubernetes/homepage#homepage_grafana_password>
   opnsense:
-    password: <path:kv/data/kubernetes#homepage_opnsense_password>
-    username: <path:kv/data/kubernetes#homepage_opnsense_username>
+    password: <path:kv/data/kubernetes/homepage#homepage_opnsense_password>
+    username: <path:kv/data/kubernetes/homepage#homepage_opnsense_username>

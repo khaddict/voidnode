@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: iacine-tech
+  namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/part-of: voidnode
+    app.kubernetes.io/component: service
+  annotations:
+    owner: platform
+    repo: khaddict/voidnode
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/khaddict/voidnode.git
+    targetRevision: main
+    path: argocd/apps/iacine-tech
+    plugin:
+      name: argocd-vault-plugin-helm
+      env:
+        - name: HELM_ARGS
+          value: -f values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: iacine-tech
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
