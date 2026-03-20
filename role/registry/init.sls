@@ -1,6 +1,7 @@
 {% set oscodename = grains.get('oscodename') or '' %}
 
 {% set harbor_version = '2.14.3' %}
+{% set trivy_version = '0.69.3' %}
 {% set harbor_creds = salt['vault'].read_secret('kv/registry') %}
 {% set harbor_admin_password = harbor_creds.admin_password %}
 {% set database_password = harbor_creds.database_password %}
@@ -99,3 +100,20 @@ harbor_archive:
         database_password: {{ database_password }}
     - require:
       - archive: harbor_archive
+
+trivy_archive:
+  archive.extracted:
+    - name: /usr/local/src/trivy-{{ trivy_version }}
+    - source: https://github.com/aquasecurity/trivy/releases/download/v{{ trivy_version }}/trivy_{{ trivy_version }}_Linux-64bit.tar.gz
+    - user: root
+    - group: root
+    - if_missing: /usr/local/src/trivy-{{ trivy_version }}/trivy
+    - enforce_toplevel: False
+    - skip_verify: True
+
+/usr/local/bin/trivy:
+  file.symlink:
+    - target: /usr/local/src/trivy-{{ trivy_version }}/trivy
+    - force: True
+    - require:
+      - archive: trivy_archive
