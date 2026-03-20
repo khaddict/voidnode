@@ -37,6 +37,7 @@ In my previous setup, everything ran on my main LAN (`192.168.0.0/24`). In the n
 - `vault.khaddict.lab`
 - `easypki.khaddict.lab`
 - `pbs.khaddict.lab`
+- `registry.khaddict.lab`
 
 ### VLAN 30 – INFRA
 **10.30.0.0/24** – *Internal infrastructure services network. This segment hosts observability and operational tools used to monitor, visualize, and manage the lab environment.*
