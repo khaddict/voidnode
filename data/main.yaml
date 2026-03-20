@@ -60,7 +60,7 @@ pve:
     # VLAN CORE
     opnsense:
       vmid: 100
-      description: "OPNsense Firewall/Router"
+      description: "Firewall, routing, and VLAN gateway"
       template: null
       tags: "core,opnsense"
       scrape: false
@@ -81,7 +81,7 @@ pve:
     # VLAN ADMIN
     saltmaster:
       vmid: 103
-      description: "Salt Master for Configuration Management"
+      description: "SaltStack control plane and state orchestration"
       template: debian-trixie-template
       tags: "admin,trixie"
       scrape: true
@@ -101,7 +101,7 @@ pve:
 
     stackstorm:
       vmid: 102
-      description: "StackStorm Automation Platform"
+      description: "Event-driven automation and workflow engine"
       template: ubuntu-jammy-template
       tags: "admin,jammy"
       scrape: true
@@ -121,7 +121,7 @@ pve:
 
     vault:
       vmid: 106
-      description: "HashiCorp Vault for Secrets Management"
+      description: "Central secrets management"
       template: debian-trixie-template
       tags: "admin,trixie"
       scrape: true
@@ -141,7 +141,7 @@ pve:
 
     easypki:
       vmid: 107
-      description: "EasyPKI for Certificate Management"
+      description: "Internal PKI authority and certificate lifecycle"
       template: debian-trixie-template
       tags: "admin,trixie"
       scrape: true
@@ -161,7 +161,7 @@ pve:
 
     pbs:
       vmid: 104
-      description: "Proxmox Backup Server for VM Backups"
+      description: "Proxmox Backup Server for VM backups"
       template: null
       tags: "admin,pbs"
       scrape: true
@@ -183,7 +183,7 @@ pve:
 
     registry:
       vmid: 101
-      description: "Registry VM"
+      description: "Container image registry and artifact cache"
       template: debian-trixie-template
       tags: "admin,trixie"
       scrape: true
@@ -204,7 +204,7 @@ pve:
     # VLAN INFRA
     netbox:
       vmid: 105
-      description: "NetBox for IPAM and DCIM"
+      description: "Source of truth for IPAM, DCIM, and inventory"
       template: debian-trixie-template
       tags: "infra,trixie"
       scrape: true
@@ -224,7 +224,7 @@ pve:
 
     prometheus:
       vmid: 110
-      description: "Prometheus for Monitoring"
+      description: "Metrics collection, alerting and rules"
       template: debian-trixie-template
       tags: "infra,trixie"
       scrape: true
@@ -244,7 +244,7 @@ pve:
 
     grafana:
       vmid: 111
-      description: "Grafana for Visualization"
+      description: "Dashboards and observability data visualization"
       template: debian-trixie-template
       tags: "infra,trixie"
       scrape: true
@@ -264,7 +264,7 @@ pve:
 
     loki:
       vmid: 112
-      description: "Loki for Log Aggregation"
+      description: "Centralized log aggregation and query backend"
       template: debian-trixie-template
       tags: "infra,trixie"
       scrape: true
@@ -285,7 +285,7 @@ pve:
     # VLAN EDGE
     revproxy:
       vmid: 109
-      description: "Reverse Proxy for Edge Services"
+      description: "Edge reverse proxy and external ingress gateway"
       template: debian-trixie-template
       tags: "edge,trixie"
       scrape: true
@@ -305,7 +305,7 @@ pve:
 
     kcontrol:
       vmid: 114
-      description: "Kubernetes Control Plane"
+      description: "Talos Kubernetes control-plane node"
       template: null
       tags: "edge,talos"
       scrape: false
@@ -325,7 +325,7 @@ pve:
 
     kworker01:
       vmid: 115
-      description: "Kubernetes Worker Node 1"
+      description: "Talos Kubernetes worker node 1"
       template: null
       tags: "edge,talos"
       scrape: false
@@ -345,7 +345,7 @@ pve:
 
     kworker02:
       vmid: 116
-      description: "Kubernetes Worker Node 2"
+      description: "Talos Kubernetes worker node 2"
       template: null
       tags: "edge,talos"
       scrape: false
@@ -365,7 +365,7 @@ pve:
 
     kcli:
       vmid: 117
-      description: "Kubernetes CLI"
+      description: "Kubernetes administration and management workstation"
       template: debian-trixie-template
       tags: "edge,trixie"
       scrape: true
