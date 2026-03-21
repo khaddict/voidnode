@@ -1,0 +1,33 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyExtensionPolicy
+metadata:
+  name: coraza-waf
+  namespace: envoy-gateway-system
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: envoy-gateway
+  wasm:
+  - name: coraza
+    rootID: coraza-root
+    failOpen: false
+    code:
+      type: Image
+      image:
+        url: ghcr.io/corazawaf/coraza-proxy-wasm:latest
+    config:
+      directives_map:
+        default:
+          - "Include @recommended-conf"
+          # CRS embedded in the wasm image
+          - "Include @crs-setup-conf"
+          - "Include @owasp_crs/*.conf"
+          # Blocking mode
+          - "SecRuleEngine On"
+          # Debug log levels: https://www.feistyduck.com/library/modsecurity-handbook-free/online/ch04-logging.html
+          - "SecDebugLogLevel 1"
+      default_directives: default
+      metric_labels:
+        owner: coraza
+        profile: recommended+crs-block
