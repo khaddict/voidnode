@@ -1,4 +1,4 @@
-{% set root_hash = salt['vault'].read_secret('kv/system').root_hash %}
+{% set root_hash = salt['vault'].read_secret('kv/shared/system').root_hash %}
 
 debian_user:
   user.absent:

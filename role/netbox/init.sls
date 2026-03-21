@@ -1,7 +1,7 @@
 {% import_yaml 'data/main.yaml' as data %}
-{% set psql_password = salt['vault'].read_secret('kv/netbox').psql_password %}
-{% set secret_key = salt['vault'].read_secret('kv/netbox').secret_key %}
-{% set api_token_peppers = salt['vault'].read_secret('kv/netbox').api_token_peppers %}
+{% set psql_password = salt['vault'].read_secret('kv/minions/netbox/default').psql_password %}
+{% set secret_key = salt['vault'].read_secret('kv/minions/netbox/default').secret_key %}
+{% set api_token_peppers = salt['vault'].read_secret('kv/minions/netbox/default').api_token_peppers %}
 {% set domain = data.network.domain %}
 {% set host = grains.get('host') %}
 {% set fqdn = host ~ '.' ~ domain %}

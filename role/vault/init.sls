@@ -1,4 +1,4 @@
-{% set root_token = salt['vault'].read_secret('kv/vault').root_token %}
+{% set root_token = salt['vault'].read_secret('kv/minions/vault/default').root_token %}
 
 include:
   - base.vault

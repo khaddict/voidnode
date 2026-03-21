@@ -1,9 +1,10 @@
-{% set st2_secrets = salt['vault'].read_secret('kv/stackstorm/stackstorm') %}
+{% set st2_secrets = salt['vault'].read_secret('kv/minions/stackstorm/default') %}
 {% set rabbitmq_password = st2_secrets.get('rabbitmq_password') %}
 {% set mongodb_password  = st2_secrets.get('mongodb_password') %}
-{% set snapshot_vms_discord_webhook = salt['vault'].read_secret('kv/stackstorm/st2_voidnode').snapshot_vms_discord_webhook %}
 
-{% set opnsense_secrets = salt['vault'].read_secret('kv/opnsense') %}
+{% set snapshot_vms_discord_webhook = salt['vault'].read_secret('kv/minions/stackstorm/st2_voidnode').snapshot_vms_discord_webhook %}
+
+{% set opnsense_secrets = salt['vault'].read_secret('kv/minions/stackstorm/opnsense') %}
 {% set dns_api_key  = opnsense_secrets.get('dns_api_key') %}
 {% set dns_api_secret  = opnsense_secrets.get('dns_api_secret') %}
 

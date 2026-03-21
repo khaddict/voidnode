@@ -1,5 +1,5 @@
 {% set alertmanager_version = '0.31.1' %}
-{% set webhook_url = salt['vault'].read_secret('kv/prometheus').webhook_url %}
+{% set webhook_url = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url %}
 
 alertmanager_user:
   user.present:
