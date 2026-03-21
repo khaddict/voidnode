@@ -104,7 +104,7 @@ tasks:
       hosts: "<% ctx().vault_vm %>"
       username: root
       cmd: |
-        vault kv put kv/easypki/server/<% ctx().fqdn %> <% ctx().fqdn %>.cert.pem="<% ctx().cert %>" <% ctx().fqdn %>.fullchain.pem="<% ctx().fullchain %>" <% ctx().fqdn %>.key.pem="<% ctx().key %>"
+        vault kv put kv/minions/easypki/server/<% ctx().fqdn %> <% ctx().fqdn %>.cert.pem="<% ctx().cert %>" <% ctx().fqdn %>.fullchain.pem="<% ctx().fullchain %>" <% ctx().fqdn %>.key.pem="<% ctx().key %>"
     next:
       - when: <% succeeded() and ctx().send_to_vm %>
         publish:

@@ -34,7 +34,7 @@ kubectl create secret generic vault-configuration \
     --from-literal=VAULT_CACERT=/ca/voidnode.chain.pem \
     --dry-run=client -o yaml | kubectl apply -f -
 
-CA_VOIDNODE_SECRET=$(vault kv get -tls-skip-verify -field="voidnode.chain.pem" "kv/easypki/chain")
+CA_VOIDNODE_SECRET=$(vault kv get -tls-skip-verify -field="voidnode.chain.pem" "kv/minions/easypki/chain")
 
 kubectl create secret generic ca-voidnode-secret \
     --namespace "$ARGOCD_NAMESPACE" \
@@ -53,8 +53,8 @@ echo "Waiting for ArgoCD components to initialize..."
 kubectl rollout status deployment/argocd-server -n "$ARGOCD_NAMESPACE" --timeout=180s
 kubectl rollout status deployment/argocd-repo-server -n "$ARGOCD_NAMESPACE" --timeout=180s || true
 
-ARGOCD_CERT_SECRET=$(vault kv get -tls-skip-verify -field="argocd.khaddict.lab.cert.pem" "kv/easypki/server/argocd.khaddict.lab")
-ARGOCD_KEY_SECRET=$(vault kv get -tls-skip-verify -field="argocd.khaddict.lab.key.pem" "kv/easypki/server/argocd.khaddict.lab")
+ARGOCD_CERT_SECRET=$(vault kv get -tls-skip-verify -field="argocd.khaddict.lab.cert.pem" "kv/minions/easypki/server/argocd.khaddict.lab")
+ARGOCD_KEY_SECRET=$(vault kv get -tls-skip-verify -field="argocd.khaddict.lab.key.pem" "kv/minions/easypki/server/argocd.khaddict.lab")
 
 printf '%s\n' "$ARGOCD_CERT_SECRET" > /tmp/argocd.cert.pem
 printf '%s\n' "$ARGOCD_KEY_SECRET" > /tmp/argocd.key.pem
@@ -73,7 +73,7 @@ ARGOCD_SERVER_POD=$(kubectl get pod -n "$ARGOCD_NAMESPACE" \
 
 ARGOCD_SERVER=$(kubectl get svc argocd-server -n "$ARGOCD_NAMESPACE" -o jsonpath='{.spec.clusterIP}')
 ARGOCD_INITIAL_PASSWORD=$(kubectl -n "$ARGOCD_NAMESPACE" get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
-ARGOCD_PASSWORD=$(vault kv get -tls-skip-verify -field="argocd_dashboard_password" "kv/kubernetes")
+ARGOCD_PASSWORD=$(vault kv get -tls-skip-verify -field="argocd_dashboard_password" "kv/kubernetes/argocd")
 
 if kubectl exec "$ARGOCD_SERVER_POD" -n "$ARGOCD_NAMESPACE" -- \
   argocd login "$ARGOCD_SERVER:443" \

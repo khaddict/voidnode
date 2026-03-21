@@ -6,6 +6,6 @@ metadata:
 type: kubernetes.io/tls
 stringData:
   tls.crt: |
-    <path:kv/data/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.cert.pem>
+    <path:kv/data/minions/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.cert.pem>
   tls.key: |
-    <path:kv/data/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.key.pem>
+    <path:kv/data/minions/easypki/server/wildcard-khaddict-lab#wildcard-khaddict-lab.key.pem>

@@ -1,4 +1,4 @@
-{% set vault_token = salt['vault'].read_secret('kv/saltmaster').vault_token %}
+{% set vault_token = salt['vault'].read_secret('kv/minions/saltmaster/default').vault_token %}
 
 /etc/salt/master.d/vault.conf:
   file.managed:
@@ -20,21 +20,3 @@
     - group: salt
     - watch_in:
       - service: salt-master
-
-saltmaster_policy_module:
-  module.run:
-    - name: vault.policy_write
-    - policy: saltmaster
-    - rules: |
-        path "kv/*" {
-          capabilities = ["read", "list"]
-        }
-
-        path "auth/token/create" {
-          capabilities = ["create", "read", "update"]
-        }
-
-        path "sys/policy/*" {
-          capabilities = ["create", "update", "read"]
-        }
-    - unless: salt-call vault.policy_fetch saltmaster

@@ -2,7 +2,7 @@
 
 {% set harbor_version = '2.14.3' %}
 {% set trivy_version = '0.69.3' %}
-{% set harbor_creds = salt['vault'].read_secret('kv/registry') %}
+{% set harbor_creds = salt['vault'].read_secret('kv/minions/registry/default') %}
 {% set harbor_admin_password = harbor_creds.admin_password %}
 {% set database_password = harbor_creds.database_password %}
 
