@@ -22,7 +22,9 @@ common_packages:
     - netcat-openbsd
   debian:
     - yq
-  ubuntu: []
+    - bind9-dnsutils
+  ubuntu:
+    - dnsutils
 
 # Binaries
 binaries:
