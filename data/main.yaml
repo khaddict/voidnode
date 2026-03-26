@@ -282,6 +282,26 @@ pve:
       backup: true
       <<: *vlan_infra
 
+    assets:
+      vmid: 108
+      description: "Assets VM"
+      template: debian-trixie-template
+      tags: "infra,trixie"
+      scrape: true
+      ip: 10.30.0.6
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 3
+        disks:
+          - name: scsi0
+            size_gb: 30
+      backup: true
+      <<: *vlan_infra
+
     # VLAN EDGE
     revproxy:
       vmid: 109
