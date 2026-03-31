@@ -9,7 +9,7 @@ spec:
       group: gateway.networking.k8s.io
       kind: Gateway
       namespace: envoy-gateway-system
-      sectionName: http
+      sectionName: https
   hostnames:
     - "{{ .Values.httproute.host }}"
   rules:
