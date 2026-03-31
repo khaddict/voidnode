@@ -22,6 +22,10 @@ spec:
           - "Include @recommended-conf"
           # CRS embedded in the wasm image
           - "Include @crs-setup-conf"
+          # Exclusion WebSocket Uptime Kuma
+          - "SecRule REQUEST_HEADERS:Host \"@streq uptimekuma.khaddict.lab\" \"id:102,phase:1,chain,allow,ctl:ruleEngine=Off\""
+          - "SecRule REQUEST_URI \"@beginsWith /socket.io/\""
+          # Include CRS rules embedded in the wasm image
           - "Include @owasp_crs/*.conf"
           # Blocking mode
           - "SecRuleEngine On"
