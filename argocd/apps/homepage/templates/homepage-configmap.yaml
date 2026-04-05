@@ -106,11 +106,11 @@ data:
               password: {{ .Values.services.grafana.password }}
         - ChangeDetection.io:
             icon: changedetection
-            href: https://changedetection.khaddict.lab
+            href: http://changedetection.khaddict.lab
             description: changedetection.khaddict.lab
             widget:
               type: changedetectionio
-              url: https://changedetection.khaddict.lab
+              url: http://changedetection.khaddict.lab
               key: {{ .Values.services.changedetection.password }}
         - Uptime Kuma:
             icon: uptime-kuma
