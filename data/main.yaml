@@ -238,7 +238,7 @@ pve:
           cores: 2
         disks:
           - name: scsi0
-            size_gb: 20
+            size_gb: 40
       backup: true
       <<: *vlan_infra
 
@@ -400,5 +400,65 @@ pve:
         disks:
           - name: scsi0
             size_gb: 40
+      backup: true
+      <<: *vlan_edge
+
+    wazuh:
+      vmid: 113
+      description: "Wazuh VM"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      scrape: true
+      ip: 10.40.0.3
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 50
+      backup: true
+      <<: *vlan_edge
+
+    win11:
+      vmid: 118
+      description: "Windows 11 VM"
+      template: null
+      tags: "edge,wazuh,windows11"
+      scrape: false
+      ip: 10.40.0.9
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 100
+      backup: false
+      <<: *vlan_edge
+
+    trixie:
+      vmid: 119
+      description: "Trixie VM"
+      template: debian-trixie-template
+      tags: "edge,trixie,wazuh"
+      scrape: true
+      ip: 10.40.0.4
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
       backup: true
       <<: *vlan_edge
