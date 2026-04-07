@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: assets-gui
+  namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/part-of: voidnode
+    app.kubernetes.io/component: service
+  annotations:
+    owner: platform
+    repo: khaddict/voidnode
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/khaddict/voidnode.git
+    targetRevision: main
+    path: argocd/apps/assets-gui
+    plugin:
+      name: argocd-vault-plugin-helm
+      env:
+        - name: HELM_ARGS
+          value: -f values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: assets-gui
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
