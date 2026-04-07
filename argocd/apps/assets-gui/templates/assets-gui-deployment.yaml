@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "assets-gui.labels" . | nindent 4 }}
+spec:
+  revisionHistoryLimit: 3
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "assets-gui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "assets-gui.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: {{ .Values.app }}
+        image: {{ .Values.deployment.image }}
+        imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 10 }}
+        ports:
+        - name: {{ .Values.service.ports.api.name }}
+          containerPort: {{ .Values.service.ports.api.targetPort }}
+          protocol: {{ .Values.service.ports.api.protocol }}
+        - name: {{ .Values.service.ports.ui.name }}
+          containerPort: {{ .Values.service.ports.ui.targetPort }}
+          protocol: {{ .Values.service.ports.ui.protocol }}
+        {{- if .Values.probes.enabled }}
+        livenessProbe:
+          {{- toYaml .Values.probes.liveness | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.probes.readiness | nindent 10 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ .Values.secret.name }}
+        {{- if .Values.persistence.enabled }}
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+        {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Values.app }}-pvc
+      {{- end }}

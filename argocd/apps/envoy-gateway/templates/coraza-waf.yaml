@@ -25,6 +25,8 @@ spec:
           # Exclusion WebSocket Uptime Kuma
           - "SecRule REQUEST_HEADERS:Host \"@streq uptimekuma.khaddict.lab\" \"id:102,phase:1,chain,allow,ctl:ruleEngine=Off\""
           - "SecRule REQUEST_URI \"@beginsWith /socket.io/\""
+          # Targeted CRS exclusion for static JS false positive (sprintf.js triggers rule 933150)
+          - "SecRule REQUEST_URI \"@beginsWith /static/js/\" \"id:105,phase:1,pass,nolog,ctl:ruleRemoveById=933150\""
           # Include CRS rules embedded in the wasm image
           - "Include @owasp_crs/*.conf"
           # Blocking mode

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "assets-gui.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "assets-gui.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.service.ports.api.name }}
+      port: {{ .Values.service.ports.api.port }}
+      targetPort: {{ .Values.service.ports.api.targetPort }}
+      protocol: {{ .Values.service.ports.api.protocol }}
+    - name: {{ .Values.service.ports.ui.name }}
+      port: {{ .Values.service.ports.ui.port }}
+      targetPort: {{ .Values.service.ports.ui.targetPort }}
+      protocol: {{ .Values.service.ports.ui.protocol }}

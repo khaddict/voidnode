@@ -1,0 +1,69 @@
+app: assets-gui
+namespace: assets-gui
+
+deployment:
+  name: assets-gui
+  replicas: 1
+  image: registry.khaddict.lab/voidnode/assets-gui:latest
+  imagePullPolicy: Always
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+service:
+  name: assets-gui
+  type: ClusterIP
+  ports:
+    api:
+      name: api
+      port: 8001
+      targetPort: 8001
+      protocol: TCP
+    ui:
+      name: ui
+      port: 8501
+      targetPort: 8501
+      protocol: TCP
+
+probes:
+  enabled: true
+  liveness:
+    httpGet:
+      path: /health
+      port: api
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  readiness:
+    httpGet:
+      path: /_stcore/health
+      port: ui
+    initialDelaySeconds: 15
+    periodSeconds: 10
+
+persistence:
+  enabled: true
+  storage: 5Gi
+  storageClassName: local-path
+  volumeName: ""
+
+secret:
+  name: assets-gui-env
+
+httproute:
+  host: assets.khaddict.lab
+  gatewayName: envoy-gateway
+
+env:
+  # Strike API Configuration
+  STRIKE_API_TOKEN: <path:kv/data/kubernetes/assets-gui#STRIKE_API_TOKEN>
+  # Streamlit Configuration for static asset serving
+  STREAMLIT_SERVER_HEADLESS: "true"
+  STREAMLIT_SERVER_PORT: "8501"
+  STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
+  STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION: "true"
+  STREAMLIT_CLIENT_LOGGER_LEVEL: "warning"
+  STREAMLIT_SERVER_MAX_MESSAGE_SIZE: "100"
