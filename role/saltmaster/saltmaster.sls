@@ -9,9 +9,11 @@ include:
     - group: root
 
 /srv/saltgui:
-  file.recurse:
-    - source: salt://role/saltmaster/files/saltgui
-    - include_empty: True
+  git.latest:
+    - name: https://github.com/erwindon/SaltGUI
+    - target: /srv/saltgui
+    - force_clone: True
+    - force_reset: True
 
 saltgui_user:
   user.present:

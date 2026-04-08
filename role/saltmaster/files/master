@@ -17,8 +17,8 @@ rest_cherrypy:
   port: 8000
   host: 0.0.0.0
   disable_ssl: false
-  app: /srv/saltgui/index.html
-  static: /srv/saltgui/static
+  app: /srv/saltgui/saltgui/index.html
+  static: /srv/saltgui/saltgui/static
   static_path: /static
   ssl_crt: /etc/salt/saltmaster.khaddict.lab.cert.pem
   ssl_key: /etc/salt/saltmaster.khaddict.lab.key.pem
