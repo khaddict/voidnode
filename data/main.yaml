@@ -287,7 +287,7 @@ pve:
       description: "Assets VM"
       template: debian-trixie-template
       tags: "infra,trixie"
-      scrape: true
+      scrape: false
       ip: 10.30.0.6
       main_iface: *default_iface
       ssh: null
@@ -299,7 +299,7 @@ pve:
         disks:
           - name: scsi0
             size_gb: 30
-      backup: true
+      backup: false
       <<: *vlan_infra
 
     # VLAN EDGE
@@ -408,7 +408,7 @@ pve:
       description: "Wazuh VM"
       template: debian-trixie-template
       tags: "edge,trixie"
-      scrape: true
+      scrape: false
       ip: 10.40.0.3
       main_iface: *default_iface
       ssh: null
@@ -420,7 +420,7 @@ pve:
         disks:
           - name: scsi0
             size_gb: 50
-      backup: true
+      backup: false
       <<: *vlan_edge
 
     win11:
@@ -448,7 +448,7 @@ pve:
       description: "Trixie VM"
       template: debian-trixie-template
       tags: "edge,trixie,wazuh"
-      scrape: true
+      scrape: false
       ip: 10.40.0.4
       main_iface: *default_iface
       ssh: null
@@ -460,5 +460,5 @@ pve:
         disks:
           - name: scsi0
             size_gb: 20
-      backup: true
+      backup: false
       <<: *vlan_edge
