@@ -462,3 +462,23 @@ pve:
             size_gb: 20
       backup: false
       <<: *vlan_edge
+
+    kali:
+      vmid: 120
+      description: "Kali Linux VM"
+      template: null
+      tags: "kali,edge"
+      scrape: false
+      ip: 10.40.0.10
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 6
+        disks:
+          - name: scsi0
+            size_gb: 100
+      backup: true
+      <<: *vlan_edge
