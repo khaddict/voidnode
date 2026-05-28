@@ -1,5 +1,5 @@
-{% set shadowdrive_user = salt['vault'].read_secret('kv/minions/pbs/default').shadowdrive_user %}
-{% set shadowdrive_encrypted_password = salt['vault'].read_secret('kv/minions/pbs/default').shadowdrive_encrypted_password %}
+{% set kdrive_user = salt['vault'].read_secret('kv/minions/pbs/default').kdrive_user %}
+{% set kdrive_encrypted_password = salt['vault'].read_secret('kv/minions/pbs/default').kdrive_encrypted_password %}
 
 rclone_pkg:
   pkg.installed:
@@ -22,8 +22,8 @@ rclone_pkg:
     - makedirs: True
     - template: jinja
     - context:
-        shadowdrive_user: {{ shadowdrive_user }}
-        shadowdrive_encrypted_password: {{ shadowdrive_encrypted_password }}
+        kdrive_user: {{ kdrive_user }}
+        kdrive_encrypted_password: {{ kdrive_encrypted_password }}
 
 /etc/systemd/system/rclone-sync.service:
   file.managed:
