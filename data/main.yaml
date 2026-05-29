@@ -282,26 +282,6 @@ pve:
       backup: true
       <<: *vlan_infra
 
-    assets:
-      vmid: 108
-      description: "Assets VM"
-      template: debian-trixie-template
-      tags: "infra,trixie"
-      scrape: false
-      ip: 10.30.0.6
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 4096
-        cpu:
-          sockets: 1
-          cores: 3
-        disks:
-          - name: scsi0
-            size_gb: 30
-      backup: false
-      <<: *vlan_infra
-
     # VLAN EDGE
     revproxy:
       vmid: 109
@@ -400,85 +380,5 @@ pve:
         disks:
           - name: scsi0
             size_gb: 40
-      backup: true
-      <<: *vlan_edge
-
-    wazuh:
-      vmid: 113
-      description: "Wazuh VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      scrape: false
-      ip: 10.40.0.3
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 4
-        disks:
-          - name: scsi0
-            size_gb: 50
-      backup: false
-      <<: *vlan_edge
-
-    win11:
-      vmid: 118
-      description: "Windows 11 VM"
-      template: null
-      tags: "edge,wazuh,windows11"
-      scrape: false
-      ip: 10.40.0.9
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 4
-        disks:
-          - name: scsi0
-            size_gb: 100
-      backup: false
-      <<: *vlan_edge
-
-    trixie:
-      vmid: 119
-      description: "Trixie VM"
-      template: debian-trixie-template
-      tags: "edge,trixie,wazuh"
-      scrape: false
-      ip: 10.40.0.4
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: false
-      <<: *vlan_edge
-
-    kali:
-      vmid: 120
-      description: "Kali Linux VM"
-      template: null
-      tags: "kali,edge"
-      scrape: false
-      ip: 10.40.0.10
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 6
-        disks:
-          - name: scsi0
-            size_gb: 100
       backup: true
       <<: *vlan_edge
