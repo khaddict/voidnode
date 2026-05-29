@@ -114,11 +114,11 @@ data:
               key: {{ .Values.services.changedetection.password }}
         - Uptime Kuma:
             icon: uptime-kuma
-            href: https://uptimekuma.khaddict.lab
-            description: uptimekuma.khaddict.lab
+            href: https://status.khaddict.com
+            description: status.khaddict.com
             widget:
               type: uptimekuma
-              url: https://uptimekuma.khaddict.lab
+              url: https://status.khaddict.com
               slug: khaddict
     - Management & network:
         - OPNsense:
