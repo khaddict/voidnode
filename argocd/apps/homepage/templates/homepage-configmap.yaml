@@ -184,4 +184,11 @@ data:
         provider: google
         showSearchSuggestions: true
         target: _blank
+    - openmeteo:
+        label: Paris
+        latitude: 48.866667
+        longitude: 2.333333
+        timezone: Europe/Paris
+        units: metric
+        cache: 5
   docker.yaml: ""
