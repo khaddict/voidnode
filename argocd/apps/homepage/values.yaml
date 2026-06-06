@@ -3,8 +3,8 @@ namespace: homepage
 
 deployment:
   replicas: 1
-  image: ghcr.io/gethomepage/homepage:latest
-  imagePullPolicy: Always
+  image: ghcr.io/gethomepage/homepage:v1.13.1
+  imagePullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 100m
@@ -21,7 +21,7 @@ service:
   protocol: TCP
 
 probes:
-  enabled: false
+  enabled: true
   liveness:
     httpGet:
       path: /
