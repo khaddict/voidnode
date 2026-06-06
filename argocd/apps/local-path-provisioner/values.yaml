@@ -6,12 +6,12 @@ namespaceOverride: ""
 
 image:
   repository: rancher/local-path-provisioner
-  tag: v0.0.35
+  tag: v0.0.36
   pullPolicy: IfNotPresent
 
 helperImage:
   repository: busybox
-  tag: latest
+  tag: "1.38.0"
 
 defaultSettings:
   registrySecret: ~

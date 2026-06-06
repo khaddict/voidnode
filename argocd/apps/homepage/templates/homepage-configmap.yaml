@@ -11,7 +11,7 @@ data:
   settings.yaml: |
     title: Khaddict's homepage
     background:
-      image: https://www.khaddict.com/images/khazix.jpg
+      image: https://khaddict.com/images/dark_star_khazix.jpg
       opacity: 30
     favicon: https://www.khaddict.com/images/khazix_pc.png
     language: en
@@ -23,6 +23,15 @@ data:
       hideVisitURL: true
       provider: google
     hideVersion: true
+    layout:
+      Infra & Orchestration:
+        columns: 2
+      Monitoring:
+        columns: 3
+      Availability:
+        columns: 2
+      Management, Network & Inventory:
+        columns: 3
   custom.css: ""
   custom.js: ""
   bookmarks.yaml: |
@@ -64,7 +73,7 @@ data:
               url: https://pbs.khaddict.lab:8007
               username: api-ro-user@pbs!homepage
               password: {{ .Values.services.pbs.password }}
-    - Configuration Management & Automation:
+    - Infra & Orchestration:
         - Saltmaster:
             icon: https://www.khaddict.com/images/saltstack.png
             href: https://saltmaster.khaddict.lab:8000
@@ -73,7 +82,6 @@ data:
             icon: https://www.khaddict.com/images/stackstorm.png
             href: https://stackstorm.khaddict.lab
             description: stackstorm.khaddict.lab
-    - Kubernetes tools:
         - ArgoCD:
             icon: argo-cd
             href: https://argocd.khaddict.lab
@@ -82,7 +90,7 @@ data:
               type: argocd
               url: https://argocd.khaddict.lab
               key: {{ .Values.services.argocd.password }}
-    - Monitoring & Logs:
+    - Monitoring:
         - Prometheus:
             icon: prometheus
             href: http://prometheus.khaddict.lab:9090
@@ -104,6 +112,7 @@ data:
               url: https://grafana.khaddict.lab:3000
               username: admin
               password: {{ .Values.services.grafana.password }}
+    - Availability:
         - ChangeDetection.io:
             icon: changedetection
             href: http://changedetection.khaddict.lab
@@ -120,7 +129,7 @@ data:
               type: uptimekuma
               url: https://status.khaddict.com
               slug: khaddict
-    - Management & network:
+    - Management, Network & Inventory:
         - OPNsense:
             icon: opnsense
             href: https://opnsense.khaddict.lab
@@ -130,7 +139,7 @@ data:
               url: https://opnsense.khaddict.lab
               username: {{ .Values.services.opnsense.username }}
               password: {{ .Values.services.opnsense.password }}
-              wan: opt1 # optional, defaults to wan
+              wan: opt1
         - TP-Link:
             icon: tp-link
             href: http://tplink.khaddict.lab
@@ -139,6 +148,14 @@ data:
             icon: freebox-revolution
             href: http://mafreebox.freebox.fr
             description: mafreebox.freebox.fr
+        - NetBox:
+            icon: netbox
+            href: https://netbox.khaddict.lab
+            description: netbox.khaddict.lab
+        - Vault:
+            icon: hashicorp-vault
+            href: https://vault.khaddict.lab:8200
+            description: vault.khaddict.lab
     - Tools:
         - YAML Lint:
             icon: https://www.khaddict.com/images/yaml.png
@@ -152,15 +169,6 @@ data:
             icon: https://www.khaddict.com/images/regex101.png
             href: https://regex101.com
             description: regex101.com
-    - Inventory & Vault:
-        - NetBox:
-            icon: netbox
-            href: https://netbox.khaddict.lab
-            description: netbox.khaddict.lab
-        - Vault:
-            icon: hashicorp-vault
-            href: https://vault.khaddict.lab:8200
-            description: vault.khaddict.lab
   widgets.yaml: |
     - kubernetes:
         cluster:

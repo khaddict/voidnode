@@ -3,7 +3,7 @@ name: site-khaddict
 description: A Helm chart for site.khaddict.com
 type: application
 version: 0.1.0
-appVersion: "stable"
+appVersion: "1.31.1"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/site.khaddict.com

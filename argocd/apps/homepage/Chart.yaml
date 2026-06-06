@@ -3,7 +3,7 @@ name: homepage
 description: A Helm chart for homepage
 type: application
 version: 0.1.0
-appVersion: "latest"
+appVersion: "v1.13.1"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/homepage
