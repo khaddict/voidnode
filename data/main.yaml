@@ -382,3 +382,23 @@ pve:
             size_gb: 40
       backup: true
       <<: *vlan_edge
+
+    htb:
+      vmid: 108
+      description: "Htb VM"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      scrape: true
+      ip: 10.40.0.3
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 10
+      backup: true
+      <<: *vlan_edge
