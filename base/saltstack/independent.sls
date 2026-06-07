@@ -13,3 +13,10 @@
     - user: root
     - group: root
     - mode: 644
+
+saltext_vault_pip:
+  cmd.run:
+    - name: /opt/saltstack/salt/salt-pip install saltext.vault
+    - unless: /opt/saltstack/salt/salt-pip show saltext.vault
+    - require:
+      - pkg: salt_minion_pkg
