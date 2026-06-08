@@ -25,12 +25,16 @@ vault:
     - require:
       - file: /etc/systemd/system/vault.service
 
+/root/.vault-token:
+  file.managed:
+    - contents: {{ root_token }}
+    - mode: 600
+    - user: root
+    - group: root
+
 /root/.bashrc.d/vault.bashrc:
   file.managed:
     - source: salt://role/vault/files/vault.bashrc
     - mode: 644
     - user: root
     - group: root
-    - template: jinja
-    - context:
-        root_token: {{ root_token }}

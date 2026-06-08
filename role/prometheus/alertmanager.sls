@@ -1,4 +1,5 @@
-{% set alertmanager_version = '0.31.1' %}
+{% import_yaml 'data/versions.yaml' as versions %}
+{% set alertmanager_version = versions.alertmanager %}
 {% set webhook_url = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url %}
 
 alertmanager_user:
@@ -14,11 +15,11 @@ alertmanager_archive:
     - source: https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz
     - user: alertmanager
     - group: alertmanager
-    - if_missing: /etc/alertmanager/alertmanager
     - overwrite: True
     - enforce_toplevel: False
     - options: --strip-components=1
-    - skip_verify: True
+    - source_hash: sha256=842f30671734e9920327aa8308e19aea7bb79c2b9905e941d83236267f87b13d
+    - unless: test -f /etc/alertmanager/alertmanager && /etc/alertmanager/alertmanager --version 2>&1 | grep -q "{{ alertmanager_version }}"
     - require:
       - file: /etc/alertmanager
       - user: alertmanager_user
