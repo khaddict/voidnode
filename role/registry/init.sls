@@ -1,7 +1,8 @@
 {% set oscodename = grains.get('oscodename') or '' %}
 
-{% set harbor_version = '2.14.3' %}
-{% set trivy_version = '0.69.3' %}
+{% import_yaml 'data/versions.yaml' as versions %}
+{% set harbor_version = versions.harbor %}
+{% set trivy_version = versions.trivy %}
 {% set harbor_creds = salt['vault'].read_secret('kv/minions/registry/default') %}
 {% set harbor_admin_password = harbor_creds.admin_password %}
 {% set database_password = harbor_creds.database_password %}
@@ -65,10 +66,10 @@ harbor_archive:
     - source: https://github.com/goharbor/harbor/releases/download/v{{ harbor_version }}/harbor-offline-installer-v{{ harbor_version }}.tgz
     - user: root
     - group: root
-    - if_missing: /etc/harbor/install.sh
     - enforce_toplevel: False
     - options: --strip-components=1
-    - skip_verify: True
+    - source_hash: md5=26442907d7b0fffecbcb44ff98af3a83
+    - unless: test -f /etc/harbor/harbor.v{{ harbor_version }}.tar.gz
 
 /etc/containers/certs.d/registry.khaddict.lab:
   file.directory:
@@ -107,9 +108,9 @@ trivy_archive:
     - source: https://github.com/aquasecurity/trivy/releases/download/v{{ trivy_version }}/trivy_{{ trivy_version }}_Linux-64bit.tar.gz
     - user: root
     - group: root
-    - if_missing: /usr/local/src/trivy-{{ trivy_version }}/trivy
     - enforce_toplevel: False
-    - skip_verify: True
+    - source_hash: sha256=30a3d22b23f88c233f1658f562fb477cae3b3e8b4761109d515b7698daf85814
+    - unless: test -f /usr/local/src/trivy-{{ trivy_version }}/trivy
 
 /usr/local/bin/trivy:
   file.symlink:

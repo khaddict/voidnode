@@ -1,4 +1,6 @@
 {% set vault_token = salt['vault'].read_secret('kv/minions/kcli/default').vault_token %}
+{% import_yaml 'data/versions.yaml' as versions %}
+{% set k9s_version = versions.k9s %}
 
 include:
   - base.vault
@@ -63,7 +65,15 @@ k9s_pkg:
   pkg.installed:
     - name: k9s
     - sources:
-      - k9s: https://github.com/derailed/k9s/releases/download/v0.50.18/k9s_linux_amd64.deb
+      - k9s: https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/k9s_linux_amd64.deb
+    - unless: k9s version 2>&1 | grep -q "{{ k9s_version }}"
+
+/root/.vault-token:
+  file.managed:
+    - contents: {{ vault_token }}
+    - mode: 600
+    - user: root
+    - group: root
 
 /root/.bashrc.d/kcli.bashrc:
   file.managed:
@@ -71,9 +81,6 @@ k9s_pkg:
     - mode: 644
     - user: root
     - group: root
-    - template: jinja
-    - context:
-        vault_token: {{ vault_token }}
 
 /root/bootstrap:
   file.recurse:

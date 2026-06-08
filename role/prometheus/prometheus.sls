@@ -1,4 +1,5 @@
-{% set prometheus_version = '3.10.0' %}
+{% import_yaml 'data/versions.yaml' as versions %}
+{% set prometheus_version = versions.prometheus %}
 {% import_yaml 'data/main.yaml' as data %}
 
 {% set pve_nodes = data.get('pve').get('nodes') %}
@@ -39,11 +40,11 @@ prometheus_archive:
     - source: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
     - user: prometheus
     - group: prometheus
-    - if_missing: /etc/prometheus/prometheus
     - overwrite: True
     - enforce_toplevel: False
     - options: --strip-components=1
-    - skip_verify: True
+    - source_hash: sha256=20da47f8e5303f74aecb78edd7f7e39041dac08ac4939dba75efd7a900ae8867
+    - unless: test -f /etc/prometheus/prometheus && /etc/prometheus/prometheus --version 2>&1 | grep -q "{{ prometheus_version }}"
     - require:
       - file: /etc/prometheus
       - user: prometheus_user
