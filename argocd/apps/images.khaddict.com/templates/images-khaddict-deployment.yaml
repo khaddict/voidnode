@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "images-khaddict.labels" . | nindent 4 }}
+spec:
+  revisionHistoryLimit: 3
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "images-khaddict.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "images-khaddict.selectorLabels" . | nindent 8 }}
+    spec:
+      initContainers:
+      - name: populate-data
+        image: alpine:3.21
+        command:
+        - sh
+        - -c
+        - |
+          apk add --no-cache git vips-tools
+          echo "Cloning repository..."
+          git clone --depth=1 https://github.com/khaddict/voidnode.git /tmp/repo
+          mkdir -p /data/icons/thumbs /data/gallery/thumbs
+
+          for f in /data/icons/*.*; do
+            [ -f "$f" ] || continue
+            [ -f "/tmp/repo/argocd/apps/images.khaddict.com/images/icons/$(basename "$f")" ] || rm -f "$f" "/data/icons/thumbs/$(basename "$f")"
+          done
+          cp /tmp/repo/argocd/apps/images.khaddict.com/images/icons/* /data/icons/
+
+          for f in /data/gallery/*.*; do
+            [ -f "$f" ] || continue
+            [ -f "/tmp/repo/argocd/apps/images.khaddict.com/images/gallery/$(basename "$f")" ] || rm -f "$f" "/data/gallery/thumbs/$(basename "$f")"
+          done
+          cp /tmp/repo/argocd/apps/images.khaddict.com/images/gallery/* /data/gallery/
+
+          echo "Syncing thumbnails..."
+          for f in /data/icons/*.*; do
+            [ -f "$f" ] || continue
+            thumb="/data/icons/thumbs/$(basename "$f")"
+            [ -f "$thumb" ] && continue
+            vipsthumbnail "$f" --size 90x90 -o "$thumb"
+          done
+          for f in /data/gallery/*.*; do
+            [ -f "$f" ] || continue
+            thumb="/data/gallery/thumbs/$(basename "$f")"
+            [ -f "$thumb" ] && continue
+            vipsthumbnail "$f" --size 90x90 --crop=centre -o "$thumb[Q=75]"
+          done
+
+          rm -rf /tmp/repo
+          echo "Done."
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+      containers:
+      - name: {{ .Values.app }}
+        image: {{ .Values.deployment.image }}
+        imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+        resources:
+          {{- toYaml .Values.deployment.resources | nindent 10 }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        {{- if .Values.probes.enabled }}
+        livenessProbe:
+          {{- toYaml .Values.probes.liveness | nindent 10 }}
+        readinessProbe:
+          {{- toYaml .Values.probes.readiness | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+        - name: html-volume
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: {{ .Values.deployment.name }}-data
+      - name: html-volume
+        configMap:
+          name: {{ .Values.deployment.name }}-html

@@ -4,17 +4,17 @@ metadata:
   name: {{ .Values.deployment.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "site-khaddict.labels" . | nindent 4 }}
+    {{- include "website-khaddict.labels" . | nindent 4 }}
 spec:
   revisionHistoryLimit: 3
   replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      {{- include "site-khaddict.selectorLabels" . | nindent 6 }}
+      {{- include "website-khaddict.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "site-khaddict.selectorLabels" . | nindent 8 }}
+        {{- include "website-khaddict.selectorLabels" . | nindent 8 }}
     spec:
       containers:
       - name: {{ .Values.app }}
