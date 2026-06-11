@@ -1,0 +1,288 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.deployment.name }}-html
+  namespace: {{ .Values.namespace }}
+data:
+  default.conf: |
+    server {
+        listen 80;
+        absolute_redirect off;
+
+        location = / {
+            root /usr/share/nginx/html;
+            try_files /index.html =404;
+        }
+
+        location /gallery/ {
+            alias /data/gallery/;
+            autoindex on;
+            autoindex_format json;
+            add_header Access-Control-Allow-Origin "*";
+            add_header Cache-Control "public, max-age=86400";
+        }
+
+        location /icons/ {
+            alias /data/icons/;
+            autoindex on;
+            autoindex_format json;
+            add_header Access-Control-Allow-Origin "*";
+            add_header Cache-Control "public, max-age=86400";
+        }
+
+        # Backward compat: root-level image paths still resolve
+        location ~ ^/[^/]+\.(png|jpg|jpeg|gif|webp)$ {
+            root /data;
+            try_files /icons$uri /gallery$uri =404;
+            add_header Cache-Control "public, max-age=86400";
+            add_header Access-Control-Allow-Origin "*";
+        }
+    }
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Images — khaddict</title>
+      <link rel="icon" href="/icons/khazix_pc.png" type="image/png" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+      <style>
+        :root {
+          --bg:     #080810;
+          --border: rgba(255, 255, 255, .07);
+          --text:   #f1f5f9;
+          --muted:  #64748b;
+          --accent: #06b6d4;
+          --tree:   rgba(255, 255, 255, .18);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body::after {
+          content: '';
+          position: fixed; inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        body {
+          min-height: 100dvh;
+          background:
+            radial-gradient(ellipse 1000px 600px at 95% 0%,  rgba(6, 182, 212, .10), transparent 60%),
+            radial-gradient(ellipse 800px 800px at -5% 100%, rgba(139, 92, 246, .10), transparent 60%),
+            radial-gradient(ellipse 600px 500px at 50% 115%, rgba(236, 72, 153, .07), transparent 55%),
+            var(--bg);
+          color: var(--text);
+          font-family: 'Inter', system-ui, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2.5rem 1.5rem 4rem;
+          gap: 2.5rem;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: .5rem;
+          animation: fade-up .5s ease both;
+        }
+
+        h1 {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 1.4rem;
+          font-weight: 600;
+          letter-spacing: -.02em;
+        }
+
+        .back {
+          font-size: .72rem;
+          color: var(--muted);
+          text-decoration: none;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          transition: color .2s;
+        }
+        .back:hover { color: var(--accent); }
+
+        .tree-wrap {
+          width: 100%;
+          max-width: 640px;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          animation: fade-up .5s .08s ease both;
+        }
+
+        .dir-block { display: flex; flex-direction: column; }
+
+        .dir-header {
+          display: flex;
+          align-items: baseline;
+          gap: .65rem;
+          padding-bottom: .55rem;
+          border-bottom: 1px solid var(--border);
+          margin-bottom: .35rem;
+        }
+
+        .dir-name {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .88rem;
+          font-weight: 600;
+        }
+
+        .dir-count {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .7rem;
+          color: var(--muted);
+        }
+
+        .tree-row {
+          display: flex;
+          align-items: center;
+          gap: .45rem;
+          padding: .25rem 0;
+          border-radius: 4px;
+          transition: background .1s;
+        }
+        .tree-row:hover { background: rgba(6, 182, 212, .04); }
+
+        .tree-prefix {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .75rem;
+          color: var(--tree);
+          flex-shrink: 0;
+          user-select: none;
+          padding-left: .4rem;
+        }
+
+        .tree-name {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .78rem;
+          color: var(--accent);
+          text-decoration: none;
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          transition: color .15s;
+        }
+        .tree-name:hover { color: var(--text); }
+
+        .tree-size {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .68rem;
+          color: var(--muted);
+          flex-shrink: 0;
+          padding-right: .4rem;
+        }
+
+        .tree-empty {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .75rem;
+          color: var(--muted);
+          padding: .4rem .4rem;
+          font-style: italic;
+        }
+
+        .tree-thumb {
+          width: 36px;
+          height: 36px;
+          border-radius: 5px;
+          border: 1px solid var(--border);
+          background: rgba(255, 255, 255, .04);
+          flex-shrink: 0;
+        }
+
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      </style>
+    </head>
+    <body>
+      <header>
+        <h1>~/images</h1>
+        <a class="back" href="https://khaddict.com">← back</a>
+      </header>
+
+      <div class="tree-wrap" id="tree"></div>
+
+      <script>
+        function fmt(b) {
+          if (b < 1024)              return b + ' B';
+          if (b < 1024 * 1024)       return (b / 1024).toFixed(0) + ' KB';
+          return (b / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        async function loadDir(label, path, fit) {
+          const res   = await fetch(path);
+          const items = await res.json();
+          return {
+            label,
+            path,
+            fit,
+            files: items.filter(i => i.type === 'file').sort((a, b) => a.name.localeCompare(b.name))
+          };
+        }
+
+        function renderDir({ label, path, fit, files }) {
+          const block = document.createElement('div');
+          block.className = 'dir-block';
+
+          const hdr = document.createElement('div');
+          hdr.className = 'dir-header';
+          hdr.innerHTML =
+            '<span class="dir-name">' + label + '/</span>' +
+            '<span class="dir-count">' + files.length + ' file' + (files.length !== 1 ? 's' : '') + '</span>';
+          block.appendChild(hdr);
+
+          if (!files.length) {
+            const empty = document.createElement('div');
+            empty.className = 'tree-empty';
+            empty.textContent = '(empty)';
+            block.appendChild(empty);
+            return block;
+          }
+
+          files.forEach((f, i) => {
+            const last   = i === files.length - 1;
+            const row    = document.createElement('div');
+            row.className = 'tree-row';
+            const prefix = last ? '└──' : '├──';
+            const link   = path + f.name;
+            row.innerHTML =
+              '<span class="tree-prefix">' + prefix + '</span>' +
+              '<img class="tree-thumb" src="' + path + 'thumbs/' + f.name + '" loading="lazy" alt="" style="object-fit:' + fit + '">' +
+              '<a class="tree-name" href="' + link + '" target="_blank" rel="noopener">' + f.name + '</a>' +
+              '<span class="tree-size">' + fmt(f.size) + '</span>';
+            block.appendChild(row);
+          });
+
+          return block;
+        }
+
+        async function init() {
+          const tree = document.getElementById('tree');
+          try {
+            const [icons, gallery] = await Promise.all([
+              loadDir('icons',   '/icons/',   'contain'),
+              loadDir('gallery', '/gallery/', 'cover')
+            ]);
+            [icons, gallery].forEach(d => tree.appendChild(renderDir(d)));
+          } catch(e) {
+            tree.innerHTML = '<div class="tree-empty">Failed to load directory listing.</div>';
+          }
+        }
+
+        init();
+      </script>
+    </body>
+    </html>

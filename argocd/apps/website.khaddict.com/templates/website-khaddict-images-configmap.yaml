@@ -4,6 +4,6 @@ metadata:
   name: {{ .Values.deployment.name }}-images
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "site-khaddict.labels" . | nindent 4 }}
+    {{- include "website-khaddict.labels" . | nindent 4 }}
 binaryData:
   khazix_pc.png: {{ .Files.Get "images/khazix_pc.png" | b64enc }}

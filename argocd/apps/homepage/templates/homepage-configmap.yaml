@@ -11,9 +11,9 @@ data:
   settings.yaml: |
     title: Khaddict's homepage
     background:
-      image: https://khaddict.com/images/dark_star_khazix.jpg
+      image: https://images.khaddict.com/gallery/dark_star_khazix.jpg
       opacity: 30
-    favicon: https://khaddict.com/images/khazix_pc.png
+    favicon: https://images.khaddict.com/icons/khazix_pc.png
     language: en
     headerStyle: boxed
     quicklaunch:
@@ -23,35 +23,24 @@ data:
       hideVisitURL: true
       provider: google
     hideVersion: true
+    maxGroupColumns: 3
+    useEqualHeights: true
     layout:
+      Virtualization & Backups:
+        columns: 2
       Infra & Orchestration:
         columns: 2
       Monitoring:
         columns: 3
-      Availability:
-        columns: 2
       Management, Network & Inventory:
         columns: 3
+      Availability:
+        columns: 2
+      Developer & Socials:
+        columns: 2
   custom.css: ""
   custom.js: ""
-  bookmarks.yaml: |
-    - Developer:
-        - Github:
-            - icon: github
-              href: https://github.com/khaddict
-              description: khaddict
-        - khaddict.com:
-            - icon: https://khaddict.com/images/khazix_pc.png
-              href: https://khaddict.com
-              description: khaddict.com
-    - Socials:
-        - Discord:
-            - icon: discord
-              description: khaddict
-        - Reddit:
-            - icon: reddit
-              href: https://www.reddit.com/user/khadddict/
-              description: khadddict
+  bookmarks.yaml: ""
   services.yaml: |
     - Virtualization & Backups:
         - Proxmox:
@@ -75,11 +64,11 @@ data:
               password: {{ .Values.services.pbs.password }}
     - Infra & Orchestration:
         - Saltmaster:
-            icon: https://khaddict.com/images/saltstack.png
+            icon: https://images.khaddict.com/icons/saltstack.png
             href: https://saltmaster.khaddict.lab:8000
             description: saltmaster.khaddict.lab
         - Stackstorm:
-            icon: https://khaddict.com/images/stackstorm.png
+            icon: https://images.khaddict.com/icons/stackstorm.png
             href: https://stackstorm.khaddict.lab
             description: stackstorm.khaddict.lab
         - ArgoCD:
@@ -90,6 +79,10 @@ data:
               type: argocd
               url: https://argocd.khaddict.lab
               key: {{ .Values.services.argocd.password }}
+        - Harbor:
+            icon: harbor
+            href: https://harbor.khaddict.lab
+            description: harbor.khaddict.lab
     - Monitoring:
         - Prometheus:
             icon: prometheus
@@ -112,23 +105,6 @@ data:
               url: https://grafana.khaddict.lab:3000
               username: admin
               password: {{ .Values.services.grafana.password }}
-    - Availability:
-        - ChangeDetection.io:
-            icon: changedetection
-            href: http://changedetection.khaddict.lab
-            description: changedetection.khaddict.lab
-            widget:
-              type: changedetectionio
-              url: http://changedetection.khaddict.lab
-              key: {{ .Values.services.changedetection.password }}
-        - Uptime Kuma:
-            icon: uptime-kuma
-            href: https://status.khaddict.com
-            description: status.khaddict.com
-            widget:
-              type: uptimekuma
-              url: https://status.khaddict.com
-              slug: khaddict
     - Management, Network & Inventory:
         - OPNsense:
             icon: opnsense
@@ -156,19 +132,39 @@ data:
             icon: hashicorp-vault
             href: https://vault.khaddict.lab:8200
             description: vault.khaddict.lab
-    - Tools:
-        - YAML Lint:
-            icon: https://khaddict.com/images/yaml.png
-            href: https://www.yamllint.com
-            description: yamllint.com
-        - JSON Lint:
-            icon: https://khaddict.com/images/json.png
-            href: https://jsonlint.com
-            description: jsonlint.com
-        - Regex101:
-            icon: https://khaddict.com/images/regex101.png
-            href: https://regex101.com
-            description: regex101.com
+    - Availability:
+        - ChangeDetection.io:
+            icon: changedetection
+            href: http://changedetection.khaddict.lab
+            description: changedetection.khaddict.lab
+            widget:
+              type: changedetectionio
+              url: http://changedetection.khaddict.lab
+              key: {{ .Values.services.changedetection.password }}
+        - Uptime Kuma:
+            icon: uptime-kuma
+            href: https://status.khaddict.com
+            description: status.khaddict.com
+            widget:
+              type: uptimekuma
+              url: https://status.khaddict.com
+              slug: khaddict
+    - Developer & Socials:
+        - Github:
+            icon: github
+            href: https://github.com/khaddict
+            description: khaddict
+        - khaddict.com:
+            icon: https://images.khaddict.com/icons/khazix_pc.png
+            href: https://khaddict.com
+            description: khaddict.com
+        - Discord:
+            icon: discord
+            description: khaddict
+        - Reddit:
+            icon: reddit
+            href: https://www.reddit.com/user/khadddict/
+            description: khadddict
   widgets.yaml: |
     - kubernetes:
         cluster:

@@ -1,0 +1,44 @@
+app: images-khaddict
+namespace: images-khaddict
+
+pvc:
+  size: 5Gi
+  storageClass: local-path
+
+deployment:
+  name: images-khaddict
+  replicas: 1
+  image: nginx:1.31.1
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+service:
+  name: images-khaddict
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+probes:
+  enabled: false
+  liveness:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 15
+    periodSeconds: 10
+  readiness:
+    httpGet:
+      path: /
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+httproute:
+  host: images.khaddict.lab
+  gatewayName: envoy-gateway

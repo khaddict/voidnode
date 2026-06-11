@@ -11,359 +11,462 @@ data:
         index index.html;
         absolute_redirect off;
 
+        location = /.well-known/security.txt {
+            default_type text/plain;
+            try_files /security.txt =404;
+        }
+
         location / {
             try_files $uri $uri/ =404;
         }
 
     }
+  security.txt: |
+    Contact: mailto:security@khaddict.com
+    Expires: 2029-12-31T22:59:00.000Z
+    Preferred-Languages: fr, en
+    Canonical: https://khaddict.com/.well-known/security.txt
   index.html: |
     <!DOCTYPE html>
     <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>khaddict</title>
-        <link
-          rel="icon"
-          href="/images/khazix_pc.png"
-          type="image/png"
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>khaddict</title>
+      <link rel="icon" href="https://images.khaddict.com/icons/khazix_pc.png" type="image/png" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />
     
-        <style>
-          :root {
-            --bg:           #080810;
-            --surface:      rgba(255, 255, 255, .032);
-            --border:       rgba(255, 255, 255, .07);
-            --border-hov:   rgba(6, 182, 212, .5);
-            --text:         #f1f5f9;
-            --muted:        #64748b;
-            --accent:       #06b6d4;
-            --accent-dim:   rgba(6, 182, 212, .15);
-            --radius:       16px;
+      <style>
+        :root {
+          --bg:     #080810;
+          --border: rgba(255, 255, 255, .07);
+          --text:   #f1f5f9;
+          --muted:  #64748b;
+          --accent: #06b6d4;
+          --green:  #4ade80;
+          --red:    #f87171;
+          --yellow: #fbbf24;
+        }
+    
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+        body::after {
+          content: '';
+          position: fixed; inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+          pointer-events: none;
+          z-index: 0;
+        }
+    
+        body {
+          min-height: 100dvh;
+          background:
+            radial-gradient(ellipse 1000px 600px at 95% 0%,  rgba(6, 182, 212, .10), transparent 60%),
+            radial-gradient(ellipse 800px 800px at -5% 100%, rgba(139, 92, 246, .10), transparent 60%),
+            radial-gradient(ellipse 600px 500px at 50% 115%, rgba(236, 72, 153, .07), transparent 55%),
+            var(--bg);
+          color: var(--text);
+          font-family: 'Inter', system-ui, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem 1.5rem;
+          gap: 2rem;
+        }
+    
+        body > * { position: relative; z-index: 1; }
+    
+        header {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: .6rem;
+          text-align: center;
+          animation: fade-up .5s ease both;
+        }
+    
+        .hero-img {
+          width: clamp(60px, 8vw, 84px);
+          height: auto;
+          -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+          mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+          animation: float 6s ease-in-out infinite;
+          pointer-events: none;
+          user-select: none;
+        }
+    
+        h1 {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 1.65rem;
+          font-weight: 600;
+          letter-spacing: -.02em;
+          display: flex;
+          align-items: center;
+          gap: .6rem;
+        }
+    
+        h1::before, h1::after {
+          content: '';
+          display: block;
+          width: 28px; height: 1px;
+          background: var(--accent);
+          opacity: .5;
+        }
+    
+        h1 .cursor {
+          display: inline-block;
+          width: 2px; height: 1.1em;
+          background: var(--accent);
+          margin-left: 3px;
+          vertical-align: middle;
+          animation: blink 1s step-end infinite;
+        }
+    
+        .tagline {
+          display: flex;
+          align-items: center;
+          gap: .5rem;
+          color: var(--muted);
+          font-size: .73rem;
+          font-weight: 500;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+    
+        .tagline span + span::before {
+          content: '·';
+          margin-right: .5rem;
+          color: var(--accent);
+          opacity: .5;
+        }
+    
+        /* links list */
+        nav {
+          width: 100%;
+          max-width: 460px;
+          border-top: 1px solid var(--border);
+          border-bottom: 1px solid var(--border);
+          animation: fade-up .5s .1s ease both;
+        }
+    
+        .row {
+          display: flex;
+          align-items: center;
+          gap: .9rem;
+          padding: .95rem .75rem;
+          border-bottom: 1px solid var(--border);
+          text-decoration: none;
+          color: var(--text);
+          cursor: pointer;
+          transition: background .14s ease, opacity .2s ease;
+          position: relative;
+          user-select: none;
+        }
+
+        .row:last-child { border-bottom: none; }
+        .row:hover { background: rgba(6, 182, 212, .04); }
+        nav:has(.row:hover) .row:not(:hover) { opacity: .25; }
+
+        .row-lead { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+        .row-name {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .88rem;
+          font-weight: 600;
+          min-width: 88px;
+          flex-shrink: 0;
+        }
+    
+        .row-url {
+          font-size: .75rem;
+          color: var(--muted);
+          flex: 1;
+        }
+    
+        .row-arrow {
+          font-size: .72rem;
+          color: var(--muted);
+          opacity: 0;
+          transform: translate(-4px, 4px);
+          transition: opacity .14s ease, transform .14s ease;
+          flex-shrink: 0;
+        }
+    
+        .row:hover .row-arrow { opacity: 1; transform: translate(0, 0); }
+    
+        .s-dot { background: var(--muted); transition: background .4s ease, box-shadow .4s ease; }
+    
+        .s-dot.up     { background: var(--green);  box-shadow: 0 0 0 0 rgba(74,222,128,.4); animation: pulse 2.5s infinite; }
+        .s-dot.down   { background: var(--red); }
+        .s-dot.partial { background: var(--yellow); }
+    
+        /* status count badge */
+        .s-badge {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .72rem;
+          color: var(--muted);
+          flex-shrink: 0;
+          min-width: 2.8rem;
+          text-align: right;
+          transition: color .4s ease;
+        }
+    
+        .s-badge.up     { color: var(--green); }
+        .s-badge.down   { color: var(--red); }
+        .s-badge.partial { color: var(--yellow); }
+
+        .img-count {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .72rem;
+          color: var(--accent);
+          flex-shrink: 0;
+          min-width: 2.8rem;
+          text-align: right;
+        }
+
+        /* expanded panel */
+        .s-expand {
+          overflow: hidden;
+          max-height: 0;
+          transition: max-height .3s ease, padding .3s ease;
+          border-bottom: none;
+        }
+    
+        .s-expand.open {
+          max-height: 400px;
+          border-bottom: 1px solid var(--border);
+        }
+    
+        .s-inner {
+          padding: .8rem .2rem .9rem;
+          display: flex;
+          flex-direction: column;
+          gap: .5rem;
+          background: rgba(0, 0, 0, .18);
+        }
+    
+        .s-service {
+          display: flex;
+          align-items: center;
+          gap: .65rem;
+          font-size: .78rem;
+          animation: fade-up .2s ease both;
+        }
+    
+        .s-service-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+    
+        .s-service-dot.up   { background: var(--green); }
+        .s-service-dot.down { background: var(--red); }
+    
+        .s-service-name {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .78rem;
+          flex: 1;
+          color: var(--text);
+        }
+    
+        .s-service-pct { color: var(--muted); font-size: .72rem; }
+    
+        .s-viewall {
+          display: inline-flex;
+          align-items: center;
+          gap: .3rem;
+          color: var(--accent);
+          font-size: .73rem;
+          text-decoration: none;
+          margin-top: .3rem;
+          opacity: .8;
+          width: fit-content;
+        }
+    
+        .s-viewall:hover { opacity: 1; }
+    
+        .s-error {
+          font-size: .75rem;
+          color: var(--muted);
+          font-style: italic;
+        }
+    
+    
+        @keyframes fade-up {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50%       { transform: translateY(-6px); }
+        }
+        @keyframes pulse {
+          0%   { box-shadow: 0 0 0 0   rgba(74, 222, 128, .5); }
+          70%  { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+          100% { box-shadow: 0 0 0 0   rgba(74, 222, 128, 0); }
+        }
+      </style>
+    </head>
+    
+    <body>
+      <header>
+        <img class="hero-img" src="https://images.khaddict.com/icons/khazix_pc.png" alt="" aria-hidden="true" />
+        <h1>khaddict<span class="cursor"></span></h1>
+        <p class="tagline">
+          <span>homelab</span>
+          <span>code</span>
+          <span>infrastructure</span>
+        </p>
+      </header>
+    
+      <nav>
+        <a class="row" href="https://website.khaddict.com" target="_blank" rel="noopener">
+          <span class="row-lead"></span>
+          <span class="row-name">website</span>
+          <span class="row-url">website.khaddict.com</span>
+          <span class="row-arrow">↗</span>
+        </a>
+        <a class="row" href="https://homepage.khaddict.com" target="_blank" rel="noopener">
+          <span class="row-lead"></span>
+          <span class="row-name">homepage</span>
+          <span class="row-url">homepage.khaddict.com</span>
+          <span class="row-arrow">↗</span>
+        </a>
+        <a class="row" href="https://images.khaddict.com" target="_blank" rel="noopener">
+          <span class="row-lead"></span>
+          <span class="row-name">images</span>
+          <span class="row-url">images.khaddict.com</span>
+          <span class="img-count" id="img-count">—</span>
+          <span class="row-arrow">↗</span>
+        </a>
+        <a class="row" href="https://github.com/khaddict" target="_blank" rel="noopener">
+          <span class="row-lead"></span>
+          <span class="row-name">github</span>
+          <span class="row-url">github.com/khaddict</span>
+          <span class="row-arrow">↗</span>
+        </a>
+        <div class="row" id="status-row">
+          <span class="row-lead s-dot" id="s-dot"></span>
+          <span class="row-name">status</span>
+          <span class="row-url">status.khaddict.com</span>
+          <span class="s-badge" id="s-badge">—</span>
+          <span class="row-arrow">↗</span>
+        </div>
+        <div class="s-expand" id="s-expand">
+          <div class="s-inner" id="s-inner"></div>
+        </div>
+      </nav>
+    
+      <script>
+        const STATUS = 'https://status.khaddict.com';
+        const SLUG   = 'khaddict';
+    
+        const dot    = document.getElementById('s-dot');
+        const badge  = document.getElementById('s-badge');
+        const expand = document.getElementById('s-expand');
+        const inner  = document.getElementById('s-inner');
+        const row    = document.getElementById('status-row');
+    
+        async function loadStatus() {
+          try {
+            const [pageRes, hbRes] = await Promise.all([
+              fetch(`${STATUS}/api/status-page/${SLUG}`),
+              fetch(`${STATUS}/api/status-page/heartbeat/${SLUG}`)
+            ]);
+    
+            if (!pageRes.ok || !hbRes.ok) throw new Error();
+    
+            const page = await pageRes.json();
+            const hb   = await hbRes.json();
+    
+            const monitors = page.publicGroupList.flatMap(g => g.monitorList);
+            let up = 0;
+    
+            inner.innerHTML = '';
+    
+            monitors.forEach((m, i) => {
+              const beats = hb.heartbeatList[m.id] || [];
+              const last  = beats[beats.length - 1];
+              const isUp  = last?.status === 1;
+              if (isUp) up++;
+    
+              const pct24 = hb.uptimeList[`${m.id}_24`];
+              const pct   = pct24 !== undefined ? `${(pct24 * 100).toFixed(1)}%` : '—';
+    
+              const el = document.createElement('div');
+              el.className = 's-service';
+              el.style.animationDelay = `${i * 40}ms`;
+              el.innerHTML = `
+                <span class="s-service-dot ${isUp ? 'up' : 'down'}"></span>
+                <span class="s-service-name">${m.name}</span>
+                <span class="s-service-pct">${pct}</span>
+              `;
+              inner.appendChild(el);
+            });
+    
+            const link = document.createElement('a');
+            link.href      = STATUS;
+            link.target    = '_blank';
+            link.rel       = 'noopener';
+            link.className = 's-viewall';
+            link.textContent = 'View full status ↗';
+            inner.appendChild(link);
+    
+            const total = monitors.length;
+            const state = up === total ? 'up' : up === 0 ? 'down' : 'partial';
+            dot.className   = `row-lead s-dot ${state}`;
+            badge.className = `s-badge ${state}`;
+            badge.textContent = `${up}/${total}`;
+
+          } catch {
+            dot.className = 'row-lead s-dot';
+            badge.textContent = '—';
+            inner.innerHTML = '<span class="s-error">Could not reach status page.</span>';
           }
+        }
     
-          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        row.addEventListener('click', () => {
+          expand.classList.toggle('open');
+        });
     
-          /* ── Grain overlay ───────────────────────────────────── */
-          body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 0;
-          }
-    
-          body {
-            min-height: 100dvh;
-            background:
-              radial-gradient(ellipse 900px 500px at 85% 5%,  rgba(6, 182, 212, .07), transparent 70%),
-              radial-gradient(ellipse 700px 700px at -5% 95%, rgba(6, 182, 212, .05), transparent 65%),
-              var(--bg);
-            color: var(--text);
-            font-family: 'Inter', system-ui, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            gap: 1.75rem;
-          }
-    
-          body > * { position: relative; z-index: 1; }
-    
-          /* ── Header ─────────────────────────────────────────── */
-          header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: .6rem;
-            text-align: center;
-            animation: fade-up .5s ease both;
-          }
-    
-          /* ── Hero image ───────────────────────────────────── */
-          .hero-img {
-            width: clamp(70px, 9vw, 96px);
-            height: auto;
-            object-fit: contain;
-            -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-            animation: float 6s ease-in-out infinite;
-            pointer-events: none;
-            user-select: none;
-          }
-    
-          header h1 {
-            display: flex;
-            align-items: center;
-            gap: .6rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.65rem;
-            font-weight: 600;
-            letter-spacing: -.02em;
-            color: var(--text);
-          }
-    
-          header h1::before,
-          header h1::after {
-            content: '';
-            display: block;
-            width: 28px;
-            height: 1px;
-            background: var(--accent);
-            opacity: .5;
-          }
-    
-          header h1 .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.1em;
-            background: var(--accent);
-            margin-left: 3px;
-            vertical-align: middle;
-            animation: blink 1s step-end infinite;
-          }
-    
-          .tagline {
-            display: flex;
-            align-items: center;
-            gap: .55rem;
-            color: var(--muted);
-            font-size: .78rem;
-            font-weight: 500;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-          }
-    
-          .tagline span::before {
-            content: '·';
-            margin-right: .55rem;
-            color: var(--accent);
-            opacity: .6;
-          }
-    
-          .tagline span:first-child::before { display: none; }
-    
-          /* ── Grid ────────────────────────────────────────────── */
-          .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: .6rem;
-            width: 100%;
-            max-width: 560px;
-          }
-    
-          @media (max-width: 440px) {
-            .grid { grid-template-columns: 1fr; }
-          }
-    
-          /* ── Card ────────────────────────────────────────────── */
-          .card {
-            position: relative;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: .85rem;
-            padding: .85rem 1rem;
-            border-radius: var(--radius);
-            background: var(--surface);
-            border: 1px solid var(--border);
-            text-decoration: none;
-            color: var(--text);
-            overflow: hidden;
-            transition:
-              transform .2s cubic-bezier(.34, 1.56, .64, 1),
-              border-color .2s ease,
-              box-shadow .2s ease;
-            animation: fade-up .5s ease both;
-          }
-    
-          .card:nth-child(1) { animation-delay: .08s; }
-          .card:nth-child(2) { animation-delay: .13s; }
-          .card:nth-child(3) { animation-delay: .18s; }
-          .card:nth-child(4) { animation-delay: .23s; }
-    
-          /* Top accent line */
-          .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity .25s ease;
-          }
-    
-          /* Inner glow */
-          .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 60% at 50% 0%, var(--accent-dim), transparent 70%);
-            opacity: 0;
-            transition: opacity .25s ease;
-            pointer-events: none;
-          }
-    
-          .card:hover {
-            transform: translateY(-5px);
-            border-color: var(--border-hov);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, .5), 0 0 0 1px rgba(6, 182, 212, .15);
-          }
-    
-          .card:hover::before,
-          .card:hover::after { opacity: 1; }
-    
-          .card-icon {
-            width: 34px;
-            height: 34px;
-            flex-shrink: 0;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
-            position: relative;
-            z-index: 1;
-            transition: transform .2s cubic-bezier(.34, 1.56, .64, 1);
-          }
-    
-          .card:hover .card-icon { transform: scale(1.12) rotate(-3deg); }
-    
-          .card-body {
-            display: flex;
-            flex-direction: column;
-            gap: .15rem;
-            flex: 1;
-            min-width: 0;
-            position: relative;
-            z-index: 1;
-          }
-    
-          .card-title {
-            font-size: .88rem;
-            font-weight: 700;
-            letter-spacing: -.01em;
-          }
-    
-          .card-desc {
-            font-size: .73rem;
-            color: var(--muted);
-            line-height: 1.4;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-    
-          .card-arrow {
-            flex-shrink: 0;
-            font-size: .8rem;
-            color: var(--accent);
-            opacity: 0;
-            transform: translate(-4px, 4px);
-            transition: opacity .2s ease, transform .2s ease;
-            z-index: 1;
-          }
-    
-          .card:hover .card-arrow {
-            opacity: 1;
-            transform: translate(0, 0);
-          }
-    
-          /* ── Footer ──────────────────────────────────────────── */
-          footer {
-            color: var(--muted);
-            font-size: .7rem;
-            letter-spacing: .06em;
-            opacity: .4;
-            animation: fade-up .5s .3s ease both;
-          }
-    
-          /* ── Animations ──────────────────────────────────────── */
-          @keyframes fade-up {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0);    }
-          }
-    
-          @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0; }
-          }
-    
-          @keyframes float {
-            0%, 100% { transform: translateY(0);   }
-            50%       { transform: translateY(-6px); }
-          }
-        </style>
-      </head>
-    
-      <body>
-        <header>
-          <img
-            class="hero-img"
-            src="/images/khazix_pc.png"
-            alt=""
-            aria-hidden="true"
-          />
-          <h1>khaddict<span class="cursor"></span></h1>
-          <p class="tagline">
-            <span>homelab</span>
-            <span>code</span>
-            <span>infrastructure</span>
-          </p>
-        </header>
-    
-        <main class="grid" aria-label="Khaddict links">
-          <a class="card" href="https://site.khaddict.com" target="_blank" rel="noopener">
-            <img class="card-icon"
-              src="/images/www.png"
-              alt=""
-            />
-            <span class="card-body">
-              <span class="card-title">Website</span>
-              <span class="card-desc">You won't regret this.</span>
-            </span>
-            <span class="card-arrow">↗</span>
-          </a>
-    
-          <a class="card" href="https://homepage.khaddict.com" target="_blank" rel="noopener">
-            <img class="card-icon"
-              src="/images/homepage.png"
-              alt=""
-            />
-            <span class="card-body">
-              <span class="card-title">Homepage</span>
-              <span class="card-desc">Everything in one place.</span>
-            </span>
-            <span class="card-arrow">↗</span>
-          </a>
-    
-          <a class="card" href="https://github.com/khaddict" target="_blank" rel="noopener">
-            <img class="card-icon"
-              src="/images/github.png"
-              alt=""
-            />
-            <span class="card-body">
-              <span class="card-title">GitHub</span>
-              <span class="card-desc">Where the magic happens.</span>
-            </span>
-            <span class="card-arrow">↗</span>
-          </a>
-    
-          <a class="card" href="https://status.khaddict.com" target="_blank" rel="noopener">
-            <img class="card-icon"
-              src="/images/status.png"
-              alt=""
-            />
-            <span class="card-body">
-              <span class="card-title">Status</span>
-              <span class="card-desc">All green. Probably.</span>
-            </span>
-            <span class="card-arrow">↗</span>
-          </a>
-        </main>
-    
-        <footer>© 2026 khaddict</footer>
-      </body>
+        function typeTitle() {
+          const h1   = document.querySelector('h1');
+          const cur  = h1.querySelector('.cursor');
+          const node = document.createTextNode('');
+          h1.insertBefore(node, cur);
+          [...h1.childNodes].forEach(n => { if (n.nodeType === 3 && n !== node) n.remove(); });
+          let i = 0;
+          const iv = setInterval(() => {
+            node.textContent = 'khaddict'.slice(0, ++i);
+            if (i >= 8) clearInterval(iv);
+          }, 140);
+        }
+        typeTitle();
+
+        loadStatus();
+
+        async function loadImageCount() {
+          try {
+            const [ir, gr] = await Promise.all([
+              fetch('https://images.khaddict.com/icons/'),
+              fetch('https://images.khaddict.com/gallery/')
+            ]);
+            const [icons, gallery] = await Promise.all([ir.json(), gr.json()]);
+            const n = icons.filter(i => i.type === 'file').length +
+                      gallery.filter(i => i.type === 'file').length;
+            document.getElementById('img-count').textContent = n;
+          } catch { /* silently fail */ }
+        }
+
+        loadImageCount();
+      </script>
+    </body>
     </html>
+    
