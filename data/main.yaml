@@ -388,7 +388,7 @@ pve:
       description: "Htb VM"
       template: debian-trixie-template
       tags: "edge,trixie"
-      scrape: true
+      scrape: false
       ip: 10.40.0.3
       main_iface: *default_iface
       ssh: null
@@ -400,5 +400,5 @@ pve:
         disks:
           - name: scsi0
             size_gb: 10
-      backup: true
+      backup: false
       <<: *vlan_edge
