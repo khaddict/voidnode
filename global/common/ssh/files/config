@@ -2,5 +2,5 @@ Host *
     User root
     IdentityFile /root/.ssh/id_ed25519
     ForwardAgent no
-    StrictHostKeyChecking no
+    StrictHostKeyChecking accept-new
     UserKnownHostsFile /root/.ssh/known_hosts

@@ -5,7 +5,7 @@ deployment:
   name: assets-gui
   replicas: 1
   image: registry.khaddict.lab/voidnode/assets-gui:latest
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   resources:
     requests:
       cpu: 100m
