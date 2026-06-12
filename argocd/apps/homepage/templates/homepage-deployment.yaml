@@ -30,7 +30,7 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "*"
+              value: "homepage.khaddict.lab"
           ports:
             - name: http
               containerPort: 3000

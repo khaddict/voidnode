@@ -59,7 +59,7 @@ salt-master:
     - watch:
       - file: /etc/salt/master
 
-# https://github.com/saltstack/salt/pull/66899/changes Fix Python3.13 compatibility regarding urllib.parse module
+# TODO: remove once Salt ships the fix — https://github.com/saltstack/salt/pull/66899
 /opt/saltstack/salt/lib/python3.10/site-packages/salt/utils/url.py:
   file.managed:
     - source: salt://role/saltmaster/files/url.py

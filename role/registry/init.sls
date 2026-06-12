@@ -68,7 +68,7 @@ harbor_archive:
     - group: root
     - enforce_toplevel: False
     - options: --strip-components=1
-    - source_hash: md5=26442907d7b0fffecbcb44ff98af3a83
+    - source_hash: sha256=46b3bb5b45c8fe632ade6d85f90cdd84935ef3885ace564a6851e98e57e3928b
     - unless: test -f /etc/harbor/harbor.v{{ harbor_version }}.tar.gz
 
 /etc/containers/certs.d/registry.khaddict.lab:
