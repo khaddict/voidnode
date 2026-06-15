@@ -22,7 +22,7 @@ data:
 
     }
   security.txt: |
-    Contact: mailto:security@khaddict.com
+    Contact: mailto:contact@khaddict.com
     Expires: 2029-12-31T22:59:00.000Z
     Preferred-Languages: fr, en
     Canonical: https://khaddict.com/.well-known/security.txt
@@ -293,8 +293,28 @@ data:
           color: var(--muted);
           font-style: italic;
         }
-    
-    
+
+        .contact-link {
+          position: fixed;
+          bottom: 1.5rem;
+          left: 50%;
+          transform: translateX(-50%);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .7rem;
+          color: var(--muted);
+          text-decoration: none;
+          opacity: .4;
+          letter-spacing: .03em;
+          transition: opacity .2s ease, color .2s ease;
+          white-space: nowrap;
+          z-index: 10;
+        }
+
+        .contact-link:hover {
+          opacity: 1;
+          color: var(--accent);
+        }
+
         @keyframes fade-up {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -363,7 +383,9 @@ data:
           <div class="s-inner" id="s-inner"></div>
         </div>
       </nav>
-    
+
+      <a class="contact-link" href="mailto:contact@khaddict.com">contact@khaddict.com</a>
+
       <script>
         const STATUS = 'https://status.khaddict.com';
         const SLUG   = 'khaddict';
@@ -469,4 +491,3 @@ data:
       </script>
     </body>
     </html>
-    
