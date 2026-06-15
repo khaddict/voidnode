@@ -81,8 +81,8 @@ data:
               key: {{ .Values.services.argocd.password }}
         - Harbor:
             icon: harbor
-            href: https://harbor.khaddict.lab
-            description: harbor.khaddict.lab
+            href: https://registry.khaddict.lab
+            description: registry.khaddict.lab
     - Monitoring:
         - Prometheus:
             icon: prometheus
