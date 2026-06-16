@@ -21,6 +21,57 @@ data:
         }
 
     }
+  robots.txt: |
+    User-agent: *
+    Allow: /
+
+    User-agent: GPTBot
+    Disallow: /
+
+    User-agent: ChatGPT-User
+    Disallow: /
+
+    User-agent: ClaudeBot
+    Disallow: /
+
+    User-agent: anthropic-ai
+    Disallow: /
+
+    User-agent: CCBot
+    Disallow: /
+
+    User-agent: Google-Extended
+    Disallow: /
+
+    User-agent: Bytespider
+    Disallow: /
+
+    User-agent: cohere-ai
+    Disallow: /
+
+    User-agent: PerplexityBot
+    Disallow: /
+
+    Sitemap: https://khaddict.com/sitemap.xml
+  sitemap.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://khaddict.com/</loc>
+      </url>
+      <url>
+        <loc>https://website.khaddict.com/</loc>
+      </url>
+      <url>
+        <loc>https://images.khaddict.com/</loc>
+      </url>
+      <url>
+        <loc>https://homepage.khaddict.com/</loc>
+      </url>
+      <url>
+        <loc>https://status.khaddict.com/</loc>
+      </url>
+    </urlset>
   security.txt: |
     Contact: mailto:contact@khaddict.com
     Expires: 2029-12-31T22:59:00.000Z
