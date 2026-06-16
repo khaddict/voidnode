@@ -45,6 +45,9 @@ data:
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Images | khaddict</title>
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://images.khaddict.com" />
+      <meta property="og:title" content="Images | khaddict" />
       <link rel="icon" href="/icons/khazix_pc.png" type="image/png" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
