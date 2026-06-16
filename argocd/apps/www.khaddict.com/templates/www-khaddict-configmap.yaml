@@ -84,6 +84,7 @@ data:
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>khaddict</title>
+      <meta name="description" content="Personal space dedicated to homelab, self-hosted infrastructure and code." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://khaddict.com" />
       <meta property="og:title" content="khaddict" />
