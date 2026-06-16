@@ -14,6 +14,11 @@ data:
             try_files /index.html =404;
         }
 
+        location = /robots.txt {
+            root /usr/share/nginx/html;
+            default_type text/plain;
+        }
+
         location /gallery/ {
             alias /data/gallery/;
             autoindex on;
@@ -38,6 +43,36 @@ data:
             add_header Access-Control-Allow-Origin "*";
         }
     }
+  robots.txt: |
+    User-agent: *
+    Allow: /
+
+    User-agent: GPTBot
+    Disallow: /
+
+    User-agent: ChatGPT-User
+    Disallow: /
+
+    User-agent: ClaudeBot
+    Disallow: /
+
+    User-agent: anthropic-ai
+    Disallow: /
+
+    User-agent: CCBot
+    Disallow: /
+
+    User-agent: Google-Extended
+    Disallow: /
+
+    User-agent: Bytespider
+    Disallow: /
+
+    User-agent: cohere-ai
+    Disallow: /
+
+    User-agent: PerplexityBot
+    Disallow: /
   index.html: |
     <!DOCTYPE html>
     <html lang="en">
