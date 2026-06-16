@@ -80,6 +80,7 @@ data:
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Images | khaddict</title>
+      <meta name="description" content="Personal image gallery hosting icons, wallpapers and homelab assets." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://images.khaddict.com" />
       <meta property="og:title" content="Images | khaddict" />

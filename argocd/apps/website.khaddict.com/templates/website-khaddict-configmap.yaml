@@ -41,6 +41,7 @@ data:
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Website | khaddict</title>
+      <meta name="description" content="A controlled environment where any action may have irreversible consequences." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://website.khaddict.com" />
       <meta property="og:title" content="Website | khaddict" />
