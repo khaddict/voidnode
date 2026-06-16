@@ -3,7 +3,7 @@ namespace: homepage
 
 deployment:
   replicas: 1
-  image: ghcr.io/gethomepage/homepage:v1.13.1
+  image: ghcr.io/gethomepage/homepage:v1.13.2
   imagePullPolicy: IfNotPresent
   resources:
     requests:
