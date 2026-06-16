@@ -4,15 +4,21 @@
   "labels": ["dependencies"],
   "schedule": ["every weekend"],
   "helm-values": {
-    "fileMatch": ["argocd/apps/.+/values\\.yaml$"]
+    "managerFilePatterns": [
+      "/argocd/apps/.+/values\\.yaml$/"
+    ]
   },
   "helmv3": {
-    "fileMatch": ["argocd/apps/.+/Chart\\.yaml$"]
+    "managerFilePatterns": [
+      "/argocd/apps/.+/Chart\\.yaml$/"
+    ]
   },
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.github/workflows/.+\\.yaml$"],
+      "managerFilePatterns": [
+        "/\\.github/workflows/.+\\.yaml$/"
+      ],
       "matchStrings": ["HELM_VERSION: \"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "helm/helm",
       "datasourceTemplate": "github-releases",
@@ -20,7 +26,9 @@
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.github/workflows/.+\\.yaml$"],
+      "managerFilePatterns": [
+        "/\\.github/workflows/.+\\.yaml$/"
+      ],
       "matchStrings": ["KUBECONFORM_VERSION: \"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "yannh/kubeconform",
       "datasourceTemplate": "github-releases",
