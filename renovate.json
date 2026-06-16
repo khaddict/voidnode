@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "labels": ["dependencies"],
+  "schedule": ["every weekend"],
+  "helm-values": {
+    "fileMatch": ["argocd/apps/.+/values\\.yaml$"]
+  },
+  "helmv3": {
+    "fileMatch": ["argocd/apps/.+/Chart\\.yaml$"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["\\.github/workflows/.+\\.yaml$"],
+      "matchStrings": ["HELM_VERSION: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "helm/helm",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["\\.github/workflows/.+\\.yaml$"],
+      "matchStrings": ["KUBECONFORM_VERSION: \"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "yannh/kubeconform",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    }
+  ]
+}
