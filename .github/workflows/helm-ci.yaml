@@ -1,0 +1,59 @@
+name: Helm CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "argocd/apps/**"
+  pull_request:
+    paths:
+      - "argocd/apps/**"
+
+env:
+  HELM_VERSION: "4.2.1"
+  KUBECONFORM_VERSION: "0.8.0"
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.3
+
+      - name: Install tools
+        run: |
+          curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin --strip-components=1 linux-amd64/helm
+
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C /usr/local/bin kubeconform
+
+      - name: Lint local charts
+        run: |
+          for dir in argocd/apps/*/; do
+            chart="${dir%/}"
+            if ! grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
+              echo "→ lint $chart"
+              helm lint "$chart"
+            fi
+          done
+
+      - name: Lint charts with dependencies
+        run: |
+          for dir in argocd/apps/*/; do
+            chart="${dir%/}"
+            if grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
+              echo "→ lint $chart"
+              helm dependency update "$chart"
+              helm lint "$chart"
+            fi
+          done
+
+      - name: Validate K8s manifests (local charts)
+        run: |
+          for dir in argocd/apps/*/; do
+            chart="${dir%/}"
+            if ! grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
+              echo "→ kubeconform $chart"
+              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
+            fi
+          done
