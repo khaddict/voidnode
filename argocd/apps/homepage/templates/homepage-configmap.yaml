@@ -9,7 +9,7 @@ data:
   kubernetes.yaml: |
     mode: cluster
   settings.yaml: |
-    title: Khaddict's homepage
+    title: Homepage | khaddict
     background:
       image: https://images.khaddict.com/gallery/dark_star_khazix.jpg
       opacity: 30
