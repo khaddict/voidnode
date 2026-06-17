@@ -197,7 +197,7 @@ pve:
           cores: 3
         disks:
           - name: scsi0
-            size_gb: 30
+            size_gb: 50
       backup: true
       <<: *vlan_admin
 
