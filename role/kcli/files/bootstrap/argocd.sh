@@ -3,6 +3,7 @@ set -euo pipefail
 
 ARGOCD_NAMESPACE="argocd"
 export VAULT_ADDR="https://vault.khaddict.lab:8200/"
+# renovate: depName=argo-cd datasource=helm registryUrl=https://argoproj.github.io/argo-helm
 VERSION="9.4.10"
 
 APP_OF_APPS_FILE="/root/bootstrap/voidnode-app-of-apps.yaml"

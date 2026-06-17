@@ -15,6 +15,7 @@ spec:
     code:
       type: Image
       image:
+        # renovate: depName=ghcr.io/corazawaf/coraza-proxy-wasm
         url: ghcr.io/corazawaf/coraza-proxy-wasm:0.6.0
     config:
       directives_map:
