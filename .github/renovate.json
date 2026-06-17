@@ -20,12 +20,22 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/\\.github/workflows/.+\\.yaml$/",
-        "/data/versions\\.yaml$/"
+        "/data/versions\\.yaml$/",
+        "/role/kcli/files/bootstrap/argocd\\.sh$/",
+        "/role/kcli/files/bootstrap/argocd-values\\.yaml$/"
       ],
       "matchStrings": [
-        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\w+: \"(?<currentValue>[^\"]+)\""
+        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)( registryUrl=(?<registryUrl>[^\\s]+))?\\n\\s*\\w+[=:] ?\"(?<currentValue>[^\"]+)\""
       ],
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/argocd/apps/.+/templates/.+\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+)\\n\\s+url: [^:]+:(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ]
 }
