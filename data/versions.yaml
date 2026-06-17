@@ -1,14 +1,11 @@
 # Versions used in SaltStack states (imported via import_yaml)
+# renovate: depName=goharbor/harbor datasource=github-releases
 harbor: "2.14.4"
+# renovate: depName=aquasecurity/trivy datasource=github-releases
 trivy: "0.71.0"
+# renovate: depName=derailed/k9s datasource=github-releases
 k9s: "0.51.0"
+# renovate: depName=prometheus/prometheus datasource=github-releases
 prometheus: "3.12.0"
+# renovate: depName=prometheus/alertmanager datasource=github-releases
 alertmanager: "0.32.2"
-
-# Versions used in ArgoCD values.yaml and Chart.yaml (not imported, reference only)
-# If you update a version here, update the corresponding values.yaml/Chart.yaml too
-homepage: "v1.13.1"
-changedetection: "0.55.7"
-nginx: "1.31.1"
-busybox: "1.38.0"
-coraza-proxy-wasm: "0.6.0"
