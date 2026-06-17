@@ -12,8 +12,10 @@
   },
   "packageRules": [
     {
-      "matchPackagePatterns": ["^registry\\.khaddict\\.lab/"],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^registry\\.khaddict\\.lab//"
+      ]
     }
   ],
   "customManagers": [
