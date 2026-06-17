@@ -43,7 +43,7 @@ prometheus_archive:
     - overwrite: True
     - enforce_toplevel: False
     - options: --strip-components=1
-    - source_hash: sha256=20da47f8e5303f74aecb78edd7f7e39041dac08ac4939dba75efd7a900ae8867
+    - source_hash: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/sha256sums.txt
     - unless: test -f /etc/prometheus/prometheus && /etc/prometheus/prometheus --version 2>&1 | grep -q "{{ prometheus_version }}"
     - require:
       - file: /etc/prometheus

@@ -18,7 +18,7 @@ alertmanager_archive:
     - overwrite: True
     - enforce_toplevel: False
     - options: --strip-components=1
-    - source_hash: sha256=842f30671734e9920327aa8308e19aea7bb79c2b9905e941d83236267f87b13d
+    - source_hash: https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/sha256sums.txt
     - unless: test -f /etc/alertmanager/alertmanager && /etc/alertmanager/alertmanager --version 2>&1 | grep -q "{{ alertmanager_version }}"
     - require:
       - file: /etc/alertmanager
