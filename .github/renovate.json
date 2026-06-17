@@ -9,12 +9,6 @@
   "helmv3": {
     "managerFilePatterns": ["/argocd/apps/.+/Chart\\.yaml$/"]
   },
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "digest"],
-      "groupName": "minor and patch updates"
-    }
-  ],
   "customManagers": [
     {
       "customType": "regex",
