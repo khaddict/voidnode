@@ -4,7 +4,7 @@ namespace: assets-gui
 deployment:
   name: assets-gui
   replicas: 1
-  image: registry.khaddict.lab/voidnode/assets-gui:latest
+  image: registry.khaddict.lab/voidnode/assets-gui:1.0.0
   imagePullPolicy: IfNotPresent
   resources:
     requests:
