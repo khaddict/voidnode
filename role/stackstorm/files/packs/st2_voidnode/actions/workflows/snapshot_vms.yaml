@@ -24,8 +24,7 @@ vars:
           fi
 
           SNAPSHOTS=$(pvesh get /nodes/$NODE/qemu/$VMID/snapshot --output-format json 2>/dev/null \
-            | jq -r '.[] | select(.name | startswith("auto_snapshot_")) | .name' \
-            | sort -r)
+            | jq -r '[.[] | select(.name | startswith("auto_snapshot_"))] | sort_by(.snaptime) | reverse | .[].name')
 
           COUNT=0
           for SNAPSHOT in $SNAPSHOTS; do
