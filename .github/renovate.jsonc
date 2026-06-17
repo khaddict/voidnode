@@ -1,6 +1,6 @@
+// Dashboard: https://developer.mend.io/github/khaddict/voidnode
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "$comment": "Dashboard: https://developer.mend.io/github/khaddict/voidnode",
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
   "schedule": ["every weekend"],
@@ -10,6 +10,12 @@
   "helmv3": {
     "managerFilePatterns": ["/argocd/apps/.+/Chart\\.yaml$/"]
   },
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^registry\\.khaddict\\.lab/"],
+      "enabled": false
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
