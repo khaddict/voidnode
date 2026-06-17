@@ -68,7 +68,7 @@ harbor_archive:
     - group: root
     - enforce_toplevel: False
     - options: --strip-components=1
-    - source_hash: sha256=46b3bb5b45c8fe632ade6d85f90cdd84935ef3885ace564a6851e98e57e3928b
+    - source_hash: https://github.com/goharbor/harbor/releases/download/v{{ harbor_version }}/md5sum
     - unless: test -f /etc/harbor/harbor.v{{ harbor_version }}.tar.gz
 
 /etc/containers/certs.d/registry.khaddict.lab:
@@ -109,7 +109,7 @@ trivy_archive:
     - user: root
     - group: root
     - enforce_toplevel: False
-    - source_hash: sha256=30a3d22b23f88c233f1658f562fb477cae3b3e8b4761109d515b7698daf85814
+    - source_hash: https://github.com/aquasecurity/trivy/releases/download/v{{ trivy_version }}/trivy_{{ trivy_version }}_checksums.txt
     - unless: test -f /usr/local/src/trivy-{{ trivy_version }}/trivy
 
 /usr/local/bin/trivy:
