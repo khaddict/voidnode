@@ -4,34 +4,27 @@
   "labels": ["dependencies"],
   "schedule": ["every weekend"],
   "helm-values": {
-    "managerFilePatterns": [
-      "/argocd/apps/.+/values\\.yaml$/"
-    ]
+    "managerFilePatterns": ["/argocd/apps/.+/values\\.yaml$/"]
   },
   "helmv3": {
-    "managerFilePatterns": [
-      "/argocd/apps/.+/Chart\\.yaml$/"
-    ]
+    "managerFilePatterns": ["/argocd/apps/.+/Chart\\.yaml$/"]
   },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "minor and patch updates"
+    }
+  ],
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/\\.github/workflows/.+\\.yaml$/"
+        "/\\.github/workflows/.+\\.yaml$/",
+        "/data/versions\\.yaml$/"
       ],
-      "matchStrings": ["HELM_VERSION: \"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "helm/helm",
-      "datasourceTemplate": "github-releases",
-      "versioningTemplate": "semver"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/\\.github/workflows/.+\\.yaml$/"
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\w+: \"(?<currentValue>[^\"]+)\""
       ],
-      "matchStrings": ["KUBECONFORM_VERSION: \"(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "yannh/kubeconform",
-      "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
     }
   ]
