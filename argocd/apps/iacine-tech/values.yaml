@@ -4,7 +4,7 @@ namespace: iacine-tech
 deployment:
   name: iacine-tech
   replicas: 3
-  image: registry.khaddict.lab/voidnode/website-iacine:latest
+  image: registry.khaddict.lab/voidnode/website-iacine:1.0.0
   imagePullPolicy: IfNotPresent
   resources:
     requests:
