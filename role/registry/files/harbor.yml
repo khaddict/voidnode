@@ -25,7 +25,7 @@ trivy:
   skip_java_db_update: false
   offline_scan: false
   security_check: vuln
-  insecure: false
+  insecure: true
   timeout: 5m0s
 
 jobservice:
