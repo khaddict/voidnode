@@ -4,7 +4,7 @@ namespace: website-khaddict
 deployment:
   name: website-khaddict
   replicas: 3
-  image: nginx:1.31.1
+  image: nginx:1.31.2
   imagePullPolicy: IfNotPresent
   resources:
     requests:
