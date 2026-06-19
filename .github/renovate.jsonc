@@ -3,7 +3,6 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
   "labels": ["dependencies"],
-  "schedule": ["every weekend"],
   "helm-values": {
     "managerFilePatterns": ["/argocd/apps/.+/values\\.yaml$/"]
   },
