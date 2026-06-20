@@ -84,7 +84,7 @@ data:
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://images.khaddict.com" />
       <meta property="og:title" content="Images | khaddict" />
-      <link rel="icon" href="/icons/khazix_pc.png" type="image/png" />
+      <link rel="icon" href="/icons/khazix-pc.png" type="image/png" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -231,6 +231,24 @@ data:
           font-style: italic;
         }
 
+        .row-hidden { display: none; }
+
+        .show-more-btn {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: .72rem;
+          color: var(--muted);
+          background: none;
+          border: 1px solid var(--border);
+          border-radius: 4px;
+          padding: .3rem .75rem;
+          cursor: pointer;
+          margin-top: .35rem;
+          margin-left: .4rem;
+          align-self: flex-start;
+          transition: color .15s, border-color .15s;
+        }
+        .show-more-btn:hover { color: var(--accent); border-color: var(--accent); }
+
         .tree-thumb {
           width: 36px;
           height: 36px;
@@ -286,6 +304,8 @@ data:
           };
         }
 
+        const INITIAL_VISIBLE = 5;
+
         function renderDir({ label, path, fit, files }) {
           const block = document.createElement('div');
           block.className = 'dir-block';
@@ -309,6 +329,7 @@ data:
             const last   = i === files.length - 1;
             const row    = document.createElement('div');
             row.className = 'tree-row';
+            if (i >= INITIAL_VISIBLE) row.classList.add('row-hidden');
             const prefix = last ? '└──' : '├──';
             const link   = path + f.name;
             row.innerHTML =
@@ -318,6 +339,22 @@ data:
               '<span class="tree-size">' + fmt(f.size) + '</span>';
             block.appendChild(row);
           });
+
+          if (files.length > INITIAL_VISIBLE) {
+            const extra = files.length - INITIAL_VISIBLE;
+            const btn   = document.createElement('button');
+            btn.className   = 'show-more-btn';
+            btn.textContent = '+ ' + extra + ' more';
+            btn.onclick = function() {
+              const expanded = block.dataset.expanded === '1';
+              block.querySelectorAll('.row-hidden').forEach(r => {
+                r.style.display = expanded ? 'none' : 'flex';
+              });
+              block.dataset.expanded = expanded ? '0' : '1';
+              btn.textContent = expanded ? '+ ' + extra + ' more' : '− show less';
+            };
+            block.appendChild(btn);
+          }
 
           return block;
         }

@@ -45,7 +45,7 @@ data:
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://website.khaddict.com" />
       <meta property="og:title" content="Website | khaddict" />
-      <link rel="icon" href="https://images.khaddict.com/icons/khazix_pc.png" type="image/png" />
+      <link rel="icon" href="https://images.khaddict.com/icons/khazix-pc.png" type="image/png" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />

@@ -11,9 +11,9 @@ data:
   settings.yaml: |
     title: Homepage | khaddict
     background:
-      image: https://images.khaddict.com/gallery/dark_star_khazix.jpg
+      image: https://images.khaddict.com/gallery/dark-star-khazix.jpg
       opacity: 30
-    favicon: https://images.khaddict.com/icons/khazix_pc.png
+    favicon: https://images.khaddict.com/icons/khazix-pc.png
     language: en
     headerStyle: boxed
     quicklaunch:
@@ -32,19 +32,27 @@ data:
         columns: 2
       Monitoring:
         columns: 3
-      Management, Network & Inventory:
+      Network:
         columns: 3
-      Availability:
+      Inventory:
+        columns: 2
+      Observability:
+        columns: 3
+      AI:
         columns: 2
       Developer & Socials:
         columns: 2
-  custom.css: ""
+  custom.css: |
+    .service-icon img {
+      width: 40px !important;
+      height: 40px !important;
+    }
   custom.js: ""
   bookmarks.yaml: ""
   services.yaml: |
     - Virtualization & Backups:
         - Proxmox:
-            icon: proxmox
+            icon: https://images.khaddict.com/icons/pve.png
             href: https://voidnode.khaddict.lab:8006
             description: voidnode.khaddict.lab
             widget:
@@ -54,7 +62,7 @@ data:
               password: {{ .Values.services.pve.password }}
               node: voidnode
         - Proxmox Backup Server:
-            icon: proxmox.png
+            icon: https://images.khaddict.com/icons/pbs.png
             href: https://pbs.khaddict.lab:8007
             description: pbs.khaddict.lab
             widget:
@@ -72,7 +80,7 @@ data:
             href: https://stackstorm.khaddict.lab
             description: stackstorm.khaddict.lab
         - ArgoCD:
-            icon: argo-cd
+            icon: https://images.khaddict.com/icons/argocd.png
             href: https://argocd.khaddict.lab
             description: argocd.khaddict.lab
             widget:
@@ -80,23 +88,27 @@ data:
               url: https://argocd.khaddict.lab
               key: {{ .Values.services.argocd.password }}
         - Harbor:
-            icon: harbor
+            icon: https://images.khaddict.com/icons/harbor.png
             href: https://registry.khaddict.lab
             description: registry.khaddict.lab
+        - Vault:
+            icon: https://images.khaddict.com/icons/vault.png
+            href: https://vault.khaddict.lab:8200
+            description: vault.khaddict.lab
     - Monitoring:
         - Prometheus:
-            icon: prometheus
+            icon: https://images.khaddict.com/icons/prometheus.png
             href: http://prometheus.khaddict.lab:9090
             description: prometheus.khaddict.lab
             widget:
               type: prometheus
               url: http://prometheus.khaddict.lab:9090
         - Alert Manager:
-            icon: alertmanager
+            icon: https://images.khaddict.com/icons/alertmanager.png
             href: http://alertmanager.khaddict.lab:9093
             description: alertmanager.khaddict.lab
         - Grafana:
-            icon: grafana
+            icon: https://images.khaddict.com/icons/grafana.png
             href: https://grafana.khaddict.lab:3000
             description: grafana.khaddict.lab
             widget:
@@ -105,9 +117,9 @@ data:
               url: https://grafana.khaddict.lab:3000
               username: admin
               password: {{ .Values.services.grafana.password }}
-    - Management, Network & Inventory:
+    - Network:
         - OPNsense:
-            icon: opnsense
+            icon: https://images.khaddict.com/icons/opnsense.png
             href: https://opnsense.khaddict.lab
             description: opnsense.khaddict.lab
             widget:
@@ -117,24 +129,25 @@ data:
               password: {{ .Values.services.opnsense.password }}
               wan: opt1
         - TP-Link:
-            icon: tp-link
+            icon: https://images.khaddict.com/icons/tplink.png
             href: http://tplink.khaddict.lab
             description: tplink.khaddict.lab
         - Freebox:
-            icon: freebox-revolution
+            icon: https://images.khaddict.com/icons/freebox.png
             href: http://mafreebox.freebox.fr
             description: mafreebox.freebox.fr
+    - Inventory:
         - NetBox:
-            icon: netbox
+            icon: https://images.khaddict.com/icons/netbox.png
             href: https://netbox.khaddict.lab
             description: netbox.khaddict.lab
-        - Vault:
-            icon: hashicorp-vault
-            href: https://vault.khaddict.lab:8200
-            description: vault.khaddict.lab
-    - Availability:
+        - Homelable:
+            icon: https://images.khaddict.com/icons/homelable.png
+            href: http://homelable.khaddict.lab:3000
+            description: homelable.khaddict.lab
+    - Observability:
         - ChangeDetection.io:
-            icon: changedetection
+            icon: https://images.khaddict.com/icons/changedetection.png
             href: http://changedetection.khaddict.lab
             description: changedetection.khaddict.lab
             widget:
@@ -142,29 +155,42 @@ data:
               url: http://changedetection.khaddict.lab
               key: {{ .Values.services.changedetection.password }}
         - Uptime Kuma:
-            icon: uptime-kuma
+            icon: https://images.khaddict.com/icons/uptimekuma.png
             href: https://status.khaddict.com
             description: status.khaddict.com
             widget:
               type: uptimekuma
               url: https://status.khaddict.com
               slug: khaddict
+        - Matomo:
+            icon: https://images.khaddict.com/icons/matomo.png
+            href: https://matomo.khaddict.com
+            description: matomo.khaddict.com
+    - AI:
+        - Ollama:
+            icon: https://images.khaddict.com/icons/ollama.png
+            href: http://ollama.khaddict.lab:11434
+            description: ollama.khaddict.lab
+        - Open WebUI:
+            icon: https://images.khaddict.com/icons/openwebui.png
+            href: http://openwebui.khaddict.lab:8080
+            description: openwebui.khaddict.lab
     - Developer & Socials:
         - Github:
-            icon: github
+            icon: https://images.khaddict.com/icons/github.png
             href: https://github.com/khaddict
             description: khaddict
         - khaddict.com:
-            icon: https://images.khaddict.com/icons/khazix_pc.png
+            icon: https://images.khaddict.com/icons/khazix-pc-2.png
             href: https://khaddict.com
             description: khaddict.com
         - Discord:
-            icon: discord
+            icon: https://images.khaddict.com/icons/discord.png
             description: khaddict
         - Reddit:
-            icon: reddit
-            href: https://www.reddit.com/user/khadddict/
-            description: khadddict
+            icon: https://images.khaddict.com/icons/reddit.png
+            href: https://www.reddit.com/user/khaddicut/
+            description: khaddicut
   widgets.yaml: |
     - kubernetes:
         cluster:

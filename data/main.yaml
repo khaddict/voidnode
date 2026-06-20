@@ -424,4 +424,42 @@ pve:
       backup: true
       <<: *vlan_edge
 
+    ollama:
+      vmid: 118
+      existing: true
+      description: "Ollama CT"
+      tags: "edge,lxc"
+      scrape: false
+      ip: 10.40.0.4
+      main_iface: eth0
+      ssh: null
+      hardware:
+        ram_mb: 51200
+        cpu:
+          cores: 16
+        rootfs:
+          storage: local-lvm
+          size_gb: 100
+      backup: false
+      <<: *vlan_edge
+
+    openwebui:
+      vmid: 119
+      existing: true
+      description: "Openwebui CT"
+      tags: "edge,lxc"
+      scrape: false
+      ip: 10.40.0.9
+      main_iface: eth0
+      ssh: null
+      hardware:
+        ram_mb: 8192
+        cpu:
+          cores: 4
+        rootfs:
+          storage: local-lvm
+          size_gb: 50
+      backup: false
+      <<: *vlan_edge
+
     # [end:lxc]
