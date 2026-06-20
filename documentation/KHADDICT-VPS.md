@@ -10,6 +10,7 @@
 | homepage            | CNAME | khaddict.com.       | Auto |
 | images              | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |
+| matomo              | CNAME | khaddict.com.       | Auto |
 
 ## 2. Firewall configuration
 
@@ -102,6 +103,7 @@ ufw default allow outgoing
 ufw allow 22222/tcp
 ufw allow 443/tcp
 ufw allow 80/tcp
+ufw allow from 10.40.0.0/24 to any port 3001 proto tcp
 ```
 
 #### Enable firewall
@@ -165,7 +167,8 @@ module.exports = {
             name: "uptime-kuma",
             script: "./server/server.js",
             env: {
-                UPTIME_KUMA_HOST: "127.0.0.1"
+                UPTIME_KUMA_HOST: "0.0.0.0",
+                UPTIME_KUMA_TRUST_PROXY: "1"
             }
         },
     ],
@@ -195,148 +198,48 @@ ss -tlnp | grep 3001
 Expected output:
 
 ```text
-127.0.0.1:3001
+0.0.0.0:3001
 ```
 
 ---
 
-## 8. Install Nginx and Certbot
+## 8. Install Nginx
 
 ```bash
-apt install -y nginx certbot python3-certbot-nginx
+apt install -y nginx libnginx-mod-stream
 ```
 
 ---
 
-## 9. Create Temporary HTTP Reverse Proxy
+## 9. Configure nginx stream proxy
 
-#### Initial configuration required for Let's Encrypt validation
+nginx acts as a **pure TCP forwarder** on port 443: all HTTPS traffic is forwarded as-is to HAProxy (10.40.0.2:443). No SSL termination on the VPS. PROXY protocol is used so HAProxy receives the real client IP. `status.khaddict.com` is routed by HAProxy like any other domain, with Uptime Kuma reachable via the WireGuard tunnel (10.1.0.2:3001).
+
+#### Add stream block to nginx.conf
 
 ```bash
-tee /etc/nginx/sites-available/status.khaddict.com >/dev/null <<'EOF'
-server {
-    listen 80;
-    server_name status.khaddict.com;
+tee -a /etc/nginx/nginx.conf >/dev/null <<'EOF'
 
-    location / {
-        proxy_pass http://127.0.0.1:3001;
+stream {
+    server {
+        listen 443;
+        proxy_pass 10.40.0.2:443;
+        proxy_protocol on;
+        proxy_connect_timeout 5s;
     }
 }
 EOF
 ```
 
-#### Validate configuration
-
-```bash
-nginx -t
-systemctl reload nginx.service
-```
-
----
-
-## 10. Generate Let's Encrypt Certificate
-
-Install the Infomaniak DNS authenticator plugin:
-
-```bash
-pip install certbot-dns-infomaniak
-```
-
-Generate a wildcard certificate covering all subdomains:
-
-```bash
-certbot certonly --authenticator dns-infomaniak \
-  --server https://acme-v02.api.letsencrypt.org/directory \
-  --agree-tos \
-  --rsa-key-size 4096 \
-  -d '*.khaddict.com' \
-  -d 'khaddict.com'
-```
-
-This single certificate covers every subdomain (`status`, `images`, `site`...). No need to rerun certbot when adding new subdomains.
-
----
-
-## 11. Configure HTTPS Reverse Proxy
+#### Configure HTTP redirect site
 
 ```bash
 tee /etc/nginx/sites-available/khaddict.com >/dev/null <<'EOF'
 server {
     listen 80;
-    server_name khaddict.com www.khaddict.com website.khaddict.com homepage.khaddict.com images.khaddict.com status.khaddict.com;
+    server_name khaddict.com www.khaddict.com website.khaddict.com homepage.khaddict.com images.khaddict.com status.khaddict.com matomo.khaddict.com;
 
     return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name www.khaddict.com;
-
-    ssl_certificate /etc/letsencrypt/live/khaddict.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/khaddict.com/privkey.pem;
-
-    return 301 https://khaddict.com$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name status.khaddict.com;
-
-    ssl_certificate /etc/letsencrypt/live/khaddict.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/khaddict.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:3001;
-
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header X-Frame-Options "DENY" always;
-        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-        add_header X-XSS-Protection "0" always;
-        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
-        add_header Access-Control-Allow-Origin "*" always;
-    }
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name khaddict.com website.khaddict.com homepage.khaddict.com images.khaddict.com;
-
-    ssl_certificate /etc/letsencrypt/live/khaddict.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/khaddict.com/privkey.pem;
-
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-Frame-Options "DENY" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header X-XSS-Protection "0" always;
-    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
-
-    location / {
-        proxy_pass https://10.40.0.2;
-
-        proxy_http_version 1.1;
-
-        proxy_ssl_verify off;
-        proxy_ssl_server_name on;
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-    }
 }
 EOF
 ```
@@ -355,7 +258,7 @@ nginx -t
 systemctl reload nginx.service
 ```
 
-## 12. Uptime Kuma initial setup
+## 10. Uptime Kuma initial setup
 
 Open the application in your browser:
 
@@ -373,7 +276,7 @@ Uptime Kuma is now ready to use.
 
 ---
 
-## 13. Custom CSS theme
+## 11. Custom CSS theme
 
 In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste:
 

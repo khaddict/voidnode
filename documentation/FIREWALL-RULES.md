@@ -16,6 +16,7 @@
 \* **Exception**: `K8S` (`EDGE`) → `PROMETHEUS` (`INFRA`) `TCP/9090` for Homepage widget access to Prometheus.  
 \* **Exception**: `K8S` (`EDGE`) → `GRAFANA` (`INFRA`) `TCP/3000` for Homepage widget access to Grafana.  
 \* **Exception**: `K8S` (`EDGE`) → `This Firewall` (`CORE`) `TCP/443` for Homepage widget access to the firewall.  
+\* **Exception**: `REVPROXY` (`EDGE`) → `STATUS` (`VPN/WireGuard`, 10.1.0.2) `TCP/3001` to forward status.khaddict.com traffic to Uptime Kuma.  
 
 # VLAN 10 CORE
 
@@ -69,7 +70,8 @@
 | EDGE | 9 | PASS | TCP | K8S | GRAFANA | 3000 | Allow Homepage widget access to Grafana |
 | EDGE | 10 | PASS | TCP | K8S | REGISTRY | 443 | Allow K8S access to the registry |
 | EDGE | 11 | PASS | TCP | K8S | This Firewall | 443 | Allow Homepage widget access to the firewall |
-| EDGE | 12 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
+| EDGE | 12 | PASS | TCP | REVPROXY | STATUS | 3001 | Allow HAProxy to reach Uptime Kuma on VPS via WireGuard |
+| EDGE | 13 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
 
 # WAN
 

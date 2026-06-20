@@ -290,11 +290,15 @@ class PopulateNetBox(Script):
     def ensure_vm(self, name, vm_data, site):
         hardware = vm_data.get("hardware", {})
         cpu = hardware.get("cpu", {})
-        disks = hardware.get("disks", [])
+        disks = hardware.get("disks") or []
+        rootfs = hardware.get("rootfs")
 
         vcpus = cpu.get("cores", 1)
         memory = hardware.get("ram_mb", 512)
-        disk = sum(d.get("size_gb", 0) for d in disks) * 1000
+        if rootfs:
+            disk = rootfs.get("size_gb", 0) * 1000
+        else:
+            disk = sum(d.get("size_gb", 0) for d in disks) * 1000
 
         vm, created = VirtualMachine.objects.get_or_create(
             name=name,
@@ -466,6 +470,7 @@ class PopulateNetBox(Script):
         vm_groups = {
             "core": pve.get("core", {}),
             "vms": pve.get("vms", {}),
+            "lxc": pve.get("lxc", {}),
         }
 
         all_vms = {}

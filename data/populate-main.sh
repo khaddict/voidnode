@@ -160,8 +160,20 @@ template_to_image_tag() {
   esac
 }
 
-section "VM Block Generator"
+section "Block Generator"
 info "Target file: $MAIN_FILE"
+
+section "Type"
+printf "  %s1%s vm\n" "$CYAN" "$RESET"
+printf "  %s2%s lxc\n" "$CYAN" "$RESET"
+type_choice="$(prompt "Type number" "1")"
+case "$type_choice" in
+  1) vm_type="vm" ;;
+  2) vm_type="lxc" ;;
+  *) fail "invalid type choice" ;;
+esac
+
+existing_val="$(yes_no "Already exists on PVE?" "n")"
 
 section "Identity"
 hostname="$(prompt "Hostname")"
@@ -185,7 +197,12 @@ if grep -Eq "^[[:space:]]+vmid:[[:space:]]+${vmid}$" "$MAIN_FILE"; then
   fail "vmid '$vmid' already exists in main.yaml"
 fi
 
-description="$(prompt "Description" "${hostname^} VM")"
+if [[ "$vm_type" == "lxc" ]]; then
+  type_label="CT"
+else
+  type_label="VM"
+fi
+description="$(prompt "Description" "${hostname^} ${type_label}")"
 
 section "Network"
 info "Choose VLAN"
@@ -203,22 +220,26 @@ case "$vlan_choice" in
   *) fail "invalid VLAN choice" ;;
 esac
 
-info "Choose template"
-printf "  %s1%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[0]}"
-printf "  %s2%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[1]}"
-printf "  %s3%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[2]}"
-template_choice="$(prompt "Template number" "1")"
-require_int "Template number" "$template_choice"
-if (( template_choice < 1 || template_choice > ${#TEMPLATES[@]} )); then
-  fail "invalid template choice."
-fi
-template="${TEMPLATES[$((template_choice - 1))]}"
+if [[ "$vm_type" == "vm" ]]; then
+  info "Choose template"
+  printf "  %s1%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[0]}"
+  printf "  %s2%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[1]}"
+  printf "  %s3%s %s\n" "$CYAN" "$RESET" "${TEMPLATES[2]}"
+  template_choice="$(prompt "Template number" "1")"
+  require_int "Template number" "$template_choice"
+  if (( template_choice < 1 || template_choice > ${#TEMPLATES[@]} )); then
+    fail "invalid template choice."
+  fi
+  template="${TEMPLATES[$((template_choice - 1))]}"
 
-image_tag="$(template_to_image_tag "$template")"
-if [[ -n "$image_tag" ]]; then
-  tags="${vlan_name},${image_tag}"
+  image_tag="$(template_to_image_tag "$template")"
+  if [[ -n "$image_tag" ]]; then
+    tags="${vlan_name},${image_tag}"
+  else
+    tags="${vlan_name}"
+  fi
 else
-  tags="${vlan_name}"
+  tags="$(prompt "Tags" "${vlan_name},lxc")"
 fi
 
 default_ip="$(next_available_ip "$vlan_subnet")"
@@ -234,54 +255,75 @@ if [[ "$ip" != "${vlan_subnet}."* ]]; then
   fail "IP address '$ip' does not belong to subnet ${vlan_subnet}.0/24."
 fi
 
-main_iface_mode="$(prompt "main_iface (default|custom)" "default")"
-case "${main_iface_mode,,}" in
-  default) main_iface_value="*default_iface" ;;
-  custom)
-    main_iface_value="$(prompt "main_iface custom value")"
-    require_non_empty "main_iface custom value" "$main_iface_value"
-    ;;
-  *)
-    fail "main_iface must be default or custom"
-    ;;
-esac
+if [[ "$vm_type" == "vm" ]]; then
+  main_iface_mode="$(prompt "main_iface (default|custom)" "default")"
+  case "${main_iface_mode,,}" in
+    default) main_iface_value="*default_iface" ;;
+    custom)
+      main_iface_value="$(prompt "main_iface custom value")"
+      require_non_empty "main_iface custom value" "$main_iface_value"
+      ;;
+    *) fail "main_iface must be default or custom" ;;
+  esac
+else
+  main_iface_mode="$(prompt "main_iface (default=eth0|custom)" "default")"
+  case "${main_iface_mode,,}" in
+    default) main_iface_value="eth0" ;;
+    custom)
+      main_iface_value="$(prompt "main_iface custom value")"
+      require_non_empty "main_iface custom value" "$main_iface_value"
+      ;;
+    *) fail "main_iface must be default or custom" ;;
+  esac
+fi
 
 ssh_line="      ssh: null"
 
 section "Compute"
-ram_mb="$(prompt "RAM (MB)" "2048")"
+if [[ "$vm_type" == "lxc" ]]; then
+  ram_default=512
+  cpu_default=1
+else
+  ram_default=2048
+  cpu_default=2
+fi
+
+ram_mb="$(prompt "RAM (MB)" "$ram_default")"
 require_int "RAM" "$ram_mb"
 
-cpu_cores="$(prompt "CPU cores" "2")"
+cpu_cores="$(prompt "CPU cores" "$cpu_default")"
 require_int "CPU cores" "$cpu_cores"
 
 scrape="$(yes_no "Enable scrape?" "y")"
 backup="$(yes_no "Enable backup?" "y")"
 
 section "Storage"
-disk_count="$(prompt "How many disks?" "1")"
-require_int "disk count" "$disk_count"
-if [[ "$disk_count" -lt 1 ]]; then
-  fail "disk count must be >= 1"
-fi
 
-disks_block=""
-for ((i=1; i<=disk_count; i++)); do
-  info "Disk #$i"
-  disk_name="$(prompt "  name" "scsi$((i-1))")"
-  disk_size="$(prompt "  size_gb" "$([[ $i -eq 1 ]] && echo 20 || echo 100)")"
-  require_non_empty "disk name" "$disk_name"
-  require_int "disk size_gb" "$disk_size"
+if [[ "$vm_type" == "vm" ]]; then
+  disk_count="$(prompt "How many disks?" "1")"
+  require_int "disk count" "$disk_count"
+  if [[ "$disk_count" -lt 1 ]]; then
+    fail "disk count must be >= 1"
+  fi
 
-  disks_block+="          - name: ${disk_name}"
-  disks_block+=$'\n'
-  disks_block+="            size_gb: ${disk_size}"
-  disks_block+=$'\n'
-done
+  disks_block=""
+  for ((i=1; i<=disk_count; i++)); do
+    info "Disk #$i"
+    disk_name="$(prompt "  name" "scsi$((i-1))")"
+    disk_size="$(prompt "  size_gb" "$([[ $i -eq 1 ]] && echo 20 || echo 100)")"
+    require_non_empty "disk name" "$disk_name"
+    require_int "disk size_gb" "$disk_size"
 
-vm_block="$(cat <<EOF
+    disks_block+="          - name: ${disk_name}"
+    disks_block+=$'\n'
+    disks_block+="            size_gb: ${disk_size}"
+    disks_block+=$'\n'
+  done
+
+  vm_block="$(cat <<EOF
     ${hostname}:
       vmid: ${vmid}
+      existing: ${existing_val}
       description: "${description}"
       template: ${template}
       tags: "${tags}"
@@ -299,12 +341,44 @@ ${disks_block}      backup: ${backup}
       <<: ${vlan_anchor}
 EOF
 )"
+else
+  rootfs_storage="$(prompt "Rootfs storage" "local-lvm")"
+  require_non_empty "rootfs storage" "$rootfs_storage"
+  rootfs_size="$(prompt "Rootfs size_gb" "8")"
+  require_int "rootfs size_gb" "$rootfs_size"
+
+  vm_block="$(cat <<EOF
+    ${hostname}:
+      vmid: ${vmid}
+      existing: ${existing_val}
+      description: "${description}"
+      tags: "${tags}"
+      scrape: ${scrape}
+      ip: ${ip}
+      main_iface: ${main_iface_value}
+${ssh_line}
+      hardware:
+        ram_mb: ${ram_mb}
+        cpu:
+          cores: ${cpu_cores}
+        rootfs:
+          storage: ${rootfs_storage}
+          size_gb: ${rootfs_size}
+      backup: ${backup}
+      <<: ${vlan_anchor}
+EOF
+)"
+fi
 
 section "Summary"
+kv "Type" "$vm_type"
+kv "Existing" "$existing_val"
 kv "Hostname" "$hostname"
 kv "VMID" "$vmid"
 kv "VLAN" "$vlan_label"
-kv "Template" "$template"
+if [[ "$vm_type" == "vm" ]]; then
+  kv "Template" "$template"
+fi
 kv "Tags" "$tags"
 kv "IP" "$ip"
 kv "main_iface" "$main_iface_value"
@@ -319,32 +393,30 @@ if [[ "$(yes_no "Insert this block into main.yaml now?" "y")" != "true" ]]; then
   exit 0
 fi
 
-tmp_file="$(mktemp)"
-target_anchor_line="      <<: ${vlan_anchor}"
+if [[ "$vm_type" == "vm" ]]; then
+  sentinel="    # [end:vms]"
+else
+  sentinel="    # [end:lxc]"
+fi
 
-if ! awk -v block="$vm_block" -v target_anchor="$target_anchor_line" '
+tmp_file="$(mktemp)"
+
+if ! awk -v block="$vm_block" -v sentinel="$sentinel" '
+BEGIN { found = 0 }
 {
-  lines[NR] = $0
-  if ($0 == target_anchor) {
-    last_anchor_line = NR
+  if ($0 == sentinel) {
+    found = 1
+    print block
+    print ""
   }
+  print $0
 }
 END {
-  if (!last_anchor_line) {
-    exit 2
-  }
-
-  for (i = 1; i <= NR; i++) {
-    print lines[i]
-    if (i == last_anchor_line) {
-      print ""
-      print block
-    }
-  }
+  if (!found) exit 2
 }
 ' "$MAIN_FILE" > "$tmp_file"; then
   rm -f "$tmp_file"
-  fail "could not find any VM anchor '${target_anchor_line}' in ${MAIN_FILE}."
+  fail "could not find sentinel '${sentinel}' in ${MAIN_FILE}."
 fi
 
 mv "$tmp_file" "$MAIN_FILE"
@@ -361,9 +433,15 @@ else
   warn "Skipped stackstorm highstate."
 fi
 
-if [[ "$(yes_no "Launch workflow st2_voidnode.create_vms?" "n")" == "true" ]]; then
-  info "Running: salt 'stackstorm' cmd.run 'st2 run st2_voidnode.create_vms --async'"
-  salt 'stackstorm' cmd.run 'st2 run st2_voidnode.create_vms --async'
+if [[ "$existing_val" == "false" && "$vm_type" == "vm" ]]; then
+  if [[ "$(yes_no "Launch workflow st2_voidnode.create_vms?" "n")" == "true" ]]; then
+    info "Running: salt 'stackstorm' cmd.run 'st2 run st2_voidnode.create_vms --async'"
+    salt 'stackstorm' cmd.run 'st2 run st2_voidnode.create_vms --async'
+  else
+    warn "Skipped StackStorm workflow."
+  fi
+elif [[ "$vm_type" == "lxc" ]]; then
+  info "No LXC provisioning workflow — container was provisioned manually via pct."
 else
-  warn "Skipped StackStorm workflow."
+  info "Existing entry registered — NetBox will sync on next highstate."
 fi

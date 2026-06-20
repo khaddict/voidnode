@@ -1,6 +1,14 @@
+{% set infomaniak_token = salt['vault'].read_secret('kv/minions/revproxy/default').infomaniak_token %}
+
 haproxy_pkg:
   pkg.installed:
     - name: haproxy
+
+certbot_pkgs:
+  pkg.installed:
+    - pkgs:
+      - certbot
+      - python3-certbot-dns-infomaniak
 
 /etc/haproxy/haproxy.cfg:
   file.managed:
@@ -12,6 +20,25 @@ haproxy_pkg:
       - pkg: haproxy_pkg
     - listen_in:
         - service: haproxy
+
+/etc/letsencrypt/renewal-hooks/deploy/haproxy.sh:
+  file.managed:
+    - source: salt://role/revproxy/files/haproxy.sh
+    - mode: 755
+    - user: root
+    - group: root
+    - makedirs: True
+
+/root/.secrets/infomaniak:
+  file.managed:
+    - mode: 600
+    - user: root
+    - group: root
+    - makedirs: True
+    - template: jinja
+    - source: salt://role/revproxy/files/infomaniak
+    - context:
+        infomaniak_token: {{ infomaniak_token }}
 
 haproxy:
   service.running:

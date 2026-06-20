@@ -383,22 +383,45 @@ pve:
       backup: true
       <<: *vlan_edge
 
-    htb:
-      vmid: 108
-      description: "Htb VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
+    # [end:vms]
+
+  lxc:
+    homelable:
+      vmid: 113
+      existing: true
+      description: "Homelable CT"
+      tags: "core,lxc"
       scrape: false
-      ip: 10.40.0.3
-      main_iface: *default_iface
+      ip: 10.10.0.3
+      main_iface: eth0
       ssh: null
       hardware:
         ram_mb: 2048
         cpu:
-          sockets: 1
           cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 10
-      backup: false
+        rootfs:
+          storage: local-lvm
+          size_gb: 8
+      backup: true
+      <<: *vlan_core
+
+    matomo:
+      vmid: 108
+      existing: true
+      description: "Matomo CT"
+      tags: "edge,lxc"
+      scrape: true
+      ip: 10.40.0.3
+      main_iface: eth0
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          cores: 2
+        rootfs:
+          storage: local-lvm
+          size_gb: 16
+      backup: true
       <<: *vlan_edge
+
+    # [end:lxc]
