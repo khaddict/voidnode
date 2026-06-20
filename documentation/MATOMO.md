@@ -59,6 +59,13 @@ Then update `/opt/matomo/config/config.ini.php`:
 sed -i 's/^password = .*/password = "<new_password>"/' /opt/matomo/config/config.ini.php
 ```
 
+#### Increase max_allowed_packet
+
+```bash
+echo -e "[mysqld]\nmax_allowed_packet = 64M" > /etc/mysql/mariadb.conf.d/99-matomo.cnf
+systemctl restart mariadb
+```
+
 ---
 
 ## 3. Matomo web installer
@@ -116,7 +123,7 @@ File: `/etc/caddy/Caddyfile`
 ```caddyfile
 :80 {
     root * /opt/matomo
-    @blocked path /config /config/* /tmp /tmp/* /.* /.*/*
+    @blocked path /config /config/* /tmp /tmp/* /lang /lang/* /.* /.*/*
     respond @blocked 403
     php_fastcgi unix//run/php/php8.3-fpm.sock {
         trusted_proxies 10.40.0.2
@@ -150,6 +157,7 @@ dbname = "matomo"
 tables_prefix = "matomo_"
 charset = "utf8mb4"
 collation = "utf8mb4_uca1400_ai_ci"
+schema = Mariadb
 
 [General]
 proxy_ips[] = "10.40.0.2"
@@ -190,11 +198,38 @@ The wildcard SSL certificate (`*.khaddict.com`) is managed on HAProxy, not on ng
 
 ---
 
-## 9. Tracking snippet (khaddict.com)
+## 9. Archiving cron
 
-Source: `argocd/apps/www.khaddict.com/templates/www-khaddict-configmap.yaml`
+Matomo archiving should run via cron rather than being triggered by browser visits.
 
-The snippet is injected before `</head>` in the homepage's `index.html`:
+#### Create the cron job (on Matomo LXC)
+
+```bash
+echo "5 * * * * www-data /usr/bin/php /opt/matomo/console core:archive --url=https://matomo.khaddict.com > /dev/null 2>&1" > /etc/cron.d/matomo
+chmod 644 /etc/cron.d/matomo
+```
+
+#### Disable browser-triggered archiving
+
+In Matomo → **Administration → Système → Paramètres généraux**, disable:
+
+> "Archiver les rapports lors de la visualisation depuis le navigateur"
+
+---
+
+## 10. Tracking snippet
+
+The snippet is injected before `</head>` in the `index.html` of each tracked app:
+
+| App | ConfigMap source |
+|-----|-----------------|
+| khaddict.com | `argocd/apps/www.khaddict.com/templates/www-khaddict-configmap.yaml` |
+| website.khaddict.com | `argocd/apps/website.khaddict.com/templates/website-khaddict-configmap.yaml` |
+| images.khaddict.com | `argocd/apps/images.khaddict.com/templates/images-khaddict-configmap.yaml` |
+
+All three use **siteId 1** — the subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
+
+Snippet:
 
 ```html
 <!-- Matomo -->
@@ -217,7 +252,7 @@ Deploy via ArgoCD sync of the `www-khaddict` application.
 
 ---
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 #### "Invalid referrer header" on login
 
