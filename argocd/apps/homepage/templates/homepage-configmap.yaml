@@ -11,7 +11,7 @@ data:
   settings.yaml: |
     title: Homepage | khaddict
     background:
-      image: https://images.khaddict.com/gallery/dark-star-khazix.jpg
+      image: https://images.khaddict.com/gallery/voidnode-khazix-wallpaper.png
       opacity: 30
     favicon: https://images.khaddict.com/icons/khazix-pc.png
     language: en
@@ -189,8 +189,8 @@ data:
             description: khaddict
         - Reddit:
             icon: https://images.khaddict.com/icons/reddit.png
-            href: https://www.reddit.com/user/khaddicut/
-            description: khaddicut
+            href: https://www.reddit.com/user/khaddict/
+            description: khaddict
   widgets.yaml: |
     - kubernetes:
         cluster:
