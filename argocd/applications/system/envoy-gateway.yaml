@@ -25,6 +25,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: envoy-gateway-system
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true

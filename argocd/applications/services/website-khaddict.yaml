@@ -25,6 +25,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: website-khaddict
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
