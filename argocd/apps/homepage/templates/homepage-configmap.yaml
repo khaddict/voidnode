@@ -47,6 +47,21 @@ data:
       width: 40px !important;
       height: 40px !important;
     }
+    .service-card {
+      background: rgba(10, 10, 20, 0.55) !important;
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+    }
+    .service-block {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    .widget-container {
+      background: rgba(10, 10, 20, 0.55) !important;
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+      border-radius: 0.375rem !important;
+      padding: 0.5rem !important;
+    }
   custom.js: ""
   bookmarks.yaml: ""
   services.yaml: |
