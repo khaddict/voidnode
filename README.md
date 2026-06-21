@@ -1,6 +1,6 @@
 # Voidnode – Single node, segmented & secure
 
-<img src="images/khazix-voidnode.png" alt="Voidnode architecture" style="width:30%;">
+<img src="https://images.khaddict.com/gallery/khazix-voidnode.png" alt="Voidnode architecture" style="width:30%;">
 
 ## Introduction
 
