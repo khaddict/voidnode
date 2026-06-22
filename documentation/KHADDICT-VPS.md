@@ -213,22 +213,82 @@ apt install -y nginx libnginx-mod-stream
 
 ## 9. Configure nginx stream proxy
 
-nginx acts as a **pure TCP forwarder** on port 443: all HTTPS traffic is forwarded as-is to HAProxy (10.40.0.2:443). No SSL termination on the VPS. PROXY protocol is used so HAProxy receives the real client IP. `status.khaddict.com` is routed by HAProxy like any other domain, with Uptime Kuma reachable via the WireGuard tunnel (10.1.0.2:3001).
+nginx uses **SNI-based TCP routing** on port 443. `status.khaddict.com` is served directly from the VPS (SSL termination local, proxied to Uptime Kuma on `localhost:3001`) so it remains available even when the homelab is down. All other domains are forwarded as-is to HAProxy (`10.40.0.2:443`) via the WireGuard tunnel. PROXY protocol is used so HAProxy receives the real client IP.
 
-#### Add stream block to nginx.conf
+#### Add stream include to nginx.conf
+
+Replace the `stream {}` block at the bottom of `/etc/nginx/nginx.conf` with:
+
+```nginx
+stream {
+    include /etc/nginx/stream-enabled/*.conf;
+}
+```
+
+#### Create stream config directory and routing rules
 
 ```bash
-tee -a /etc/nginx/nginx.conf >/dev/null <<'EOF'
+mkdir -p /etc/nginx/stream-enabled
 
-stream {
-    server {
-        listen 443;
-        proxy_pass 10.40.0.2:443;
-        proxy_protocol on;
-        proxy_connect_timeout 5s;
+tee /etc/nginx/stream-enabled/khaddict.conf >/dev/null <<'EOF'
+map $ssl_preread_server_name $upstream {
+    status.khaddict.com  127.0.0.1:4443;
+    default              10.40.0.2:443;
+}
+
+server {
+    listen 443;
+    ssl_preread on;
+    proxy_pass $upstream;
+    proxy_protocol on;
+    proxy_connect_timeout 5s;
+}
+EOF
+```
+
+#### Issue TLS certificate for status.khaddict.com
+
+```bash
+certbot certonly \
+  --authenticator dns-infomaniak \
+  --dns-infomaniak-credentials /etc/letsencrypt/infomaniak.ini \
+  --server https://acme-v02.api.letsencrypt.org/directory \
+  --agree-tos \
+  --rsa-key-size 4096 \
+  -d 'status.khaddict.com'
+```
+
+#### Create local HTTPS vhost for Uptime Kuma
+
+```bash
+tee /etc/nginx/sites-available/status.khaddict.com >/dev/null <<'EOF'
+server {
+    listen 4443 ssl proxy_protocol;
+    server_name status.khaddict.com;
+
+    ssl_certificate     /etc/letsencrypt/live/status.khaddict.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/status.khaddict.com/privkey.pem;
+
+    real_ip_header proxy_protocol;
+    set_real_ip_from 127.0.0.1;
+
+    location / {
+        add_header Access-Control-Allow-Origin "https://khaddict.com" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type" always;
+
+        proxy_pass http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
     }
 }
 EOF
+
+ln -sf /etc/nginx/sites-available/status.khaddict.com /etc/nginx/sites-enabled/
 ```
 
 #### Configure HTTP redirect site
