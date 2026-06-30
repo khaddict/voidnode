@@ -1,5 +1,8 @@
 {% set fqdn = grains["fqdn"] %}
 {% set host_type = grains.get('host_type') or '' %}
+{% import_yaml 'data/main.yaml' as data %}
+{% set stackstorm_ssh = data.pve.vms.stackstorm.ssh %}
+{% set easypki_ssh = data.pve.vms.easypki.ssh %}
 
 openssh_server_pkg:
   pkg.installed:
@@ -28,6 +31,8 @@ openssh_server_pkg:
     - template: jinja
     - context:
         fqdn: {{ fqdn }}
+        stackstorm_ssh: "{{ stackstorm_ssh }}"
+        easypki_ssh: "{{ easypki_ssh }}"
 
 /root/.ssh/config:
   file.managed:

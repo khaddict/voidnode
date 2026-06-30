@@ -2,16 +2,20 @@
 {% set prometheus_version = versions.prometheus %}
 {% import_yaml 'data/main.yaml' as data %}
 
-{% set pve_nodes = data.get('pve').get('nodes') %}
-{% set pve_vms = data.get('pve').get('vms') %}
+{% set pve = data.get('pve') %}
 {% set domain = data.get('network').get('domain') %}
 {% set node_hosts = {} %}
 {% set blackbox_hosts = {} %}
-{% do node_hosts.update(pve_nodes) %}
-{% do blackbox_hosts.update(pve_nodes) %}
-{% for hostname, host in pve_vms.items() %}
-{%   do blackbox_hosts.update({hostname: host}) %}
-{%   if host.get('scrape', True) %}
+{% do node_hosts.update(pve.get('nodes')) %}
+{% do blackbox_hosts.update(pve.get('nodes')) %}
+{% set all_hosts = {} %}
+{% do all_hosts.update(pve.get('vms')) %}
+{% do all_hosts.update(pve.get('lxc', {})) %}
+{% for hostname, host in all_hosts.items() %}
+{%   if host.get('exporters', {}).get('blackbox', False) %}
+{%     do blackbox_hosts.update({hostname: host}) %}
+{%   endif %}
+{%   if host.get('exporters', {}).get('node', False) %}
 {%     do node_hosts.update({hostname: host}) %}
 {%   endif %}
 {% endfor %}

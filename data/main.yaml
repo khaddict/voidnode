@@ -63,10 +63,11 @@ pve:
       description: "Firewall, routing, and VLAN gateway"
       template: null
       tags: "core,opnsense"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.10.0.1
       main_iface: null
-      ssh: null
       hardware:
         ram_mb: 4096
         cpu:
@@ -84,7 +85,9 @@ pve:
       description: "SaltStack control plane and state orchestration"
       template: debian-trixie-template
       tags: "admin,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.3
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3v0wOk/qb2Bq80EzC+BZMArREUa/6WlIIzav05AQyt saltmaster@khaddict.lab"
@@ -104,7 +107,9 @@ pve:
       description: "Event-driven automation and workflow engine"
       template: ubuntu-jammy-template
       tags: "admin,jammy"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.4
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICGrrb3pJzWN7njrlWUE0pPjVD0j1XmJXgrc51FVZqzk stackstorm@khaddict.lab"
@@ -124,10 +129,11 @@ pve:
       description: "Central secrets management"
       template: debian-trixie-template
       tags: "admin,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.5
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMQAB3GXUp/Ergl9VhpRkTvNw5tSxD7PzPUPBrH1ygI vault@khaddict.lab"
       hardware:
         ram_mb: 2048
         cpu:
@@ -144,7 +150,9 @@ pve:
       description: "Internal PKI authority and certificate lifecycle"
       template: debian-trixie-template
       tags: "admin,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.6
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICJdraaRkgzciz65r4ZaA8uVBhnv80CKI49jKEo16sBg easypki@khaddict.lab"
@@ -164,10 +172,11 @@ pve:
       description: "Proxmox Backup Server for VM backups"
       template: null
       tags: "admin,pbs"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.7
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAuBymc/W/lhrIfdYeTw034n/PBjfttkP5W7u/4WlIrT pbs@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -186,10 +195,11 @@ pve:
       description: "Container image registry and artifact cache"
       template: debian-trixie-template
       tags: "admin,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.20.0.2
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSFcXtIu2isa6ve519qB6K/SePQ0yBb0aSIpmjjgZ5J registry@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -207,10 +217,11 @@ pve:
       description: "Source of truth for IPAM, DCIM, and inventory"
       template: debian-trixie-template
       tags: "infra,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.30.0.2
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEVxWEewWZGYnRqMtXa3glkQS8AG30gPjhE02Z7237By netbox@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -227,10 +238,11 @@ pve:
       description: "Metrics collection, alerting and rules"
       template: debian-trixie-template
       tags: "infra,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.30.0.3
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGm7Su4feupVYWqlzHuo1coP5kNS7fNT9uV7qa8TB4QF prometheus@khaddict.lab"
       hardware:
         ram_mb: 2048
         cpu:
@@ -247,10 +259,11 @@ pve:
       description: "Dashboards and observability data visualization"
       template: debian-trixie-template
       tags: "infra,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.30.0.4
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIN23Mh38z0N0QylJwhKsSkECVF3DOgbvZ8dZHqTh/JtL grafana@khaddict.lab"
       hardware:
         ram_mb: 2048
         cpu:
@@ -267,10 +280,11 @@ pve:
       description: "Centralized log aggregation and query backend"
       template: debian-trixie-template
       tags: "infra,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.30.0.5
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBHgGh/4ODt7ZiivX1DW6h3tOYO+5LIPfhdNgFhZXIRb loki@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -288,10 +302,11 @@ pve:
       description: "Edge reverse proxy and external ingress gateway"
       template: debian-trixie-template
       tags: "edge,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.40.0.2
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDKxcsI82GqQBOX1w1b+LqScp9XftXL4kYABgsyiSE2/ revproxy@khaddict.lab"
       hardware:
         ram_mb: 2048
         cpu:
@@ -308,10 +323,11 @@ pve:
       description: "Talos Kubernetes control-plane node"
       template: null
       tags: "edge,talos"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.5
       main_iface: *default_iface
-      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -328,10 +344,11 @@ pve:
       description: "Talos Kubernetes worker node 1"
       template: null
       tags: "edge,talos"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.6
       main_iface: *default_iface
-      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -348,10 +365,11 @@ pve:
       description: "Talos Kubernetes worker node 2"
       template: null
       tags: "edge,talos"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.7
       main_iface: *default_iface
-      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -368,10 +386,11 @@ pve:
       description: "Kubernetes administration and management workstation"
       template: debian-trixie-template
       tags: "edge,trixie"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: true
       ip: 10.40.0.8
       main_iface: *default_iface
-      ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEgER/cAhU00TOXEQTmEHdPSHMTx8E5Oy/RTMRyjQuAL kcli@khaddict.lab"
       hardware:
         ram_mb: 4096
         cpu:
@@ -391,10 +410,11 @@ pve:
       existing: true
       description: "Homelable CT"
       tags: "core,lxc"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.10.0.3
       main_iface: eth0
-      ssh: null
       hardware:
         ram_mb: 2048
         cpu:
@@ -410,10 +430,11 @@ pve:
       existing: true
       description: "Matomo CT"
       tags: "edge,lxc"
-      scrape: true
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.3
       main_iface: eth0
-      ssh: null
       hardware:
         ram_mb: 2048
         cpu:
@@ -429,10 +450,11 @@ pve:
       existing: true
       description: "Ollama CT"
       tags: "edge,lxc"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.4
       main_iface: eth0
-      ssh: null
       hardware:
         ram_mb: 51200
         cpu:
@@ -440,7 +462,7 @@ pve:
         rootfs:
           storage: local-lvm
           size_gb: 100
-      backup: false
+      backup: true
       <<: *vlan_edge
 
     openwebui:
@@ -448,10 +470,11 @@ pve:
       existing: true
       description: "Openwebui CT"
       tags: "edge,lxc"
-      scrape: false
+      exporters:
+        blackbox: true
+        node: false
       ip: 10.40.0.9
       main_iface: eth0
-      ssh: null
       hardware:
         ram_mb: 8192
         cpu:
@@ -459,7 +482,7 @@ pve:
         rootfs:
           storage: local-lvm
           size_gb: 50
-      backup: false
+      backup: true
       <<: *vlan_edge
 
     # [end:lxc]

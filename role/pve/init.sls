@@ -1,6 +1,7 @@
 {% import_yaml 'data/main.yaml' as data %}
 
 {% set pve_vms = data.get('pve', {}).get('vms', {}) %}
+{% set pve_lxc = data.get('pve', {}).get('lxc', {}) %}
 
 {% set storage = data.get('pve', {}).get('backups', {}).get('storage') %}
 
@@ -9,6 +10,12 @@
 {% for name, vm in pve_vms.items() %}
   {% if vm.get('backup') %}
     {% do backup_vmids.append(vm.vmid) %}
+  {% endif %}
+{% endfor %}
+
+{% for name, ct in pve_lxc.items() %}
+  {% if ct.get('backup') %}
+    {% do backup_vmids.append(ct.vmid) %}
   {% endif %}
 {% endfor %}
 
