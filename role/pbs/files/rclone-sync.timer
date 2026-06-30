@@ -1,10 +1,10 @@
 [Unit]
-Description=Timer to run rclone-sync.service every Tuesday at 00:00 (local time)
+Description=Timer to run rclone-sync.service every Monday and Thursday at 01:00 (local time)
 Requires=network-online.target
 After=network-online.target
 
 [Timer]
-OnCalendar=Tue 00:00
+OnCalendar=Mon,Thu 01:00
 Persistent=true
 
 [Install]
