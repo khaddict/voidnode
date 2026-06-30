@@ -2,7 +2,7 @@
 # renovate: depName=goharbor/harbor datasource=github-releases
 harbor: "2.15.1"
 # renovate: depName=aquasecurity/trivy datasource=github-releases
-trivy: "0.71.2"
+trivy: "0.72.0"
 # renovate: depName=derailed/k9s datasource=github-releases
 k9s: "0.51.0"
 # renovate: depName=prometheus/prometheus datasource=github-releases
