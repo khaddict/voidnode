@@ -1,0 +1,5 @@
+apiVersion: v2
+name: node-shell
+description: Privileged DaemonSet for node-level access on worker nodes
+type: application
+version: 0.1.0

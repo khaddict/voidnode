@@ -1,0 +1,12 @@
+image:
+  repository: busybox
+  tag: "1.38.0"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    cpu: 50m
+    memory: 32Mi
