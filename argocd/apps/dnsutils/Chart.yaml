@@ -3,7 +3,7 @@ name: dnsutils
 description: A Helm chart for dnsutils
 type: application
 version: 0.1.0
-appVersion: "2.56"
+appVersion: "2.61"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/dnsutils

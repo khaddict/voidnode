@@ -3,3 +3,8 @@ name: node-shell
 description: Privileged DaemonSet for node-level access on worker nodes
 type: application
 version: 0.1.0
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/node-shell
+maintainers:
+  - name: platform

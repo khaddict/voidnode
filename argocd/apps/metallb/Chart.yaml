@@ -10,7 +10,6 @@ sources:
   - https://github.com/metallb/metallb
 maintainers:
   - name: platform
-
 dependencies:
   - name: metallb
     version: 0.16.1

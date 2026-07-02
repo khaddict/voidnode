@@ -3,7 +3,7 @@ name: metrics-server
 description: A Helm chart for metrics-server
 type: application
 version: 0.1.0
-appVersion: 0.8.0
+appVersion: "0.8.0"
 home: https://github.com/kubernetes-sigs/metrics-server
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/metrics-server
@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: metrics-server
-    repository: https://kubernetes-sigs.github.io/metrics-server/
     version: 3.13.1
+    repository: https://kubernetes-sigs.github.io/metrics-server/
