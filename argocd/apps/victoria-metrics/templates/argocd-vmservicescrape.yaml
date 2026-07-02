@@ -39,21 +39,6 @@ spec:
       - argocd
   selector:
     matchLabels:
-      app.kubernetes.io/name: argocd-repo-server
-  endpoints:
-    - port: http-metrics
----
-apiVersion: operator.victoriametrics.com/v1beta1
-kind: VMServiceScrape
-metadata:
-  name: argocd-applicationset-controller
-  namespace: {{ .Values.namespace }}
-spec:
-  namespaceSelector:
-    matchNames:
-      - argocd
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: argocd-applicationset-controller
+      app.kubernetes.io/name: argocd-repo-server-metrics
   endpoints:
     - port: http-metrics
