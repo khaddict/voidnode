@@ -1,4 +1,4 @@
-FROM alpine:3.21 AS builder
+FROM alpine:3.24 AS builder
 RUN apk add --no-cache vips-tools
 COPY images/ /data/
 RUN mkdir -p /data/icons/thumbs /data/gallery/thumbs \
