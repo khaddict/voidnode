@@ -25,6 +25,8 @@ spec:
           - "Include @crs-setup-conf"
           # Targeted CRS exclusion for static JS false positive (sprintf.js triggers rule 933150)
           - "SecRule REQUEST_URI \"@beginsWith /static/js/\" \"id:105,phase:1,pass,nolog,ctl:ruleRemoveById=933150\""
+          # PromQL aggregate functions (count, sum, avg) trigger SQL injection rules 942xxx — exclude query arg on VM API
+          - "SecRule REQUEST_URI \"@beginsWith /api/v1/\" \"id:106,phase:1,pass,nolog,ctl:ruleRemoveByTag=attack-sqli\""
           # Include CRS rules embedded in the wasm image
           - "Include @owasp_crs/*.conf"
           # Blocking mode
