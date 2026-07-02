@@ -62,4 +62,4 @@ upload_purging:
   interval: 24h
   dryrun: false
 
-_version: 2.14.0
+_version: {{ harbor_version }}

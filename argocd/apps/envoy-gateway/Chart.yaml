@@ -3,7 +3,7 @@ name: envoy-gateway
 description: A Helm chart for envoy-gateway
 type: application
 version: 0.1.0
-appVersion: "v1.8.1"
+appVersion: "v1.8.2"
 home: https://github.com/envoyproxy/gateway
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/envoy-gateway

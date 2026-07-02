@@ -97,6 +97,7 @@ harbor_archive:
     - group: root
     - template: jinja
     - context:
+        harbor_version: {{ harbor_version }}
         harbor_admin_password: {{ harbor_admin_password }}
         database_password: {{ database_password }}
     - require:
