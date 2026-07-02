@@ -1,6 +1,7 @@
 {% import_yaml 'data/versions.yaml' as versions %}
 {% set alertmanager_version = versions.alertmanager %}
 {% set webhook_url = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url %}
+{% set webhook_url_muted = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url_muted %}
 
 alertmanager_user:
   user.present:
@@ -41,6 +42,7 @@ alertmanager_archive:
     - template: jinja
     - context:
         webhook_url: "{{ webhook_url }}"
+        webhook_url_muted: "{{ webhook_url_muted }}"
     - require:
       - archive: alertmanager_archive
 
