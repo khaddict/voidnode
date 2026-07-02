@@ -46,6 +46,15 @@ victoria-metrics-k8s-stack:
   kubeEtcd:
     enabled: false
 
+  defaultRules:
+    groups:
+      kubernetes-system-controller-manager:
+        enabled: false
+      kubernetes-system-scheduler:
+        enabled: false
+      kube-scheduler.rules:
+        enabled: false
+
   kube-state-metrics:
     enabled: true
 
