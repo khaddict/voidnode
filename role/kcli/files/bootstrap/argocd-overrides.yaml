@@ -23,3 +23,19 @@ configs:
     accounts.readonly: apiKey
   rbac:
     policy.csv: "g, readonly, role:readonly"
+
+controller:
+  metrics:
+    enabled: true
+
+server:
+  metrics:
+    enabled: true
+
+repoServer:
+  metrics:
+    enabled: true
+
+applicationSet:
+  metrics:
+    enabled: true
