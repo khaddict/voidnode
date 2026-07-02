@@ -3,6 +3,7 @@ set -euo pipefail
 
 ARGOCD_NAMESPACE="argocd"
 export VAULT_ADDR="https://vault.khaddict.lab:8200/"
+export VAULT_TOKEN="${VAULT_TOKEN:-$(cat ~/.vault-token)}"
 # renovate: depName=argo-cd datasource=helm registryUrl=https://argoproj.github.io/argo-helm
 VERSION="10.1.0"
 
