@@ -70,7 +70,7 @@ spec:
               name: logs
       volumes:
         - name: homepage-config
-          configMap:
-            name: {{ .Values.config_map.name }}
+          secret:
+            secretName: {{ .Values.config_secret.name }}
         - name: logs
           emptyDir: {}

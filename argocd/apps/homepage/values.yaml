@@ -41,8 +41,8 @@ secret:
 service_account:
   name: homepage
 
-config_map:
-  name: homepage
+config_secret:
+  name: homepage-config
 
 cluster_role:
   name: homepage
@@ -56,15 +56,15 @@ httproute:
 
 services:
   pve:
-    password: <path:kv/data/kubernetes/homepage#homepage_pve_token>
+    password: <path:kv/data/kubernetes/homepage#pve_token>
   argocd:
-    password: <path:kv/data/kubernetes/homepage#homepage_argocd_token>
+    password: <path:kv/data/kubernetes/homepage#argocd_token>
   pbs:
-    password: <path:kv/data/kubernetes/homepage#homepage_pbs_token>
+    password: <path:kv/data/kubernetes/homepage#pbs_token>
   changedetection:
-    password: <path:kv/data/kubernetes/homepage#homepage_changedetection_token>
+    password: <path:kv/data/kubernetes/homepage#changedetection_token>
   grafana:
-    password: <path:kv/data/kubernetes/homepage#homepage_grafana_password>
+    password: <path:kv/data/kubernetes/homepage#grafana_password>
   opnsense:
-    password: <path:kv/data/kubernetes/homepage#homepage_opnsense_password>
-    username: <path:kv/data/kubernetes/homepage#homepage_opnsense_username>
+    password: <path:kv/data/kubernetes/homepage#opnsense_password>
+    username: <path:kv/data/kubernetes/homepage#opnsense_username>
