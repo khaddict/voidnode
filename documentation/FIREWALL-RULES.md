@@ -15,6 +15,7 @@
 \* **Exception**: `K8S` (`EDGE`) → `REGISTRY` (`ADMIN`) `TCP/443` for Homepage widget access to REGISTRY.  
 \* **Exception**: `K8S` (`EDGE`) → `PROMETHEUS` (`INFRA`) `TCP/9090` for Homepage widget access to Prometheus.  
 \* **Exception**: `K8S` (`EDGE`) → `GRAFANA` (`INFRA`) `TCP/3000` for Homepage widget access to Grafana.  
+\* **Exception**: `K8S` (`EDGE`) → `ALERTMANAGER` (`INFRA`) `TCP/9093` for VMAlert to send alerts to AlertManager.  
 \* **Exception**: `K8S` (`EDGE`) → `This Firewall` (`CORE`) `TCP/443` for Homepage widget access to the firewall.  
 \* **Exception**: `REVPROXY` (`EDGE`) → `STATUS` (`VPN/WireGuard`, 10.1.0.2) `TCP/3001` to forward status.khaddict.com traffic to Uptime Kuma.  
 
@@ -68,10 +69,11 @@
 | EDGE | 7 | PASS | TCP | K8S | PBS | 8007 | Allow Homepage widget access to PBS |
 | EDGE | 8 | PASS | TCP | K8S | PROMETHEUS | 9090 | Allow Homepage widget access to Prometheus |
 | EDGE | 9 | PASS | TCP | K8S | GRAFANA | 3000 | Allow Homepage widget access to Grafana |
-| EDGE | 10 | PASS | TCP | K8S | REGISTRY | 443 | Allow K8S access to the registry |
-| EDGE | 11 | PASS | TCP | K8S | This Firewall | 443 | Allow Homepage widget access to the firewall |
-| EDGE | 12 | PASS | TCP | REVPROXY | STATUS | 3001 | Allow HAProxy to reach Uptime Kuma on VPS via WireGuard |
-| EDGE | 13 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
+| EDGE | 10 | PASS | TCP | K8S | ALERTMANAGER | 9093 | Allow VMAlert to send alerts to AlertManager |
+| EDGE | 11 | PASS | TCP | K8S | REGISTRY | 443 | Allow K8S access to the registry |
+| EDGE | 12 | PASS | TCP | K8S | This Firewall | 443 | Allow Homepage widget access to the firewall |
+| EDGE | 13 | PASS | TCP | REVPROXY | STATUS | 3001 | Allow HAProxy to reach Uptime Kuma on VPS via WireGuard |
+| EDGE | 14 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
 
 # WAN
 

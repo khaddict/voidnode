@@ -29,7 +29,7 @@ victoria-metrics-k8s-stack:
       externalLabels:
         cluster: voidnode
       notifiers:
-        - url: "http://10.30.0.3:9093"
+        - url: "http://alertmanager.khaddict.lab:9093"
 
   vmagent:
     enabled: true
