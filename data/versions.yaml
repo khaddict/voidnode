@@ -1,6 +1,6 @@
 # Versions used in SaltStack states (imported via import_yaml)
 # renovate: depName=goharbor/harbor datasource=github-releases
-harbor: "2.15.1"
+harbor: "2.15.2"
 # renovate: depName=aquasecurity/trivy datasource=github-releases
 trivy: "0.72.0"
 # renovate: depName=derailed/k9s datasource=github-releases
