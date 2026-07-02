@@ -1,0 +1,54 @@
+name: Build images-khaddict
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "argocd/apps/images.khaddict.com/images/**"
+      - "argocd/apps/images.khaddict.com/Dockerfile"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(echo "${{ github.sha }}" | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: argocd/apps/images.khaddict.com
+          push: true
+          tags: |
+            ghcr.io/khaddict/images-khaddict:${{ steps.sha.outputs.short }}
+            ghcr.io/khaddict/images-khaddict:latest
+
+      - name: Update image tag in values.yaml
+        run: |
+          sed -i "s|image: ghcr.io/khaddict/images-khaddict:.*|image: ghcr.io/khaddict/images-khaddict:${{ steps.sha.outputs.short }}|" \
+            argocd/apps/images.khaddict.com/values.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add argocd/apps/images.khaddict.com/values.yaml
+          git diff --cached --quiet || git commit -m "ci: update images-khaddict to ${{ steps.sha.outputs.short }}"
+          git push

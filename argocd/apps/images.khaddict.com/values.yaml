@@ -1,14 +1,10 @@
 app: images-khaddict
 namespace: images-khaddict
 
-pvc:
-  size: 5Gi
-  storageClass: local-path
-
 deployment:
   name: images-khaddict
   replicas: 1
-  image: nginx:1.31.2
+  image: ghcr.io/khaddict/images-khaddict:latest
   imagePullPolicy: IfNotPresent
   resources:
     requests:
@@ -30,13 +26,13 @@ probes:
     httpGet:
       path: /
       port: 80
-    initialDelaySeconds: 60
+    initialDelaySeconds: 5
     periodSeconds: 10
   readiness:
     httpGet:
       path: /
       port: 80
-    initialDelaySeconds: 30
+    initialDelaySeconds: 5
     periodSeconds: 5
 
 httproute:
