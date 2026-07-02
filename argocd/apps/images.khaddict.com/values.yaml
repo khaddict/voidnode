@@ -4,7 +4,7 @@ namespace: images-khaddict
 deployment:
   name: images-khaddict
   replicas: 1
-  image: ghcr.io/khaddict/images-khaddict:68c3fa1
+  image: ghcr.io/khaddict/images-khaddict:ce4fb73
   imagePullPolicy: IfNotPresent
   resources:
     requests:
