@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: victoria-metrics
+  namespace: argocd
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/part-of: voidnode
+    app.kubernetes.io/component: system
+  annotations:
+    owner: platform
+    repo: khaddict/voidnode
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/khaddict/voidnode.git
+    targetRevision: main
+    path: argocd/apps/victoria-metrics
+    helm:
+      releaseName: vm
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: victoria-metrics
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

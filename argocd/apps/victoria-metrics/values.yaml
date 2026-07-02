@@ -1,0 +1,55 @@
+namespace: victoria-metrics
+
+httproute:
+  host: vmsingle.khaddict.lab
+  gatewayName: envoy-gateway
+
+victoria-metrics-k8s-stack:
+  fullnameOverride: "vm"
+
+  grafana:
+    enabled: false
+
+  alertmanager:
+    enabled: false
+
+  vmsingle:
+    enabled: true
+    spec:
+      retentionPeriod: "30d"
+      storage:
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 20Gi
+
+  vmalert:
+    enabled: true
+    spec:
+      externalLabels:
+        cluster: voidnode
+      notifiers:
+        - url: "http://alertmanager.khaddict.lab:9093"
+
+  vmagent:
+    enabled: true
+    spec:
+      externalLabels:
+        cluster: voidnode
+
+  kubeControllerManager:
+    enabled: false
+
+  kubeScheduler:
+    enabled: false
+
+  kubeEtcd:
+    enabled: false
+
+  kube-state-metrics:
+    enabled: true
+
+  prometheus-node-exporter:
+    enabled: true
+    tolerations:
+      - operator: Exists

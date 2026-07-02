@@ -1,0 +1,16 @@
+apiVersion: v2
+name: victoria-metrics
+description: A Helm chart for victoria-metrics-k8s-stack
+type: application
+version: 0.1.0
+appVersion: "v1.146.0"
+home: https://victoriametrics.com
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/victoria-metrics
+  - https://github.com/VictoriaMetrics/helm-charts
+maintainers:
+  - name: platform
+dependencies:
+  - name: victoria-metrics-k8s-stack
+    version: 0.85.9
+    repository: https://victoriametrics.github.io/helm-charts/
