@@ -294,7 +294,8 @@ require_int "RAM" "$ram_mb"
 cpu_cores="$(prompt "CPU cores" "$cpu_default")"
 require_int "CPU cores" "$cpu_cores"
 
-scrape="$(yes_no "Enable scrape?" "y")"
+exporter_blackbox="$(yes_no "Enable blackbox_exporter (HTTP/ICMP probe)?" "y")"
+exporter_node="$(yes_no "Enable node_exporter (host metrics)?" "y")"
 backup="$(yes_no "Enable backup?" "y")"
 
 section "Storage"
@@ -327,7 +328,9 @@ if [[ "$vm_type" == "vm" ]]; then
       description: "${description}"
       template: ${template}
       tags: "${tags}"
-      scrape: ${scrape}
+      exporters:
+        blackbox: ${exporter_blackbox}
+        node: ${exporter_node}
       ip: ${ip}
       main_iface: ${main_iface_value}
 ${ssh_line}
@@ -353,7 +356,9 @@ else
       existing: ${existing_val}
       description: "${description}"
       tags: "${tags}"
-      scrape: ${scrape}
+      exporters:
+        blackbox: ${exporter_blackbox}
+        node: ${exporter_node}
       ip: ${ip}
       main_iface: ${main_iface_value}
 ${ssh_line}
@@ -382,7 +387,8 @@ fi
 kv "Tags" "$tags"
 kv "IP" "$ip"
 kv "main_iface" "$main_iface_value"
-kv "Scrape" "$scrape"
+kv "Blackbox exporter" "$exporter_blackbox"
+kv "Node exporter" "$exporter_node"
 kv "Backup" "$backup"
 
 section "Generated Block"

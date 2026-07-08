@@ -6,7 +6,7 @@
 
 /etc/resolv.conf:
   file.managed:
-    - source: salt://global/common/network/resolvconf/files/resolv.conf
+    - source: salt://global/common/resolver/resolvconf/files/resolv.conf
     - template: jinja
     - context:
         domain: {{ domain }}
