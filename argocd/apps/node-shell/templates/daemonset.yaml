@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-shell
-  namespace: tools
+  namespace: node-shell
 spec:
   selector:
     matchLabels:

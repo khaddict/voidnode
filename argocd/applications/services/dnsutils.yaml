@@ -21,7 +21,7 @@ spec:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: tools
+    namespace: dnsutils
   syncPolicy:
     automated:
       prune: true

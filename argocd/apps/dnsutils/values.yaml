@@ -1,5 +1,5 @@
 app: dnsutils
-namespace: tools
+namespace: dnsutils
 
 deployment:
   replicas: 1
@@ -12,19 +12,6 @@ deployment:
     limits:
       cpu: 200m
       memory: 256Mi
-
-probes:
-  enabled: false
-  liveness:
-    tcpSocket:
-      port: 8080
-    initialDelaySeconds: 30
-    periodSeconds: 10
-  readiness:
-    tcpSocket:
-      port: 8080
-    initialDelaySeconds: 10
-    periodSeconds: 5
 
 securityContext:
   runAsNonRoot: true

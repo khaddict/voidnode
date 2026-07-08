@@ -119,7 +119,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `images.khaddict.com` | Image hosting via nginx, 5Gi PVC |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
-| `dnsutils` | Minimal debug pod in the `tools` namespace for DNS troubleshooting |
+| `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
 
 Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<path:kv/data/kubernetes/<app>#FIELD>` annotations, authenticated with a long-lived Vault token.
 
