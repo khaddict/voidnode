@@ -61,16 +61,24 @@ helm_pkg:
       - file: /usr/share/keyrings/helm.gpg
       - file: /etc/apt/sources.list.d/helm.sources
 
+/tmp/k9s_linux_amd64.deb:
+  file.managed:
+    - source: https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/k9s_linux_amd64.deb
+    - source_hash: https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/checksums.sha256
+    - unless: k9s version 2>&1 | grep -q "{{ k9s_version }}"
+
 k9s_pkg:
   pkg.installed:
     - name: k9s
     - sources:
-      - k9s: https://github.com/derailed/k9s/releases/download/v{{ k9s_version }}/k9s_linux_amd64.deb
+      - k9s: /tmp/k9s_linux_amd64.deb
+    - require:
+      - file: /tmp/k9s_linux_amd64.deb
     - unless: k9s version 2>&1 | grep -q "{{ k9s_version }}"
 
 /root/.vault-token:
   file.managed:
-    - contents: {{ vault_token }}
+    - contents: "{{ vault_token }}"
     - mode: 600
     - user: root
     - group: root

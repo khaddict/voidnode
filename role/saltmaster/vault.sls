@@ -8,7 +8,9 @@
     - group: salt
     - template: jinja
     - context:
-        vault_token: {{ vault_token }}
+        vault_token: "{{ vault_token }}"
+    - require:
+      - pkg: salt_master_pkg
     - watch_in:
       - service: salt-master
 
@@ -18,5 +20,7 @@
     - mode: 644
     - user: salt
     - group: salt
+    - require:
+      - pkg: salt_master_pkg
     - watch_in:
       - service: salt-master

@@ -76,9 +76,9 @@ netbox_repo_git:
     - group: netbox
     - template: jinja
     - context:
-        psql_password: {{ psql_password }}
-        secret_key: {{ secret_key }}
-        api_token_peppers: {{ api_token_peppers }}
+        psql_password: "{{ psql_password }}"
+        secret_key: "{{ secret_key }}"
+        api_token_peppers: "{{ api_token_peppers }}"
         fqdn: {{ fqdn }}
         ip: {{ ip }}
 
@@ -152,3 +152,4 @@ nginx:
     - mode: 640
     - user: netbox
     - group: netbox
+    - makedirs: True

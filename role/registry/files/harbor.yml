@@ -1,4 +1,4 @@
-hostname: registry.khaddict.lab
+hostname: registry.{{ domain }}
 
 http:
   port: 80

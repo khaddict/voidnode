@@ -38,7 +38,7 @@ certbot_pkgs:
     - template: jinja
     - source: salt://role/revproxy/files/infomaniak
     - context:
-        infomaniak_token: {{ infomaniak_token }}
+        infomaniak_token: "{{ infomaniak_token }}"
 
 haproxy:
   service.running:

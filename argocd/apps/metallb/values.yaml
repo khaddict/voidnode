@@ -1,3 +1,13 @@
+namespace: metallb-system
+
+ipAddressPool:
+  name: voidnode-pool
+  addresses:
+    - 10.40.0.150-10.40.0.200
+
+l2Advertisement:
+  name: voidnode-l2
+
 metallb:
   # Default values for metallb.
   # This is a YAML-formatted file.

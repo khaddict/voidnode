@@ -1,8 +1,8 @@
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: voidnode-pool
-  namespace: metallb-system
+  name: {{ .Values.ipAddressPool.name }}
+  namespace: {{ .Values.namespace }}
 spec:
   addresses:
-  - 10.40.0.150-10.40.0.200
+    {{- toYaml .Values.ipAddressPool.addresses | nindent 4 }}

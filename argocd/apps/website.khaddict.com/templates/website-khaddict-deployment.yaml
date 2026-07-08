@@ -32,7 +32,11 @@ spec:
         {{- end }}
         volumeMounts:
         - name: html-volume
-          mountPath: /usr/share/nginx/html
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/robots.txt
+          subPath: robots.txt
       volumes:
       - name: html-volume
         configMap:

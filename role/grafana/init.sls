@@ -1,3 +1,6 @@
+{% import_yaml 'data/main.yaml' as data %}
+{% set domain = data.network.domain %}
+
 include:
   - base.observability.grafana
 
@@ -7,6 +10,9 @@ include:
     - mode: 640
     - user: root
     - group: grafana
+    - template: jinja
+    - context:
+        domain: {{ domain }}
     - require:
       - pkg: grafana_pkg
     - listen_in:

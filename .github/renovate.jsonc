@@ -38,6 +38,16 @@
         "# renovate: depName=(?<depName>[^\\s]+)\\n\\s+url: [^:]+:(?<currentValue>[^\\s]+)"
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/role/kcli/files/kubernetes\\.sources$/"],
+      "matchStrings": [
+        "URIs: https://pkgs\\.k8s\\.io/core:/stable:/v(?<currentValue>\\d+\\.\\d+)/deb/"
+      ],
+      "depNameTemplate": "kubernetes/kubernetes",
+      "datasourceTemplate": "github-releases",
+      "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
     }
   ]
 }

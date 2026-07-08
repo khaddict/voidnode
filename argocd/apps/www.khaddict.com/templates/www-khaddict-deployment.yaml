@@ -32,14 +32,21 @@ spec:
         {{- end }}
         volumeMounts:
         - name: html-volume
-          mountPath: /usr/share/nginx/html
-        - name: nginx-conf-volume
+          mountPath: /usr/share/nginx/html/index.html
+          subPath: index.html
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/robots.txt
+          subPath: robots.txt
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/sitemap.xml
+          subPath: sitemap.xml
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/security.txt
+          subPath: security.txt
+        - name: html-volume
           mountPath: /etc/nginx/conf.d/default.conf
           subPath: default.conf
       volumes:
       - name: html-volume
-        configMap:
-          name: {{ .Values.deployment.name }}-html
-      - name: nginx-conf-volume
         configMap:
           name: {{ .Values.deployment.name }}-html

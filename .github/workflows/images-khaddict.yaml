@@ -45,10 +45,15 @@ jobs:
           sed -i "s|image: ghcr.io/khaddict/images-khaddict:.*|image: ghcr.io/khaddict/images-khaddict:${{ steps.sha.outputs.short }}|" \
             argocd/apps/images.khaddict.com/values.yaml
 
+      - name: Update appVersion in Chart.yaml
+        run: |
+          sed -i "s|appVersion: .*|appVersion: \"${{ steps.sha.outputs.short }}\"|" \
+            argocd/apps/images.khaddict.com/Chart.yaml
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add argocd/apps/images.khaddict.com/values.yaml
+          git add argocd/apps/images.khaddict.com/values.yaml argocd/apps/images.khaddict.com/Chart.yaml
           git diff --cached --quiet || git commit -m "ci: update images-khaddict to ${{ steps.sha.outputs.short }}"
           git push

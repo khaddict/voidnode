@@ -1,5 +1,7 @@
 {% set oscodename = grains.get('oscodename') or '' %}
 
+{% import_yaml 'data/main.yaml' as data %}
+{% set domain = data.network.domain %}
 {% import_yaml 'data/versions.yaml' as versions %}
 {% set harbor_version = versions.harbor %}
 {% set trivy_version = versions.trivy %}
@@ -97,9 +99,10 @@ harbor_archive:
     - group: root
     - template: jinja
     - context:
+        domain: {{ domain }}
         harbor_version: {{ harbor_version }}
-        harbor_admin_password: {{ harbor_admin_password }}
-        database_password: {{ database_password }}
+        harbor_admin_password: "{{ harbor_admin_password }}"
+        database_password: "{{ database_password }}"
     - require:
       - archive: harbor_archive
 

@@ -65,7 +65,7 @@ Management plane. Hosts all the tooling that operates, secures, and maintains th
 |------|------|-------------|
 | `registry.khaddict.lab` | VM | [Harbor](https://goharbor.io/) container image registry. Stores custom-built Docker images used in Kubernetes. Also caches upstream images to avoid rate limits. |
 | `saltmaster.khaddict.lab` | VM | [SaltStack](https://saltproject.io/) master. Manages configuration of all Debian/Ubuntu VMs via states. Orchestrates provisioning, service configuration, certificate deployment, and package management. |
-| `stackstorm.khaddict.lab` | VM | [StackStorm](https://stackstorm.com/) event-driven automation engine. Runs a custom `st2_voidnode` pack that handles VM lifecycle (create, decommission, snapshot, template), PKI certificate provisioning, and sends Discord notifications. Triggered by webhooks or schedules. |
+| `stackstorm.khaddict.lab` | VM | [StackStorm](https://stackstorm.com/) event-driven automation engine. Runs a custom `st2_voidnode` pack that handles VM lifecycle (create, decommission, snapshot, template), PKI certificate provisioning, and sends Discord notifications. Triggered manually via CLI/API, or on a schedule (cron) for automated snapshots. |
 | `vault.khaddict.lab` | VM | [HashiCorp Vault](https://www.vaultproject.io/). Central secrets store for the entire lab. SaltStack minions authenticate via AppRole with strict per-minion path isolation. Kubernetes workloads pull secrets at sync time via the ArgoCD Vault Plugin. |
 | `easypki.khaddict.lab` | VM | Internal PKI authority ([EasyPKI](https://github.com/khaddict/easypki)). Issues and renews TLS certificates for all internal `*.khaddict.lab` services. Certificates are provisioned by StackStorm and distributed by SaltStack. |
 | `pbs.khaddict.lab` | VM | [Proxmox Backup Server](https://www.proxmox.com/en/proxmox-backup-server). Stores VM backups on a dedicated 500GB disk. Most VMs back up nightly, with a few exceptions (PBS itself, stateless K8s nodes). |
@@ -109,6 +109,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | Provides `local-path` StorageClass backed by `/opt/local-path-provisioner` on the node |
 | [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | Exposes resource metrics for HPA and kubectl top |
 | [VictoriaMetrics](https://victoriametrics.com/) | Metrics stack (vmsingle + vmagent + vmalert) for cluster observability, alerts routed to Alertmanager |
+| `node-shell` | Privileged DaemonSet giving a root shell on any worker node for debugging |
 
 **Services:**
 
@@ -121,7 +122,6 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
-| `node-shell` | Privileged DaemonSet giving a root shell on any worker node for debugging |
 
 Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<path:kv/data/kubernetes/<app>#FIELD>` annotations, authenticated with a long-lived Vault token.
 

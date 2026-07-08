@@ -18,7 +18,7 @@ spec:
       labels:
         {{- include "homepage.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: homepage
+      serviceAccountName: {{ .Values.service_account.name }}
       automountServiceAccountToken: true
       dnsPolicy: "ClusterFirstWithHostNet"
       enableServiceLinks: true
@@ -30,7 +30,7 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
-              value: "homepage.khaddict.lab"
+              value: "{{ .Values.httproute.host }}"
           ports:
             - name: http
               containerPort: 3000

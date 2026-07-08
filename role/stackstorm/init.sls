@@ -23,8 +23,8 @@
     - group: root
     - template: jinja
     - context:
-        rabbitmq_password: {{ rabbitmq_password }}
-        mongodb_password: {{ mongodb_password }}
+        rabbitmq_password: "{{ rabbitmq_password }}"
+        mongodb_password: "{{ mongodb_password }}"
 
 # Packs
 
@@ -36,16 +36,16 @@
     - file_mode: 600
     - dir_mode: 700
     - context:
-        snapshot_vms_discord_webhook: {{ snapshot_vms_discord_webhook }}
-        dns_api_key: {{ dns_api_key }}
-        dns_api_secret: {{ dns_api_secret }}
+        snapshot_vms_discord_webhook: "{{ snapshot_vms_discord_webhook }}"
+        dns_api_key: "{{ dns_api_key }}"
+        dns_api_secret: "{{ dns_api_secret }}"
 
 # Data
 
 /opt/stackstorm/data/main.yaml:
   file.managed:
     - source: salt://data/main.yaml
-    - mode: 644
+    - mode: 640
     - user: root
     - group: root
     - makedirs: True

@@ -94,4 +94,20 @@ path "kv/data/minions/easypki/server/wildcard-khaddict-lab" {
 path "kv/metadata/minions/easypki/server/wildcard-khaddict-lab" {
   capabilities = ["list"]
 }
+
+path "kv/data/minions/easypki/chain" {
+  capabilities = ["read"]
+}
+
+path "kv/metadata/minions/easypki/chain" {
+  capabilities = ["list"]
+}
+
+path "kv/data/minions/easypki/server/argocd.khaddict.lab" {
+  capabilities = ["read"]
+}
+
+path "kv/metadata/minions/easypki/server/argocd.khaddict.lab" {
+  capabilities = ["list"]
+}
 ```

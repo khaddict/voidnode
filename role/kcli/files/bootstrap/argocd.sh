@@ -75,25 +75,38 @@ ARGOCD_SERVER_POD=$(kubectl get pod -n "$ARGOCD_NAMESPACE" \
   -o jsonpath='{.items[0].metadata.name}')
 
 ARGOCD_SERVER=$(kubectl get svc argocd-server -n "$ARGOCD_NAMESPACE" -o jsonpath='{.spec.clusterIP}')
-ARGOCD_INITIAL_PASSWORD=$(kubectl -n "$ARGOCD_NAMESPACE" get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
 ARGOCD_PASSWORD=$(vault kv get -tls-skip-verify -field="argocd_dashboard_password" "kv/kubernetes/argocd")
 
 if kubectl exec "$ARGOCD_SERVER_POD" -n "$ARGOCD_NAMESPACE" -- \
   argocd login "$ARGOCD_SERVER:443" \
   --username admin \
-  --password "$ARGOCD_INITIAL_PASSWORD" \
+  --password "$ARGOCD_PASSWORD" \
   --skip-test-tls \
   --grpc-web \
   --plaintext \
-  --insecure; then
-  kubectl exec "$ARGOCD_SERVER_POD" -n "$ARGOCD_NAMESPACE" -- \
-    argocd account update-password \
-    --account admin \
-    --current-password "$ARGOCD_INITIAL_PASSWORD" \
-    --new-password "$ARGOCD_PASSWORD" \
-    --server "$ARGOCD_SERVER:443"
+  --insecure >/dev/null 2>&1; then
+  echo "Admin password already set to the target value, skipping reset."
+elif kubectl get secret argocd-initial-admin-secret -n "$ARGOCD_NAMESPACE" >/dev/null 2>&1; then
+  ARGOCD_INITIAL_PASSWORD=$(kubectl -n "$ARGOCD_NAMESPACE" get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)
+  if kubectl exec "$ARGOCD_SERVER_POD" -n "$ARGOCD_NAMESPACE" -- \
+    argocd login "$ARGOCD_SERVER:443" \
+    --username admin \
+    --password "$ARGOCD_INITIAL_PASSWORD" \
+    --skip-test-tls \
+    --grpc-web \
+    --plaintext \
+    --insecure; then
+    kubectl exec "$ARGOCD_SERVER_POD" -n "$ARGOCD_NAMESPACE" -- \
+      argocd account update-password \
+      --account admin \
+      --current-password "$ARGOCD_INITIAL_PASSWORD" \
+      --new-password "$ARGOCD_PASSWORD" \
+      --server "$ARGOCD_SERVER:443"
+  else
+    echo "Failed to log in with the initial admin password. Argo CD may not be ready yet."
+  fi
 else
-  echo "Failed to log in with the initial admin password. It may already have been changed, or Argo CD may not be ready yet."
+  echo "Could not log in with the target password and no initial admin secret was found. You may need to reset the admin password manually."
 fi
 
 echo "Applying app of apps..."

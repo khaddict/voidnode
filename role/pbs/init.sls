@@ -22,8 +22,8 @@ rclone_pkg:
     - makedirs: True
     - template: jinja
     - context:
-        kdrive_user: {{ kdrive_user }}
-        kdrive_encrypted_password: {{ kdrive_encrypted_password }}
+        kdrive_user: "{{ kdrive_user }}"
+        kdrive_encrypted_password: "{{ kdrive_encrypted_password }}"
 
 /etc/systemd/system/rclone-sync.service:
   file.managed:

@@ -1,3 +1,5 @@
+{% import_yaml 'data/main.yaml' as data %}
+{% set domain = data.network.domain %}
 {% set root_token = salt['vault'].read_secret('kv/minions/vault/default').root_token %}
 
 include:
@@ -9,6 +11,9 @@ include:
     - mode: 644
     - user: root
     - group: root
+    - template: jinja
+    - context:
+        domain: {{ domain }}
 
 /etc/systemd/system/vault.service:
   file.managed:
@@ -27,7 +32,7 @@ vault:
 
 /root/.vault-token:
   file.managed:
-    - contents: {{ root_token }}
+    - contents: "{{ root_token }}"
     - mode: 600
     - user: root
     - group: root
