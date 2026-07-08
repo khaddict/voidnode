@@ -71,9 +71,9 @@ netbox_repo_git:
 /opt/netbox/netbox/netbox/configuration.py:
   file.managed:
     - source: salt://role/netbox/files/configuration.py
-    - mode: 644
+    - mode: 640
     - user: root
-    - group: root
+    - group: netbox
     - template: jinja
     - context:
         psql_password: {{ psql_password }}

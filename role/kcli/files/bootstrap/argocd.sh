@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+umask 077
 
 ARGOCD_NAMESPACE="argocd"
 export VAULT_ADDR="https://vault.khaddict.lab:8200/"

@@ -3,7 +3,7 @@
 /etc/salt/master.d/vault.conf:
   file.managed:
     - source: salt://role/saltmaster/files/vault.conf
-    - mode: 644
+    - mode: 600
     - user: salt
     - group: salt
     - template: jinja

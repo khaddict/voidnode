@@ -92,7 +92,7 @@ harbor_archive:
 /etc/harbor/harbor.yml:
   file.managed:
     - source: salt://role/registry/files/harbor.yml
-    - mode: 644
+    - mode: 600
     - user: root
     - group: root
     - template: jinja

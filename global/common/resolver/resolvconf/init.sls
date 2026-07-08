@@ -7,6 +7,9 @@
 /etc/resolv.conf:
   file.managed:
     - source: salt://global/common/resolver/resolvconf/files/resolv.conf
+    - mode: 644
+    - user: root
+    - group: root
     - template: jinja
     - context:
         domain: {{ domain }}

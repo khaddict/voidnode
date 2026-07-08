@@ -4,11 +4,13 @@
 |----------|----|-----|-----|----|-----|----------|----|--------|
 | CORE      | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | ADMIN     | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| INFRA     | ✖* | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| EDGE      | ✖* | ✖* | ✖ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| INFRA     | ✖* | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| EDGE      | ✖* | ✖* | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ |
 
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` to scrape node_exporter metrics.  
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` to run blackbox_exporter probes.  
+\* **Exception**: `PROMETHEUS` (`INFRA`) → `ADMIN net` `TCP/9100` to scrape node_exporter metrics on ADMIN.  
+\* **Exception**: `PROMETHEUS` (`INFRA`) → `ADMIN net` `ICMP` to run blackbox_exporter probes on ADMIN.  
 \* **Exception**: `STACKSTORM` (`ADMIN`) → `CORE` `SSH` to run StackStorm workflows.  
 \* **Exception**: `K8S` (`EDGE`) → `PVE` (`CORE`) `TCP/8006` for Homepage widget access to PVE.  
 \* **Exception**: `K8S` (`EDGE`) → `PBS` (`ADMIN`) `TCP/8007` for Homepage widget access to PBS.  

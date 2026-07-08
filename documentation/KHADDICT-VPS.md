@@ -6,7 +6,7 @@
 |---------------------|-------|---------------------|------|
 | khaddict.com        | A     | XXX.XXX.XXX.XXX     | Auto |
 | www                 | CNAME | khaddict.com.       | Auto |
-| site                | CNAME | khaddict.com.       | Auto |
+| website             | CNAME | khaddict.com.       | Auto |
 | homepage            | CNAME | khaddict.com.       | Auto |
 | images              | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |

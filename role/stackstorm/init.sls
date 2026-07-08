@@ -18,7 +18,7 @@
 /etc/st2/st2.conf:
   file.managed:
     - source: salt://role/stackstorm/files/st2.conf
-    - mode: 644
+    - mode: 600
     - user: root
     - group: root
     - template: jinja
@@ -33,6 +33,8 @@
     - source: salt://role/stackstorm/files/packs/st2_voidnode
     - include_empty: True
     - template: jinja
+    - file_mode: 600
+    - dir_mode: 700
     - context:
         snapshot_vms_discord_webhook: {{ snapshot_vms_discord_webhook }}
         dns_api_key: {{ dns_api_key }}

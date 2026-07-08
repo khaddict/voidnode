@@ -12,6 +12,9 @@ systemd_pkg:
   file.managed:
     - name: /etc/systemd/network/10-{{ vm.main_iface }}.network
     - source: salt://global/common/network/systemd-networkd/files/default-networkd-conf
+    - mode: 644
+    - user: root
+    - group: root
     - template: jinja
     - context:
         gateway: {{ vm.gateway }}

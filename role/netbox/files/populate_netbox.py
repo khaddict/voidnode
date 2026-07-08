@@ -1,3 +1,7 @@
+import ipaddress
+import random
+
+import yaml
 from django.utils.text import slugify
 
 from dcim.models import Site, Device, DeviceRole, Manufacturer, DeviceType, Interface
@@ -6,10 +10,6 @@ from extras.scripts import Script, StringVar
 from ipam.models import VLAN, Prefix, IPAddress
 from utilities.exceptions import AbortScript
 from virtualization.models import VirtualMachine, VMInterface
-
-import ipaddress
-import yaml
-import random
 
 class PopulateNetBox(Script):
 
@@ -468,7 +468,6 @@ class PopulateNetBox(Script):
         pve = config.get("pve", {})
 
         vm_groups = {
-            "core": pve.get("core", {}),
             "vms": pve.get("vms", {}),
             "lxc": pve.get("lxc", {}),
         }

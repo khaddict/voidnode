@@ -36,7 +36,7 @@ alertmanager_archive:
 /etc/alertmanager/alertmanager.yml:
   file.managed:
     - source: salt://role/prometheus/files/alertmanager.yml
-    - mode: 644
+    - mode: 600
     - user: alertmanager
     - group: alertmanager
     - template: jinja

@@ -3,7 +3,7 @@ name: metallb
 description: A Helm chart for metallb
 type: application
 version: 0.1.0
-appVersion: "0.15.3"
+appVersion: "v0.16.1"
 home: https://metallb.universe.tf
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/metallb
