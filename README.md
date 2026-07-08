@@ -118,7 +118,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `homepage` | Dashboard. Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
 | `www.khaddict.com` | Main static site (nginx, 3 replicas) |
 | `website.khaddict.com` | Secondary static site (nginx, 3 replicas) |
-| `images.khaddict.com` | Image hosting via nginx, 5Gi PVC |
+| `images.khaddict.com` | Image hosting via nginx, ConfigMap-backed |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
@@ -137,18 +137,18 @@ Minions authenticate to Vault via AppRole (`auth/salt-minions`). Each minion has
 
 ## External exposure
 
-Public traffic arrives at an **Infomaniak VPS** first. nginx runs in pure TCP passthrough mode (stream module), forwarding raw TLS as-is to HAProxy at `revproxy` with PROXY protocol to preserve the real client IP. HTTP (port 80) is redirected to HTTPS at the VPS level.
+Public traffic arrives at an **Infomaniak VPS** first. nginx does SNI-based TCP routing (stream module + `ssl_preread`): `status.khaddict.com` is terminated locally on the VPS, everything else is forwarded as raw TLS passthrough to HAProxy at `revproxy` (over the WireGuard tunnel) with PROXY protocol to preserve the real client IP. HTTP (port 80) is redirected to HTTPS at the VPS level.
 
 ```
 Browser
-  → nginx VPS :443 (TCP passthrough, PROXY protocol)
-    → HAProxy revproxy (SSL termination)
-      ├── Kubernetes services    → Envoy Gateway HTTPRoute
-      ├── matomo.khaddict.com    → Matomo LXC
-      └── status.khaddict.com    → Uptime Kuma VPS via WireGuard
+  → nginx VPS :443 (SNI routing via ssl_preread)
+    ├── status.khaddict.com    → local nginx vhost :4443 (SSL termination) → Uptime Kuma :3001 (same VPS)
+    └── everything else        → HAProxy revproxy via WireGuard (PROXY protocol, SSL termination)
+          ├── Kubernetes services    → Envoy Gateway HTTPRoute
+          └── matomo.khaddict.com    → Matomo LXC
 ```
 
-**Uptime Kuma** runs directly on the VPS (Node.js + PM2). HAProxy reaches it over a WireGuard tunnel, so the status page stays up even if the entire homelab goes down.
+**Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down.
 
 **Public domains:** `khaddict.com` · `www` · `website` · `homepage` · `images` · `matomo` · `status`
 

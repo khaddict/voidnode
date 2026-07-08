@@ -19,7 +19,6 @@
 \* **Exception**: `K8S` (`EDGE`) → `GRAFANA` (`INFRA`) `TCP/3000` for Homepage widget access to Grafana.  
 \* **Exception**: `K8S` (`EDGE`) → `ALERTMANAGER` (`INFRA`) `TCP/9093` for VMAlert to send alerts to AlertManager.  
 \* **Exception**: `K8S` (`EDGE`) → `This Firewall` (`CORE`) `TCP/443` for Homepage widget access to the firewall.  
-\* **Exception**: `REVPROXY` (`EDGE`) → `STATUS` (`VPN/WireGuard`, 10.1.0.2) `TCP/3001` to forward status.khaddict.com traffic to Uptime Kuma.  
 
 # VLAN 10 CORE
 
