@@ -3,7 +3,7 @@ description: Create sequential Proxmox snapshots for VMs with vmid < 200, prune 
 
 vars:
   - pve_node: voidnode
-  - snapshot_name: "<% 'auto_snapshot_' + str(now().year) + str(now().month) + str(now().day) + '_' + str(now().hour + 1) + str(now().minute) + str(now().second) %>"
+  - snapshot_name: "<% 'auto_snapshot_' + str(now().year) + str(now().month) + str(now().day) + '_' + str(now().hour) + str(now().minute) + str(now().second) %>"
   - snapshot_script: |
       SUCCESS=0
       FAILED=0

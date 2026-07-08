@@ -1,5 +1,7 @@
-# Administrator SSH key
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDCYof7EQ8eiEsSmIdsXqsciWKVab/LQjb2cffsqTxVf admin@khaddict.com
+# Administrator SSH keys
+{%- for key in admin_ssh_keys %}
+{{ key }}
+{%- endfor %}
 # StackStorm SSH key
 {{ stackstorm_ssh }}
 # EasyPKI SSH key

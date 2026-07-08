@@ -149,6 +149,6 @@ nginx:
 /opt/netbox/data/inventory.yaml:
   file.managed:
     - source: salt://data/main.yaml
-    - mode: 644
+    - mode: 640
     - user: netbox
     - group: netbox

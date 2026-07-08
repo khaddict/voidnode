@@ -103,6 +103,18 @@ harbor_archive:
     - require:
       - archive: harbor_archive
 
+harbor_install:
+  cmd.run:
+    - name: ./install.sh
+    - cwd: /etc/harbor
+    - require:
+      - archive: harbor_archive
+      - file: /etc/harbor/harbor.yml
+      - pkg: docker_packages_pkg
+    - onchanges:
+      - archive: harbor_archive
+      - file: /etc/harbor/harbor.yml
+
 trivy_archive:
   archive.extracted:
     - name: /usr/local/src/trivy-{{ trivy_version }}
@@ -137,6 +149,7 @@ harbor:
     - require:
       - pkg: docker_packages_pkg
       - file: /etc/systemd/system/harbor.service
+      - cmd: harbor_install
     - watch:
       - file: /etc/systemd/system/harbor.service
       - file: /etc/harbor/harbor.yml

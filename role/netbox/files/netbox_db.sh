@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # chmod +x /opt/netbox_db.sh && /bin/bash /opt/netbox_db.sh
 

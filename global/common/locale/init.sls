@@ -6,7 +6,9 @@ locales_pkg:
     - name: locales
 
 en_US.UTF-8 UTF-8:
-  locale.present
+  locale.present:
+    - require:
+      - pkg: locales_pkg
 
 /etc/default/locale:
   file.managed:
@@ -23,6 +25,7 @@ en_US.UTF-8 UTF-8:
     - mode: 644
     - require:
       - pkg: keyboard_configuration_pkg
+      - pkg: console_setup_pkg
 
 console_setup_pkg:
   pkg.installed:

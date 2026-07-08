@@ -1,44 +1,44 @@
 # Common packages
 common_packages:
   common:
-    - curl
-    - git
-    - htop
-    - tmux
-    - jq
-    - gnupg
-    - rsync
-    - tree
-    - bc
-    - qemu-guest-agent
-    - parted
-    - figlet
-    - lolcat
-    - ca-certificates
-    - fping
-    - tcpdump
-    - tig
-    - iproute2
-    - netcat-openbsd
+    - "curl"
+    - "git"
+    - "htop"
+    - "tmux"
+    - "jq"
+    - "gnupg"
+    - "rsync"
+    - "tree"
+    - "bc"
+    - "qemu-guest-agent"
+    - "parted"
+    - "figlet"
+    - "lolcat"
+    - "ca-certificates"
+    - "fping"
+    - "tcpdump"
+    - "tig"
+    - "iproute2"
+    - "netcat-openbsd"
   debian:
-    - yq
-    - bind9-dnsutils
+    - "yq"
+    - "bind9-dnsutils"
   ubuntu:
-    - dnsutils
+    - "dnsutils"
 
 # Binaries
 binaries:
   common: []
   debian: []
   ubuntu:
-    - yq
+    - "yq"
 
 # Purged packages
 purged_packages:
   common:
-    - openipmi
-    - netplan.io
-    - netplan-generator
-    - cloud-init
+    - "openipmi"
+    - "netplan.io"
+    - "netplan-generator"
+    - "cloud-init"
   debian: []
   ubuntu: []

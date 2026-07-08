@@ -3,6 +3,7 @@
 {% import_yaml 'data/main.yaml' as data %}
 {% set stackstorm_ssh = data.pve.vms.stackstorm.ssh %}
 {% set easypki_ssh = data.pve.vms.easypki.ssh %}
+{% set admin_ssh_keys = data.admin_ssh_keys %}
 
 openssh_server_pkg:
   pkg.installed:
@@ -31,6 +32,7 @@ openssh_server_pkg:
     - template: jinja
     - context:
         fqdn: {{ fqdn }}
+        admin_ssh_keys: {{ admin_ssh_keys }}
         stackstorm_ssh: "{{ stackstorm_ssh }}"
         easypki_ssh: "{{ easypki_ssh }}"
 
@@ -48,6 +50,8 @@ ssh:
   service.running:
     - enable: True
     - reload: True
+    - require:
+      - pkg: openssh_server_pkg
     - watch:
       - file: /etc/ssh/sshd_config
       - file: /root/.ssh/config

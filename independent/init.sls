@@ -1,5 +1,5 @@
 include:
-  - global.common.salt-minion.independent
+  - global.common.salt-minion
   - global.common.sources
   - global.common.ca
   - global.common.network
