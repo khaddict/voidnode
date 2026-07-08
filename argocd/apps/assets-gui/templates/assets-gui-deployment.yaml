@@ -17,7 +17,7 @@ spec:
         {{- include "assets-gui.selectorLabels" . | nindent 8 }}
     spec:
       imagePullSecrets:
-      - name: regcred
+      - name: {{ .Values.imagePullSecret.name }}
       containers:
       - name: {{ .Values.app }}
         image: {{ .Values.deployment.image }}

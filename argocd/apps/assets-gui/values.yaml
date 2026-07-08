@@ -53,6 +53,10 @@ persistence:
 secret:
   name: assets-gui-env
 
+imagePullSecret:
+  name: regcred
+  dockerconfigjson: <path:kv/data/kubernetes/assets-gui#dockerconfigjson>
+
 httproute:
   host: assets.khaddict.lab
   gatewayName: envoy-gateway

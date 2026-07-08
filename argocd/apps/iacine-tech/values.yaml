@@ -38,6 +38,10 @@ probes:
 secret:
   name: iacine-tech-env
 
+imagePullSecret:
+  name: regcred
+  dockerconfigjson: <path:kv/data/kubernetes/iacine-tech#dockerconfigjson>
+
 httproute:
   host: iacine-tech.khaddict.lab
   gatewayName: envoy-gateway

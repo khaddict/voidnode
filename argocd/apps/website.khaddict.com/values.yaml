@@ -35,9 +35,6 @@ probes:
     initialDelaySeconds: 5
     periodSeconds: 5
 
-secret:
-  name: website-khaddict
-
 httproute:
   host: website.khaddict.lab
   gatewayName: envoy-gateway
