@@ -1,3 +1,6 @@
+{% import_yaml 'data/main.yaml' as data %}
+{% set domain = data.network.domain %}
+{% set public_domain = data.network.public_domain %}
 {% set infomaniak_token = salt['vault'].read_secret('kv/minions/revproxy/default').infomaniak_token %}
 
 haproxy_pkg:
@@ -13,9 +16,13 @@ certbot_pkgs:
 /etc/haproxy/haproxy.cfg:
   file.managed:
     - source: salt://role/revproxy/files/haproxy.cfg
+    - template: jinja
     - mode: 644
     - user: root
     - group: root
+    - context:
+        domain: {{ domain }}
+        public_domain: {{ public_domain }}
     - require:
       - pkg: haproxy_pkg
     - listen_in:

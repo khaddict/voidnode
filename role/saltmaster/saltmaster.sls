@@ -59,7 +59,7 @@ salt-master:
     - watch:
       - file: /etc/salt/master
 
-# TODO: remove once Salt ships the fix — https://github.com/saltstack/salt/pull/66899
+# TODO: remove once Salt ships the fix : https://github.com/saltstack/salt/pull/66899
 /opt/saltstack/salt/lib/python3.10/site-packages/salt/utils/url.py:
   file.managed:
     - source: salt://role/saltmaster/files/url.py

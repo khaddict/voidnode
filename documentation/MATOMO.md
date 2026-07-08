@@ -76,7 +76,7 @@ Navigate to `http://matomo.khaddict.lab` (internal) or `https://matomo.khaddict.
 
 ## 4. DNS configuration
 
-#### OPNsense — internal host override
+#### OPNsense: internal host override
 
 Add a host override in **Services → Unbound DNS → Host Overrides**:
 
@@ -84,7 +84,7 @@ Add a host override in **Services → Unbound DNS → Host Overrides**:
 |--------|--------------|------------|
 | matomo | khaddict.lab | 10.40.0.3  |
 
-#### Public DNS — CNAME record
+#### Public DNS: CNAME record
 
 | Name   | Type  | Content       | TTL  |
 |--------|-------|---------------|------|
@@ -133,7 +133,7 @@ File: `/etc/caddy/Caddyfile`
 }
 ```
 
-`trusted_proxies 10.40.0.2` is critical: without it, Caddy ignores the upstream `X-Forwarded-Proto` and `X-Forwarded-Host` headers from HAProxy and regenerates them from its own (plain HTTP) connection — causing Matomo to believe it is running on `http://matomo.khaddict.lab` instead of `https://matomo.khaddict.com`, which breaks the login referrer security check.
+`trusted_proxies 10.40.0.2` is critical: without it, Caddy ignores the upstream `X-Forwarded-Proto` and `X-Forwarded-Host` headers from HAProxy and regenerates them from its own (plain HTTP) connection. This causes Matomo to believe it is running on `http://matomo.khaddict.lab` instead of `https://matomo.khaddict.com`, which breaks the login referrer security check.
 
 Reload after any change:
 
@@ -192,7 +192,7 @@ systemctl restart php8.3-fpm
 
 ## 8. nginx VPS configuration
 
-nginx uses **TLS passthrough** (stream module) on port 443 — it reads the SNI hostname without terminating SSL and forwards raw TCP to HAProxy at 10.40.0.2:443. No Matomo-specific nginx configuration is required beyond including `matomo.khaddict.com` in the port 80 HTTP redirect block.
+nginx uses **TLS passthrough** (stream module) on port 443. It reads the SNI hostname without terminating SSL and forwards raw TCP to HAProxy at 10.40.0.2:443. No Matomo-specific nginx configuration is required beyond including `matomo.khaddict.com` in the port 80 HTTP redirect block.
 
 The wildcard SSL certificate (`*.khaddict.com`) is managed on HAProxy, not on nginx.
 
@@ -227,7 +227,7 @@ The snippet is injected before `</head>` in the `index.html` of each tracked app
 | website.khaddict.com | `argocd/apps/website.khaddict.com/templates/website-khaddict-configmap.yaml` |
 | images.khaddict.com | `argocd/apps/images.khaddict.com/templates/images-khaddict-configmap.yaml` |
 
-All three use **siteId 1** — the subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
+All three use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
 
 Snippet:
 
@@ -258,7 +258,7 @@ Deploy via ArgoCD sync of the `www-khaddict` application.
 
 **Symptom:** `Échec de la sécurité du formulaire, en-tête referrer invalide` when submitting the login form at `https://matomo.khaddict.com`.
 
-**Cause:** Matomo determines its own URL from `HTTP_X_FORWARDED_HOST`. If that value is `matomo.khaddict.lab` (the internal hostname) instead of `matomo.khaddict.com`, Matomo expects `Referer: https://matomo.khaddict.lab/` but the browser sends `Referer: https://matomo.khaddict.com/` — mismatch → rejected.
+**Cause:** Matomo determines its own URL from `HTTP_X_FORWARDED_HOST`. If that value is `matomo.khaddict.lab` (the internal hostname) instead of `matomo.khaddict.com`, Matomo expects `Referer: https://matomo.khaddict.lab/` but the browser sends `Referer: https://matomo.khaddict.com/`. The mismatch gets the request rejected.
 
 This happens when Caddy regenerates `X-Forwarded-Host` from the `Host` header without `trusted_proxies` set.
 
@@ -268,7 +268,7 @@ This happens when Caddy regenerates `X-Forwarded-Host` from the `Host` header wi
 
 **Symptom:** `La sécurité du formulaire a échoué, le jeton ne correspond pas` when accessing via `http://matomo.khaddict.lab`.
 
-**Cause:** `force_ssl = 1` and `assume_secure_protocol = 1` cause Matomo to set the `Secure` flag on session cookies. When accessed over plain HTTP, the browser does not send those cookies back — the session is lost between page load and form submission, so the CSRF token cannot be matched.
+**Cause:** `force_ssl = 1` and `assume_secure_protocol = 1` cause Matomo to set the `Secure` flag on session cookies. When accessed over plain HTTP, the browser does not send those cookies back. The session is lost between page load and form submission, so the CSRF token cannot be matched.
 
 **Fix:** Always access Matomo via `https://matomo.khaddict.com`. Do not use the internal `.lab` URL for the admin interface.
 

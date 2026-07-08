@@ -447,7 +447,7 @@ if [[ "$existing_val" == "false" && "$vm_type" == "vm" ]]; then
     warn "Skipped StackStorm workflow."
   fi
 elif [[ "$vm_type" == "lxc" ]]; then
-  info "No LXC provisioning workflow — container was provisioned manually via pct."
+  info "No LXC provisioning workflow. Container was provisioned manually via pct."
 else
-  info "Existing entry registered — NetBox will sync on next highstate."
+  info "Existing entry registered. NetBox will sync on next highstate."
 fi

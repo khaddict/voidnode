@@ -3,6 +3,7 @@ admin_ssh_keys:
 
 network:
   domain: khaddict.lab
+  public_domain: khaddict.com
   default_iface: &default_iface ens18
 
   vlans:

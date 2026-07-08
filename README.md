@@ -87,7 +87,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 
 | Host | Type | Description |
 |------|------|-------------|
-| `revproxy.khaddict.lab` | VM | [HAProxy](https://www.haproxy.org/) reverse proxy. Handles SSL termination for all public `*.khaddict.com` domains. Routes by hostname to the appropriate backend: Kubernetes Envoy Gateway, Matomo LXC, or Uptime Kuma via WireGuard. Certificates renewed via Infomaniak DNS API. |
+| `revproxy.khaddict.lab` | VM | [HAProxy](https://www.haproxy.org/) reverse proxy. Handles SSL termination for all public `*.khaddict.com` domains except `status.khaddict.com` (terminated directly on the VPS, see Network architecture). Routes by hostname to the appropriate backend: Kubernetes Envoy Gateway or Matomo LXC. Certificates renewed via Infomaniak DNS API. |
 | `kcontrol.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes control plane. Manages the cluster API. No SSH, fully API-driven via `talosctl` and `kubectl` from `kcli`. |
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
