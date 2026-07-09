@@ -51,6 +51,16 @@
       ],
       "depNameTemplate": "kubernetes/kubernetes",
       "datasourceTemplate": "github-releases"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/role/easypki/init\\.sls$/"],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\{% set easypki_rev = '(?<currentDigest>[^']+)' %\\}"
+      ],
+      "currentValueTemplate": "main",
+      "packageNameTemplate": "https://github.com/{{depName}}",
+      "datasourceTemplate": "{{datasource}}"
     }
   ]
 }

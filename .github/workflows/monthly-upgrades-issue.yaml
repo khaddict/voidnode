@@ -16,9 +16,57 @@ jobs:
           script: |
             const now = new Date();
             const title = `Upgrades - ${now.toLocaleString("en-US", { month: "long", year: "numeric" })}`;
-            await github.rest.issues.create({
+
+            const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title,
-              labels: ["upgrades"],
+              state: "all",
+              labels: "upgrades",
             });
+            const match = existing.data.find((issue) => issue.title === title);
+
+            const body = [
+              "## Renovate",
+              "- [ ] Merge open Renovate PRs",
+              "",
+              "## Kubernetes",
+              "- [ ] New Talos OS release",
+              "- [ ] New Kubernetes release",
+              "- [ ] Helm apt mirror up to date",
+              "- [ ] Run `argocd.sh` on `kcli` if ArgoCD's version was bumped",
+              "- [ ] Hard refresh ArgoCD, check for out-of-sync apps",
+              "",
+              "## System infra",
+              "- [ ] New Proxmox VE & Proxmox Backup Server release",
+              "- [ ] OPNsense firmware update",
+              "- [ ] `apt update && apt upgrade -y && apt autoremove -y` on VMs & LXC",
+              "- [ ] Highstate all minions",
+              "- [ ] `certbot certificates` sanity check (revproxy + VPS)",
+              "",
+              "## Manual tools",
+              "- [ ] New Uptime Kuma release (on VPS)",
+              "- [ ] New NetBox release",
+              "",
+              "**⚠️ Reboot `voidnode` (the whole node) once everything above is done.**",
+              "",
+              "## Billing",
+              "- [ ] Infomaniak renewal & payment status (VPS, kDrive...)",
+            ].join("\n");
+
+            if (match) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body,
+              });
+              console.log(`Updated #${match.number} ("${title}") with the current template.`);
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ["upgrades"],
+              });
+            }
