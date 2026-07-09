@@ -15,6 +15,10 @@
       "matchPackageNames": [
         "/^registry\\.khaddict\\.lab//"
       ]
+    },
+    {
+      "matchDepNames": ["kubernetes/kubernetes"],
+      "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
     }
   ],
   "customManagers": [
@@ -46,8 +50,7 @@
         "URIs: https://pkgs\\.k8s\\.io/core:/stable:/v(?<currentValue>\\d+\\.\\d+)/deb/"
       ],
       "depNameTemplate": "kubernetes/kubernetes",
-      "datasourceTemplate": "github-releases",
-      "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
+      "datasourceTemplate": "github-releases"
     }
   ]
 }
