@@ -33,8 +33,10 @@
     - source: salt://role/stackstorm/files/packs/st2_voidnode
     - include_empty: True
     - template: jinja
-    - file_mode: 600
-    - dir_mode: 700
+    - user: root
+    - group: st2packs
+    - file_mode: 775
+    - dir_mode: 775
     - context:
         snapshot_vms_discord_webhook: "{{ snapshot_vms_discord_webhook }}"
         dns_api_key: "{{ dns_api_key }}"
