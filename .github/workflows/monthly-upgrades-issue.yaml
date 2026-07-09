@@ -73,5 +73,5 @@ jobs:
                 labels: ["upgrades"],
               });
             } else {
-              console.log(`No open "${title}" ticket to update, and this run was not triggered by the schedule — skipping.`);
+              console.log(`No open "${title}" ticket to update, and this run was not triggered by the schedule. Skipping.`);
             }

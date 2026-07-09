@@ -159,7 +159,8 @@ SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automaticall
 Full VM/LXC inventory with hardware specs, VLAN assignments, IPs, and backup flags: [data/main.yaml](data/main.yaml).  
 Firewall rules: [documentation/FIREWALL-RULES.md](documentation/FIREWALL-RULES.md).  
 VPS setup: [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md).  
-Talos & Kubernetes upgrades: [documentation/KUBERNETES-UPGRADE.md](documentation/KUBERNETES-UPGRADE.md).
+Talos & Kubernetes upgrades: [documentation/KUBERNETES-UPGRADE.md](documentation/KUBERNETES-UPGRADE.md).  
+Vault ACL policies: [documentation/VAULT-ACL-POLICIES.md](documentation/VAULT-ACL-POLICIES.md).
 
 ## License
 
