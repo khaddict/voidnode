@@ -3,7 +3,10 @@ name: Monthly upgrades ticket
 on:
   schedule:
     - cron: "0 8 1 * *"
-  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/monthly-upgrades-issue.yaml"
 
 jobs:
   create-issue:
@@ -11,7 +14,7 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const now = new Date();
@@ -20,7 +23,7 @@ jobs:
             const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: "all",
+              state: "open",
               labels: "upgrades",
             });
             const match = existing.data.find((issue) => issue.title === title);
@@ -61,7 +64,7 @@ jobs:
                 body,
               });
               console.log(`Updated #${match.number} ("${title}") with the current template.`);
-            } else {
+            } else if (context.eventName === "schedule") {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -69,4 +72,6 @@ jobs:
                 body,
                 labels: ["upgrades"],
               });
+            } else {
+              console.log(`No open "${title}" ticket to update, and this run was not triggered by the schedule — skipping.`);
             }
