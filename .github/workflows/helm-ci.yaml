@@ -11,7 +11,7 @@ on:
 
 env:
   # renovate: depName=helm/helm datasource=github-releases
-  HELM_VERSION: "4.2.2"
+  HELM_VERSION: "4.2.3"
   # renovate: depName=yannh/kubeconform datasource=github-releases
   KUBECONFORM_VERSION: "0.8.0"
 
