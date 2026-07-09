@@ -1,0 +1,192 @@
+version: 1.0
+description: Bootstrap an already-existing LXC container as a Salt minion and apply the base highstate.
+
+input:
+  - name
+
+vars:
+  - domain: "khaddict.lab"
+  - msg: ""
+  - vmid: ""
+  - ip: ""
+  - tags: ""
+  - saltmaster_sshkey: ""
+  - pve: "voidnode.<% ctx().domain %>"
+  - saltmaster: "saltmaster.<% ctx().domain %>"
+  - node: "voidnode"
+
+tasks:
+  extract_lxc_fields:
+    action: core.local
+    input:
+      cmd: |
+        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) | .pve.lxc["<% ctx().name %>"] as $lxc |
+          [
+            $lxc.vmid,
+            $lxc.ip,
+            $lxc.tags
+          ] | @tsv' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() and result().stdout != "" %>
+        publish:
+          - vmid: <% result().stdout.split("\t")[0] %>
+          - ip: <% result().stdout.split("\t")[1] %>
+          - tags: <% result().stdout.split("\t")[2] %>
+        do: check_already_minion
+      - when: <% succeeded() and result().stdout = "" %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' not found in main.yaml (pve.lxc)."
+
+  check_already_minion:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      cmd: |
+        salt-key -l accepted | grep -qx "<% ctx().name %>" && echo EXISTS || echo ABSENT
+    next:
+      - when: <% result()[ctx().saltmaster].stdout = "EXISTS" %>
+        do: noop
+        publish:
+          - msg: "LXC '<% ctx().name %>' is already a registered minion. Skipping bootstrap."
+      - when: <% result()[ctx().saltmaster].stdout = "ABSENT" %>
+        do: extract_saltmaster_key
+
+  extract_saltmaster_key:
+    action: core.local
+    input:
+      cmd: |
+        yq --yaml-fix-merge-anchor-to-spec=true -r 'explode(.) | .pve.vms["saltmaster"].ssh' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() and result().stdout != "" %>
+        publish:
+          - saltmaster_sshkey: <% result().stdout %>
+        do: prepare_lxc_container
+      - when: <% succeeded() and result().stdout = "" %>
+        publish:
+          - msg: "Failed to retrieve the saltmaster SSH public key from main.yaml."
+
+  prepare_lxc_container:
+    action: core.remote
+    input:
+      hosts: <% ctx().pve %>
+      username: root
+      cmd: |
+        pct exec <% ctx().vmid %> -- hostnamectl set-hostname "<% ctx().name %>"
+        pct exec <% ctx().vmid %> -- bash -c "mkdir -p /etc/salt && echo '<% ctx().name %>' > /etc/salt/minion_id"
+        pct exec <% ctx().vmid %> -- bash -c "mkdir -p /root/.ssh && chmod 700 /root/.ssh && echo '<% ctx().saltmaster_sshkey %>' >> /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys"
+        pct exec <% ctx().vmid %> -- bash -c "touch /etc/.pve-ignore.hosts /etc/network/.pve-ignore.interfaces"
+        pct exec <% ctx().vmid %> -- bash -c "
+          apt-get update -qq &&
+          apt-get install -y -qq openssh-sftp-server &&
+          grep -q '^Subsystem[[:space:]]\+sftp' /etc/ssh/sshd_config || echo 'Subsystem sftp /usr/lib/openssh/sftp-server' >> /etc/ssh/sshd_config &&
+          systemctl restart ssh
+        "
+    next:
+      - when: <% succeeded() %>
+        do: clear_stackstorm_known_host
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to prepare LXC '<% ctx().name %>' (vmid <% ctx().vmid %>) for Salt bootstrap (hostname, SSH key, or SFTP subsystem)."
+
+  clear_stackstorm_known_host:
+    action: core.local
+    input:
+      cmd: |
+        ssh-keygen -R "<% ctx().ip %>" || true
+    next:
+      - when: <% succeeded() or failed() %>
+        do: clear_saltmaster_known_host
+
+  clear_saltmaster_known_host:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      cmd: |
+        ssh-keygen -R "<% ctx().ip %>" || true
+    next:
+      - when: <% succeeded() %>
+        do: bootstrap_minion
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to clear the saltmaster known_hosts entry for LXC '<% ctx().name %>' (<% ctx().ip %>)."
+
+  bootstrap_minion:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      timeout: 180
+      cmd: |
+        salt-ssh --user=root --priv=/root/.ssh/id_ed25519 <% ctx().ip %> state.sls independent_lxc
+    next:
+      - when: <% succeeded() %>
+        do: wait_for_unaccepted_key
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to bootstrap the independent Salt minion on LXC '<% ctx().name %>'."
+
+  wait_for_unaccepted_key:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      timeout: 180
+      cmd: |
+        until salt-key -l unaccepted | grep -qx "<% ctx().name %>"; do sleep 1; done
+    next:
+      - when: <% succeeded() %>
+        do: accept_salt_key
+      - when: <% failed() %>
+        publish:
+          - msg: "Timed out waiting for LXC '<% ctx().name %>' to register an unaccepted Salt key."
+
+  accept_salt_key:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      timeout: 30
+      cmd: |
+        salt-key -a "<% ctx().name %>" -y
+    next:
+      - when: <% succeeded() %>
+        do: wait_ssh_ready
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to accept the Salt key for LXC '<% ctx().name %>'."
+
+  wait_ssh_ready:
+    action: core.local
+    input:
+      cmd: |
+        until nc -z -w1 <% ctx().ip %> 22 >/dev/null 2>&1; do sleep 1; done
+    next:
+      - when: <% succeeded() %>
+        do: run_highstate
+      - when: <% failed() %>
+        publish:
+          - msg: "Timed out waiting for SSH on LXC '<% ctx().name %>' (<% ctx().ip %>)."
+
+  run_highstate:
+    action: core.remote
+    input:
+      hosts: <% ctx().ip %>
+      username: root
+      timeout: 240
+      cmd: |
+        salt-call state.highstate
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' (vmid <% ctx().vmid %>) was bootstrapped as a Salt minion and the highstate applied successfully."
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to apply the Salt highstate on LXC '<% ctx().name %>'."
+
+output:
+  - msg: <% ctx().msg %>
+  - vmid: <% ctx().vmid %>
+  - ip: <% ctx().ip %>
+  - tags: <% ctx().tags %>

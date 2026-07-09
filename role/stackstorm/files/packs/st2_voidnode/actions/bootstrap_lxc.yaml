@@ -1,0 +1,12 @@
+name: bootstrap_lxc
+pack: st2_voidnode
+description: Bootstrap an already-existing LXC container as a Salt minion and apply the base highstate.
+runner_type: orquesta
+entry_point: workflows/bootstrap_lxc.yaml
+enabled: true
+
+parameters:
+  name:
+    type: string
+    required: true
+    description: The LXC name defined in main.yaml (pve.lxc).

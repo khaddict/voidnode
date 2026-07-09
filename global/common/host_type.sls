@@ -3,11 +3,12 @@
 
 {#
   Determine the type of this host based on data/main.yaml.
-  This allows other states to branch consistently (vm vs node) without
+  This allows other states to branch consistently (vm vs node vs lxc) without
   re-implementing the same logic repeatedly.
 #}
 {% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
 {% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
+{% set lxc = data.get('pve', {}).get('lxc', {}).get(host) %}
 
 {% if vm %}
 host_type_grain:
@@ -19,6 +20,11 @@ host_type_grain:
   grains.present:
     - name: host_type
     - value: node
+{% elif lxc %}
+host_type_grain:
+  grains.present:
+    - name: host_type
+    - value: lxc
 {% else %}
 # Host not found in data/main.yaml: remove the grain to avoid accidental default behavior.
 host_type_grain:

@@ -1,0 +1,12 @@
+name: decommission_lxc
+pack: st2_voidnode
+description: Decommission an LXC container and clean up its Salt key.
+runner_type: orquesta
+entry_point: workflows/decommission_lxc.yaml
+enabled: true
+
+parameters:
+  name:
+    type: string
+    required: true
+    description: The LXC name defined in main.yaml (pve.lxc).

@@ -160,8 +160,96 @@ template_to_image_tag() {
   esac
 }
 
-section "Block Generator"
+section "Main Manager"
 info "Target file: $MAIN_FILE"
+
+section "Mode"
+printf "  %s1%s Create\n" "$CYAN" "$RESET"
+printf "  %s2%s Delete\n" "$CYAN" "$RESET"
+mode_choice="$(prompt "Mode number" "1")"
+case "$mode_choice" in
+  1) mode="create" ;;
+  2) mode="delete" ;;
+  *) fail "invalid mode choice" ;;
+esac
+
+if [[ "$mode" == "delete" ]]; then
+  section "Identity"
+  hostname="$(prompt "Hostname")"
+  require_non_empty "hostname" "$hostname"
+
+  host_section="$(awk -v host="$hostname" '
+    /^  vms:$/ { section = "vm" }
+    /^  lxc:$/ { section = "lxc" }
+    $0 ~ "^    " host ":$" { print section; exit }
+  ' "$MAIN_FILE")"
+
+  if [[ -z "$host_section" ]]; then
+    fail "hostname '$hostname' not found in main.yaml"
+  fi
+
+  vmid="$(awk -v host="$hostname" '
+    $0 ~ "^    " host ":$" { grab=1; next }
+    grab && /^      vmid:/ { print $2; exit }
+  ' "$MAIN_FILE")"
+
+  description="$(awk -v host="$hostname" '
+    $0 ~ "^    " host ":$" { grab=1; next }
+    grab && /^      description:/ { sub(/^      description: /, ""); print; exit }
+  ' "$MAIN_FILE")"
+
+  section "Summary"
+  kv "Type" "$host_section"
+  kv "Hostname" "$hostname"
+  kv "VMID" "$vmid"
+  kv "Description" "$description"
+
+  warn "This will PERMANENTLY destroy '${hostname}' (vmid ${vmid}) on PVE."
+  if [[ "$(yes_no "Continue?" "n")" != "true" ]]; then
+    warn "Cancelled. No action taken."
+    exit 0
+  fi
+
+  if [[ "$host_section" == "vm" ]]; then
+    workflow_action="decommission_vm"
+  else
+    workflow_action="decommission_lxc"
+  fi
+
+  section "Decommission"
+  info "Running: salt 'stackstorm' cmd.run 'st2 run st2_voidnode.${workflow_action} name=${hostname}'"
+  salt 'stackstorm' cmd.run "st2 run st2_voidnode.${workflow_action} name=${hostname}"
+
+  if [[ "$(yes_no "Did the decommission succeed? Remove the main.yaml entry now?" "n")" != "true" ]]; then
+    warn "Skipped. main.yaml was not modified."
+    exit 0
+  fi
+
+  if [[ "$host_section" == "vm" ]]; then
+    sentinel="    # [end:vms]"
+  else
+    sentinel="    # [end:lxc]"
+  fi
+
+  tmp_file="$(mktemp)"
+
+  awk -v host="$hostname" -v sentinel="$sentinel" '
+BEGIN { skip = 0 }
+{
+  if ($0 ~ "^    " host ":$") { skip = 1; next }
+  if (skip && $0 ~ "^    [A-Za-z0-9_-]+:$") { skip = 0 }
+  if (skip && $0 == sentinel) { skip = 0 }
+  if (skip) next
+  print $0
+}
+' "$MAIN_FILE" > "$tmp_file"
+
+  mv "$tmp_file" "$MAIN_FILE"
+  chmod 644 "$MAIN_FILE"
+
+  success "Done. '${hostname}' removed from $MAIN_FILE"
+  exit 0
+fi
 
 section "Type"
 printf "  %s1%s vm\n" "$CYAN" "$RESET"
@@ -174,6 +262,10 @@ case "$type_choice" in
 esac
 
 existing_val="$(yes_no "Already exists on PVE?" "n")"
+
+if [[ "$vm_type" == "lxc" && "$existing_val" == "false" ]]; then
+  fail "deploy the LXC container on PVE first (e.g. via community-scripts.org), then re-run this script."
+fi
 
 section "Identity"
 hostname="$(prompt "Hostname")"
@@ -295,7 +387,7 @@ cpu_cores="$(prompt "CPU cores" "$cpu_default")"
 require_int "CPU cores" "$cpu_cores"
 
 exporter_blackbox="$(yes_no "Enable blackbox_exporter (HTTP/ICMP probe)?" "y")"
-exporter_node="$(yes_no "Enable node_exporter (host metrics)?" "y")"
+exporter_node="$(yes_no "Scrape node_exporter metrics for this host? (installed on all hosts regardless)" "y")"
 backup="$(yes_no "Enable backup?" "y")"
 
 section "Storage"
@@ -324,7 +416,6 @@ if [[ "$vm_type" == "vm" ]]; then
   vm_block="$(cat <<EOF
     ${hostname}:
       vmid: ${vmid}
-      existing: ${existing_val}
       description: "${description}"
       template: ${template}
       tags: "${tags}"
@@ -353,7 +444,6 @@ else
   vm_block="$(cat <<EOF
     ${hostname}:
       vmid: ${vmid}
-      existing: ${existing_val}
       description: "${description}"
       tags: "${tags}"
       exporters:
@@ -447,7 +537,12 @@ if [[ "$existing_val" == "false" && "$vm_type" == "vm" ]]; then
     warn "Skipped StackStorm workflow."
   fi
 elif [[ "$vm_type" == "lxc" ]]; then
-  info "No LXC provisioning workflow. Container was provisioned manually via pct."
+  if [[ "$(yes_no "Launch workflow st2_voidnode.bootstrap_lxc?" "n")" == "true" ]]; then
+    info "Running: salt 'stackstorm' cmd.run 'st2 run st2_voidnode.bootstrap_lxc name=${hostname} --async'"
+    salt 'stackstorm' cmd.run "st2 run st2_voidnode.bootstrap_lxc name=${hostname} --async"
+  else
+    warn "Skipped StackStorm workflow."
+  fi
 else
-  info "Existing entry registered. NetBox will sync on next highstate."
+  info "Existing entry registered. Run the populate_netbox script in NetBox to sync."
 fi

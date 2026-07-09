@@ -411,13 +411,12 @@ pve:
   lxc:
     homelable:
       vmid: 113
-      existing: true
       description: "Homelable CT"
-      tags: "core,lxc"
+      tags: "edge,lxc"
       exporters:
         blackbox: true
         node: false
-      ip: 10.10.0.3
+      ip: 10.40.0.10
       main_iface: eth0
       hardware:
         ram_mb: 2048
@@ -427,11 +426,10 @@ pve:
           storage: local-lvm
           size_gb: 8
       backup: true
-      <<: *vlan_core
+      <<: *vlan_edge
 
     matomo:
       vmid: 108
-      existing: true
       description: "Matomo CT"
       tags: "edge,lxc"
       exporters:
@@ -451,12 +449,11 @@ pve:
 
     ollama:
       vmid: 118
-      existing: true
       description: "Ollama CT"
       tags: "edge,lxc"
       exporters:
         blackbox: true
-        node: false
+        node: true
       ip: 10.40.0.4
       main_iface: eth0
       hardware:
@@ -471,7 +468,6 @@ pve:
 
     openwebui:
       vmid: 119
-      existing: true
       description: "Openwebui CT"
       tags: "edge,lxc"
       exporters:

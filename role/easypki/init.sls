@@ -14,5 +14,6 @@ easypki_repo_git:
     - name: https://github.com/khaddict/easypki.git
     - target: /root/easypki
     - rev: {{ easypki_rev }}
+    - force_reset: True
     - require:
       - file: /root/easypki

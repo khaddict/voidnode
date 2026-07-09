@@ -7,7 +7,9 @@
 
 openssh_server_pkg:
   pkg.installed:
-    - name: openssh-server
+    - pkgs:
+      - openssh-server
+      - openssh-sftp-server
 
 /etc/ssh/sshd_config:
   file.managed:
@@ -49,7 +51,6 @@ openssh_server_pkg:
 ssh:
   service.running:
     - enable: True
-    - reload: True
     - require:
       - pkg: openssh_server_pkg
     - watch:

@@ -18,9 +18,9 @@
 /etc/st2/st2.conf:
   file.managed:
     - source: salt://role/stackstorm/files/st2.conf
-    - mode: 600
+    - mode: 640
     - user: root
-    - group: root
+    - group: st2
     - template: jinja
     - context:
         rabbitmq_password: "{{ rabbitmq_password }}"

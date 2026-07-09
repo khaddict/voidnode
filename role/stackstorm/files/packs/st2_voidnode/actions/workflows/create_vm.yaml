@@ -172,10 +172,30 @@ tasks:
         until nc -z -w1 <% ctx().ip %> 22 >/dev/null 2>&1; do sleep 1; done
     next:
       - when: <% succeeded() %>
-        do: set_hostname
+        do: clear_stackstorm_known_host
       - when: <% failed() %>
         publish:
           - msg: "Failed to start VM '<% ctx().name %>' or reach SSH on '<% ctx().ip %>:22'."
+
+  clear_stackstorm_known_host:
+    action: core.local
+    input:
+      cmd: |
+        ssh-keygen -R "<% ctx().ip %>" || true
+    next:
+      - when: <% succeeded() or failed() %>
+        do: clear_saltmaster_known_host
+
+  clear_saltmaster_known_host:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      cmd: |
+        ssh-keygen -R "<% ctx().ip %>" || true
+    next:
+      - when: <% succeeded() or failed() %>
+        do: set_hostname
 
   set_hostname:
     action: core.remote
@@ -268,10 +288,22 @@ tasks:
         salt-key -a "<% ctx().name %>" -y
     next:
       - when: <% succeeded() %>
-        do: run_highstate
+        do: wait_ssh_after_reboot
       - when: <% failed() %>
         publish:
           - msg: "Failed to accept the Salt key for VM '<% ctx().name %>'."
+
+  wait_ssh_after_reboot:
+    action: core.local
+    input:
+      cmd: |
+        until nc -z -w1 <% ctx().ip %> 22 >/dev/null 2>&1; do sleep 1; done
+    next:
+      - when: <% succeeded() %>
+        do: run_highstate
+      - when: <% failed() %>
+        publish:
+          - msg: "Timed out waiting for SSH on VM '<% ctx().name %>' (<% ctx().ip %>) after reboot."
 
   run_highstate:
     action: core.remote

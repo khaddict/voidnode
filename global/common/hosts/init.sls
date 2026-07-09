@@ -2,7 +2,7 @@
 {% set domain = data.network.domain %}
 {% set host = grains.get('host') %}
 {% set fqdn = host ~ '.' ~ domain %}
-{% set host_entry = data.pve.vms.get(host) or data.pve.nodes.get(host) %}
+{% set host_entry = data.pve.vms.get(host) or data.pve.nodes.get(host) or data.pve.lxc.get(host) %}
 {% set ip = host_entry.get('ip') %}
 
 /etc/hosts:

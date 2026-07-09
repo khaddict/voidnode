@@ -1,0 +1,154 @@
+version: 1.0
+description: Decommission a Proxmox LXC container and clean up its Salt key.
+
+input:
+  - name
+
+vars:
+  - domain: "khaddict.lab"
+  - msg: ""
+  - dns_record_uuid: ""
+  - pve: "voidnode.<% ctx().domain %>"
+  - saltmaster: "saltmaster.<% ctx().domain %>"
+  - node: "voidnode"
+  - opnsense_url: "https://opnsense.<% ctx().domain %>"
+  - opnsense_api_key: "{{ dns_api_key }}"
+  - opnsense_api_secret: "{{ dns_api_secret }}"
+  - opnsense_verify_ssl_cert: false
+
+tasks:
+  check_lxc_exists:
+    action: core.remote
+    input:
+      hosts: "<% ctx().pve %>"
+      username: root
+      cmd: |
+        pvesh get /nodes/<% ctx().node %>/lxc --output-format json | jq -re --arg name '<% ctx().name %>' 'first(.[] | select(.name == $name)) | .vmid | tostring'
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - vmid: <% result()[ctx().pve].stdout %>
+        do: check_lxc_status
+      - when: <% failed() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was not found on '<% ctx().pve %>'."
+
+  check_lxc_status:
+    action: core.remote
+    input:
+      hosts: "<% ctx().pve %>"
+      username: root
+      cmd: |
+        pct status <% ctx().vmid %> | awk '{print $2}'
+    next:
+      - when: <% succeeded() and result()[ctx().pve].stdout = "running" %>
+        do: stop_lxc
+      - when: <% succeeded() and result()[ctx().pve].stdout = "stopped" %>
+        do: delete_lxc
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to determine the power state of LXC '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
+
+  stop_lxc:
+    action: core.remote
+    input:
+      hosts: "<% ctx().pve %>"
+      username: root
+      cmd: |
+        pct stop <% ctx().vmid %>
+    next:
+      - when: <% succeeded() %>
+        do: delete_lxc
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to stop LXC '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
+
+  delete_lxc:
+    action: core.remote
+    input:
+      hosts: "<% ctx().pve %>"
+      username: root
+      cmd: |
+        pct destroy <% ctx().vmid %>
+    next:
+      - when: <% succeeded() %>
+        do: delete_salt_key
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to delete LXC '<% ctx().name %>' (vmid <% ctx().vmid %>) on '<% ctx().pve %>'."
+
+  delete_salt_key:
+    action: core.remote
+    input:
+      hosts: <% ctx().saltmaster %>
+      username: root
+      cmd: |
+        salt-key -d <% ctx().name %> -y
+    next:
+      - when: <% succeeded() %>
+        do: find_dns_record
+      - when: <% failed() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was deleted, but its Salt key could not be removed from '<% ctx().saltmaster %>'."
+
+  find_dns_record:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/settings/search_host_override/"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/x-www-form-urlencoded
+      body: "current=1&rowCount=-1&searchPhrase=<% ctx().name %>"
+    next:
+      - when: <% succeeded() and result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).len() > 0 %>
+        publish:
+          - dns_record_uuid: <% result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).select($.uuid).first() %>
+        do: delete_dns_record
+      - when: <% succeeded() and result().body.rows.where($.hostname = ctx().name and $.domain = ctx().domain).len() = 0 %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was decommissioned successfully. No DNS record was found in Unbound."
+      - when: <% failed() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was decommissioned, but DNS record lookup failed."
+
+  delete_dns_record:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/settings/del_host_override/<% ctx().dns_record_uuid %>"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/json
+    next:
+      - when: <% succeeded() %>
+        do: reconfigure_unbound_delete
+      - when: <% failed() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was decommissioned, but DNS record deletion failed."
+
+  reconfigure_unbound_delete:
+    action: core.http
+    input:
+      method: POST
+      url: "<% ctx().opnsense_url %>/api/unbound/service/reconfigure"
+      username: "<% ctx().opnsense_api_key %>"
+      password: "<% ctx().opnsense_api_secret %>"
+      verify_ssl_cert: <% ctx().opnsense_verify_ssl_cert %>
+      headers:
+        Content-Type: application/json
+      body: "{}"
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was decommissioned successfully. DNS record deleted and Unbound reconfigured."
+      - when: <% failed() %>
+        publish:
+          - msg: "LXC '<% ctx().name %>' was decommissioned, DNS record deleted, but Unbound reconfigure failed."
+
+output:
+  - msg: <% ctx().msg %>

@@ -2,8 +2,9 @@
 {% set host = grains.get('host') or '' %}
 {% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
 {% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
+{% set lxc = data.get('pve', {}).get('lxc', {}).get(host) %}
 
-{% if vm %}
+{% if vm or lxc %}
 include:
   - global.common.network.systemd-networkd
 {% elif node %}

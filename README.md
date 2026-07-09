@@ -55,7 +55,6 @@ Core infrastructure. Full outbound access, all other VLANs isolated from it by d
 |------|------|-------------|
 | `opnsense.khaddict.lab` | VM | [OPNsense](https://opnsense.org/) firewall, VLAN routing, DNS (Unbound), NTP. Acts as the default gateway and DNS resolver for all segments. |
 | `voidnode.khaddict.lab` | VM | [Proxmox VE](https://www.proxmox.com/en/proxmox-virtual-environment/overview) hypervisor. Hosts all VMs and LXC containers. Single bare-metal node. |
-| `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
 
 ## VLAN 20 – ADMIN `10.20.0.0/24`
 
@@ -65,7 +64,7 @@ Management plane. Hosts all the tooling that operates, secures, and maintains th
 |------|------|-------------|
 | `registry.khaddict.lab` | VM | [Harbor](https://goharbor.io/) container image registry. Stores custom-built Docker images used in Kubernetes. Also caches upstream images to avoid rate limits. |
 | `saltmaster.khaddict.lab` | VM | [SaltStack](https://saltproject.io/) master. Manages configuration of all Debian/Ubuntu VMs via states. Orchestrates provisioning, service configuration, certificate deployment, and package management. |
-| `stackstorm.khaddict.lab` | VM | [StackStorm](https://stackstorm.com/) event-driven automation engine. Runs a custom `st2_voidnode` pack that handles VM lifecycle (create, decommission, snapshot, template), PKI certificate provisioning, and sends Discord notifications. Triggered manually via CLI/API, or on a schedule (cron) for automated snapshots. |
+| `stackstorm.khaddict.lab` | VM | [StackStorm](https://stackstorm.com/) event-driven automation engine. Runs a custom `st2_voidnode` pack that handles VM and LXC lifecycle (create, bootstrap, decommission, snapshot, template), PKI certificate provisioning, and sends Discord notifications. Triggered manually via CLI/API, or on a schedule (cron) for automated snapshots. |
 | `vault.khaddict.lab` | VM | [HashiCorp Vault](https://www.vaultproject.io/). Central secrets store for the entire lab. SaltStack minions authenticate via AppRole with strict per-minion path isolation. Kubernetes workloads pull secrets at sync time via the ArgoCD Vault Plugin. |
 | `easypki.khaddict.lab` | VM | Internal PKI authority ([EasyPKI](https://github.com/khaddict/easypki)). Issues and renews TLS certificates for all internal `*.khaddict.lab` services. Certificates are provisioned by StackStorm and distributed by SaltStack. |
 | `pbs.khaddict.lab` | VM | [Proxmox Backup Server](https://www.proxmox.com/en/proxmox-backup-server). Stores VM backups on a dedicated 500GB disk. Most VMs back up nightly, with a few exceptions (PBS itself, stateless K8s nodes). |
@@ -95,6 +94,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `website.khaddict.com`, `images.khaddict.com`. Snippet injected via ArgoCD ConfigMaps. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
+| `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
 
 ## Kubernetes cluster
 
