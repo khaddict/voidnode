@@ -1,6 +1,7 @@
 {% set vault_token = salt['vault'].read_secret('kv/minions/kcli/default').vault_token %}
 {% import_yaml 'data/versions.yaml' as versions %}
 {% set k9s_version = versions.k9s %}
+{% set talosctl_version = versions.talosctl %}
 
 include:
   - base.vault
@@ -75,6 +76,13 @@ k9s_pkg:
     - require:
       - file: /tmp/k9s_linux_amd64.deb
     - unless: k9s version 2>&1 | grep -q "{{ k9s_version }}"
+
+/usr/local/bin/talosctl:
+  file.managed:
+    - source: https://github.com/siderolabs/talos/releases/download/v{{ talosctl_version }}/talosctl-linux-amd64
+    - source_hash: https://github.com/siderolabs/talos/releases/download/v{{ talosctl_version }}/sha256sum.txt
+    - mode: 755
+    - unless: talosctl version --client 2>&1 | grep -q "{{ talosctl_version }}"
 
 /root/.vault-token:
   file.managed:

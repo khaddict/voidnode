@@ -11,3 +11,5 @@ prometheus: "3.13.0"
 alertmanager: "0.33.1"
 # renovate: depName=mikefarah/yq datasource=github-releases
 yq: "4.53.3"
+# renovate: depName=siderolabs/talos datasource=github-releases
+talosctl: "1.13.6"

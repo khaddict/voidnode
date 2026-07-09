@@ -285,9 +285,9 @@ In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste the cont
 
 When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 9) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`, styled like the rest of the site. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
 
-#### Issue a wildcard certificate
+#### Issue the certificate
 
-One cert covers the apex domain and all current/future subdomains:
+Explicit domain list, no wildcard: `status.khaddict.com` must never be covered by this cert, otherwise a browser holding an open connection to one of these domains can transparently reuse it for `status.khaddict.com` too (HTTP/2 connection coalescing), bypassing the stream routing below entirely and defeating the point of giving status its own always-on path. Add new `-d` entries here if you add a new public subdomain.
 
 ```bash
 certbot certonly \
@@ -298,7 +298,11 @@ certbot certonly \
   --rsa-key-size 4096 \
   --deploy-hook "systemctl reload nginx" \
   -d 'khaddict.com' \
-  -d '*.khaddict.com'
+  -d 'www.khaddict.com' \
+  -d 'website.khaddict.com' \
+  -d 'homepage.khaddict.com' \
+  -d 'images.khaddict.com' \
+  -d 'matomo.khaddict.com'
 ```
 
 #### Create the fallback page content
@@ -324,4 +328,4 @@ nginx -t
 systemctl reload nginx.service
 ```
 
-Test by stopping HAProxy on `revproxy` (or blocking the WireGuard tunnel) and hitting any `*.khaddict.com` domain. It should switch to the fallback page within `fail_timeout` (10s) of the first failed attempt, and switch back automatically once HAProxy is reachable again.
+Test by stopping HAProxy on `revproxy` (or blocking the WireGuard tunnel) and hitting any of the domains covered above. It should switch to the fallback page within `fail_timeout` (10s) of the first failed attempt, and switch back automatically once HAProxy is reachable again.
