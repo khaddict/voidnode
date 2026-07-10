@@ -411,11 +411,11 @@ pve:
   lxc:
     homelable:
       vmid: 113
-      description: "Homelable CT"
+      description: "Self-hosted visual network diagram and homelab mapper"
       tags: "edge,lxc"
       exporters:
         blackbox: true
-        node: false
+        node: true
       ip: 10.40.0.10
       main_iface: eth0
       hardware:
@@ -430,11 +430,11 @@ pve:
 
     matomo:
       vmid: 108
-      description: "Matomo CT"
+      description: "Web analytics for khaddict.com"
       tags: "edge,lxc"
       exporters:
         blackbox: true
-        node: false
+        node: true
       ip: 10.40.0.3
       main_iface: eth0
       hardware:
@@ -449,7 +449,7 @@ pve:
 
     ollama:
       vmid: 118
-      description: "Ollama CT"
+      description: "Local LLM inference server (50GB RAM, 16 cores)"
       tags: "edge,lxc"
       exporters:
         blackbox: true
@@ -468,11 +468,11 @@ pve:
 
     openwebui:
       vmid: 119
-      description: "Openwebui CT"
+      description: "Browser-based chat frontend for Ollama"
       tags: "edge,lxc"
       exporters:
         blackbox: true
-        node: false
+        node: true
       ip: 10.40.0.9
       main_iface: eth0
       hardware:

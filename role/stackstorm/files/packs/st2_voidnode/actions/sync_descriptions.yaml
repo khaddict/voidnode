@@ -1,0 +1,6 @@
+name: sync_descriptions
+pack: st2_voidnode
+description: Sync Proxmox VM/LXC descriptions from main.yaml.
+runner_type: orquesta
+entry_point: workflows/sync_descriptions.yaml
+enabled: true

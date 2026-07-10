@@ -1,0 +1,46 @@
+version: 1.0
+description: Sync Proxmox VM/LXC descriptions from main.yaml.
+
+vars:
+  - msg: ""
+  - entries: ""
+  - pve: "voidnode.khaddict.lab"
+
+tasks:
+  extract_descriptions:
+    action: core.local
+    input:
+      cmd: |
+        yq --yaml-fix-merge-anchor-to-spec=true -r '
+          explode(.) |
+          (.pve.vms // {} | to_entries[] | [.value.vmid, "qm", .value.description] | @tsv),
+          (.pve.lxc // {} | to_entries[] | [.value.vmid, "pct", .value.description] | @tsv)
+        ' /opt/stackstorm/data/main.yaml
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - entries: <% result().stdout %>
+        do: apply_descriptions
+
+  apply_descriptions:
+    action: core.remote
+    input:
+      hosts: <% ctx().pve %>
+      username: root
+      cmd: |
+        while IFS=$'\t' read -r vmid cmd desc; do
+          [ -z "$vmid" ] && continue
+          "$cmd" set "$vmid" --description "$desc"
+        done <<'ENTRIES'
+        <% ctx().entries %>
+        ENTRIES
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "Descriptions synced to Proxmox."
+      - when: <% failed() %>
+        publish:
+          - msg: "Failed to sync one or more descriptions to Proxmox."
+
+output:
+  - msg: <% ctx().msg %>
