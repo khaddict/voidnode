@@ -171,6 +171,9 @@ tasks:
 
   run_highstate:
     action: core.remote
+    retry:
+      count: 1
+      delay: 5
     input:
       hosts: <% ctx().ip %>
       username: root
