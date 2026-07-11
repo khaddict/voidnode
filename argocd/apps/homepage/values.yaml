@@ -51,7 +51,7 @@ cluster_role_binding:
   name: homepage
 
 httproute:
-  host: homepage.khaddict.lab
+  host: dashboard.khaddict.lab
   gatewayName: envoy-gateway
 
 services:

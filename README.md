@@ -91,7 +91,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
-| `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `website.khaddict.com`, `images.khaddict.com`. Snippet injected via ArgoCD ConfigMaps. Exposed publicly at `matomo.khaddict.com`. |
+| `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `images.khaddict.com`. Snippet injected via ArgoCD ConfigMaps. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
 | `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
@@ -115,9 +115,9 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 
 | App | Description |
 |-----|-------------|
-| `homepage` | Dashboard. Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
+| `dashboard.khaddict.com` | Dashboard (Homepage). Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
 | `www.khaddict.com` | Main static site (nginx, 3 replicas) |
-| `website.khaddict.com` | Secondary static site (nginx, 3 replicas) |
+| `blog.khaddict.com` | Blog (nginx, 3 replicas) |
 | `images.khaddict.com` | Image hosting via nginx, ConfigMap-backed |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
@@ -150,7 +150,7 @@ Browser
 
 **Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down.
 
-**Public domains:** `khaddict.com` · `www` · `website` · `homepage` · `images` · `matomo` · `status`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `matomo` · `status`
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 

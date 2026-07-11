@@ -1,8 +1,8 @@
-app: website-khaddict
-namespace: website-khaddict
+app: blog-khaddict
+namespace: blog-khaddict
 
 deployment:
-  name: website-khaddict
+  name: blog-khaddict
   replicas: 3
   image: nginx:1.31.2
   imagePullPolicy: IfNotPresent
@@ -15,7 +15,7 @@ deployment:
       memory: 256Mi
 
 service:
-  name: website-khaddict
+  name: blog-khaddict
   type: ClusterIP
   port: 80
   targetPort: 80
@@ -36,5 +36,5 @@ probes:
     periodSeconds: 5
 
 httproute:
-  host: website.khaddict.lab
+  host: blog.khaddict.lab
   gatewayName: envoy-gateway

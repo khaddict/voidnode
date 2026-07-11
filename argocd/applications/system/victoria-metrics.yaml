@@ -33,3 +33,15 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: vm-victoria-metrics-operator-validation
+      namespace: victoria-metrics
+      jsonPointers:
+        - /data
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      name: vm-victoria-metrics-operator-admission
+      jqPathExpressions:
+        - .webhooks[].clientConfig.caBundle

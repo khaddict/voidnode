@@ -44,8 +44,14 @@ spec:
           mountPath: /usr/share/nginx/html/security.txt
           subPath: security.txt
         - name: html-volume
+          mountPath: /usr/share/nginx/html/404.html
+          subPath: 404.html
+        - name: html-volume
           mountPath: /etc/nginx/conf.d/default.conf
           subPath: default.conf
+        - name: html-volume
+          mountPath: /etc/nginx/security-headers.conf
+          subPath: security-headers.conf
       volumes:
       - name: html-volume
         configMap:

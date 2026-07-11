@@ -6,8 +6,8 @@
 |---------------------|-------|---------------------|------|
 | khaddict.com        | A     | XXX.XXX.XXX.XXX     | Auto |
 | www                 | CNAME | khaddict.com.       | Auto |
-| website             | CNAME | khaddict.com.       | Auto |
-| homepage            | CNAME | khaddict.com.       | Auto |
+| blog                | CNAME | khaddict.com.       | Auto |
+| dashboard           | CNAME | khaddict.com.       | Auto |
 | images              | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |
 | matomo              | CNAME | khaddict.com.       | Auto |
@@ -299,8 +299,8 @@ certbot certonly \
   --deploy-hook "systemctl reload nginx" \
   -d 'khaddict.com' \
   -d 'www.khaddict.com' \
-  -d 'website.khaddict.com' \
-  -d 'homepage.khaddict.com' \
+  -d 'blog.khaddict.com' \
+  -d 'dashboard.khaddict.com' \
   -d 'images.khaddict.com' \
   -d 'matomo.khaddict.com'
 ```

@@ -6,6 +6,7 @@ on:
     paths:
       - "argocd/apps/images.khaddict.com/images/**"
       - "argocd/apps/images.khaddict.com/Dockerfile"
+  workflow_dispatch:
 
 jobs:
   build:

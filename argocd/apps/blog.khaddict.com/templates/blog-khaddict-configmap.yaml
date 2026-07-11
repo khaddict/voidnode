@@ -7,56 +7,27 @@ data:
   default.conf: |
     server {
         listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
         absolute_redirect off;
 
         include /etc/nginx/security-headers.conf;
 
-        location = / {
-            root /usr/share/nginx/html;
-            try_files /index.html =404;
-        }
-
         location = /robots.txt {
-            root /usr/share/nginx/html;
             default_type text/plain;
         }
 
         location = /.well-known/security.txt {
-            root /usr/share/nginx/html;
             default_type text/plain;
             try_files /security.txt =404;
         }
 
-        location /gallery/ {
-            alias /data/gallery/;
-            autoindex on;
-            autoindex_format json;
-            include /etc/nginx/security-headers.conf;
-            add_header Access-Control-Allow-Origin "*";
-            add_header Cache-Control "public, max-age=86400";
-        }
-
-        location /icons/ {
-            alias /data/icons/;
-            autoindex on;
-            autoindex_format json;
-            include /etc/nginx/security-headers.conf;
-            add_header Access-Control-Allow-Origin "*";
-            add_header Cache-Control "public, max-age=86400";
-        }
-
-        # Backward compat: root-level image paths still resolve
-        location ~ ^/[^/]+\.(png|jpg|jpeg|gif|webp)$ {
-            root /data;
-            try_files /icons$uri /gallery$uri =404;
-            include /etc/nginx/security-headers.conf;
-            add_header Cache-Control "public, max-age=86400";
-            add_header Access-Control-Allow-Origin "*";
+        location / {
+            try_files $uri $uri/ =404;
         }
 
         error_page 404 /404.html;
         location = /404.html {
-            root /usr/share/nginx/html;
             internal;
         }
     }
@@ -100,7 +71,7 @@ data:
     Contact: mailto:contact@khaddict.com
     Expires: 2029-12-31T22:59:00.000Z
     Preferred-Languages: fr, en
-    Canonical: https://images.khaddict.com/.well-known/security.txt
+    Canonical: https://blog.khaddict.com/.well-known/security.txt
   404.html: |
     <!DOCTYPE html>
     <html lang="en">
@@ -714,18 +685,18 @@ data:
           document.documentElement.dataset.theme = theme;
         })();
       </script>
-      <title>Images | khaddict</title>
-      <meta name="description" content="Personal image gallery hosting icons, wallpapers and homelab assets." />
+      <title>Blog | khaddict</title>
+      <meta name="description" content="Coming soon." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://images.khaddict.com" />
-      <meta property="og:title" content="Images | khaddict" />
-      <meta property="og:description" content="Personal image gallery hosting icons, wallpapers and homelab assets." />
+      <meta property="og:url" content="https://blog.khaddict.com" />
+      <meta property="og:title" content="Blog | khaddict" />
+      <meta property="og:description" content="Coming soon." />
       <meta property="og:image" content="https://images.khaddict.com/icons/khazix-pc.png" />
       <meta name="twitter:card" content="summary" />
-      <meta name="twitter:title" content="Images | khaddict" />
+      <meta name="twitter:title" content="Blog | khaddict" />
       <meta name="twitter:image" content="https://images.khaddict.com/icons/khazix-pc.png" />
-      <link rel="icon" href="/icons/khazix-pc.png" type="image/png" />
-      <link rel="apple-touch-icon" href="/icons/khazix-pc.png" />
+      <link rel="icon" href="https://images.khaddict.com/icons/khazix-pc.png" type="image/png" />
+      <link rel="apple-touch-icon" href="https://images.khaddict.com/icons/khazix-pc.png" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
@@ -1048,322 +1019,40 @@ data:
         :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
         :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
     
-        /* gallery tree */
-        .content {
+        /* placeholder hero */
+        .hero {
           flex: 1;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          padding: 3rem 1.5rem 4rem;
-          gap: 2.5rem;
+          justify-content: center;
+          padding: 3rem 1.5rem;
+          animation: fade-up .45s ease both;
+          text-align: center;
         }
     
-        .gallery-wrap {
-          width: 100%;
-          max-width: 1040px;
-          display: flex;
-          flex-direction: column;
-          gap: 2.75rem;
-          animation: fade-up .45s .08s ease both;
+        .hero h1 {
+          font-size: clamp(1.5rem, 4vw, 2.1rem);
+          font-weight: 700;
+          line-height: 1.4;
+          letter-spacing: -.02em;
+          margin-bottom: .75rem;
         }
     
-        .tabs {
-          display: flex;
-          gap: 1.6rem;
-          border-bottom: 1px solid var(--border);
-          margin-bottom: 1.6rem;
+        .hero .highlight {
+          background: linear-gradient(90deg, var(--accent), var(--accent-2));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
         }
     
-        .tab {
+        .hero p {
           font-family: 'JetBrains Mono', monospace;
-          font-size: .85rem;
-          font-weight: 600;
+          font-size: .82rem;
           color: var(--muted);
-          background: none;
-          border: none;
-          border-bottom: 2px solid transparent;
-          padding: .1rem .1rem .75rem;
-          margin-bottom: -1px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: .45rem;
-          transition: color .15s ease, border-color .15s ease;
-        }
-        .tab:hover { color: var(--text); }
-        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    
-        .tab-count {
-          font-size: .68rem;
-          font-weight: 600;
-          color: var(--muted);
-          background: var(--border);
-          padding: .05rem .45rem;
-          border-radius: 20px;
-        }
-        .tab.active .tab-count { color: var(--accent); }
-    
-        .tab-panel { display: none; animation: fade-up .3s ease both; }
-        .tab-panel.active { display: block; }
-    
-        .dock {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: flex-end;
-          justify-content: flex-start;
-          gap: 1rem;
-          padding: 1.5rem 1rem 2.5rem;
-        }
-    
-        .dock-item {
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 58px;
-          height: 58px;
-          flex-shrink: 0;
-          border-radius: 14px;
-          overflow: hidden;
-          border: 1px solid var(--border);
-          background: var(--surface);
-          box-shadow: 0 2px 6px var(--shadow);
-          cursor: pointer;
-          text-decoration: none;
-          transform-origin: bottom center;
-          transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-        }
-        .dock-item img {
-          width: 100%;
-          height: 100%;
-          display: block;
-        }
-        .dock-item:hover {
-          transform: scale(1.7);
-          border-color: var(--accent);
-          box-shadow: 0 10px 24px var(--shadow);
-          z-index: 5;
-        }
-    
-        .dock-tooltip {
-          position: absolute;
-          bottom: calc(100% + .6rem);
-          left: 50%;
-          transform: translateX(-50%) translateY(4px);
-          white-space: nowrap;
-          background: var(--surface);
-          border: 1px solid var(--border);
-          color: var(--text);
-          font-family: 'JetBrains Mono', monospace;
-          font-size: .7rem;
-          padding: .3rem .6rem;
-          border-radius: 6px;
-          box-shadow: 0 8px 20px var(--shadow);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity .15s ease, transform .15s ease;
-          z-index: 5;
-        }
-        .dock-item:hover .dock-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
-    
-        .dock-size {
-          position: absolute;
-          bottom: 2px;
-          right: 2px;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: .56rem;
-          color: #f8fafc;
-          background: rgba(0, 0, 0, .55);
-          padding: .05rem .3rem;
-          border-radius: 4px;
-          opacity: 0;
-          transition: opacity .15s ease;
-        }
-        .dock-item:hover .dock-size { opacity: 1; }
-    
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-          gap: 1.1rem;
-        }
-    
-        .gallery-card {
-          display: flex;
-          flex-direction: column;
-          gap: .5rem;
-          text-decoration: none;
-          color: inherit;
-          position: relative;
-          z-index: 1;
-        }
-        .gallery-card:hover { z-index: 2; }
-    
-        .gallery-thumb {
-          position: relative;
-          aspect-ratio: 4 / 3;
-          border-radius: 12px;
-          overflow: hidden;
-          border: 1px solid var(--border);
-          background: var(--surface);
-          box-shadow: 0 1px 2px var(--shadow);
-          transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
-        }
-        .gallery-thumb img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-          transition: transform .4s ease;
-        }
-        .gallery-card:hover .gallery-thumb {
-          transform: translateY(-6px) scale(1.08);
-          box-shadow: 0 22px 44px var(--shadow);
-          border-color: var(--accent);
-        }
-        .gallery-card:hover .gallery-thumb img { transform: scale(1.15); }
-    
-        .gallery-size {
-          position: absolute;
-          bottom: .4rem;
-          right: .4rem;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: .62rem;
-          color: #f8fafc;
-          background: rgba(0, 0, 0, .55);
-          padding: .12rem .45rem;
-          border-radius: 5px;
-          opacity: 0;
-          transform: translateY(3px);
-          transition: opacity .18s ease, transform .18s ease;
-          backdrop-filter: blur(4px);
-        }
-        .gallery-card:hover .gallery-size { opacity: 1; transform: translateY(0); }
-    
-        .dir-empty {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: .75rem;
-          color: var(--muted);
-          padding: .4rem .4rem;
-          font-style: italic;
-        }
-    
-        /* lightbox */
-        .lightbox {
-          position: fixed;
-          inset: 0;
-          z-index: 50;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(8, 8, 12, .82);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity .2s ease;
-          padding: 2rem;
-        }
-        .lightbox.open { opacity: 1; pointer-events: auto; }
-    
-        .lightbox-img {
-          max-width: min(90vw, 1100px);
-          max-height: 82vh;
-          border-radius: 12px;
-          box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
-          transform: scale(.96);
-          transition: transform .2s ease;
-        }
-        .lightbox.open .lightbox-img { transform: scale(1); }
-    
-        .lightbox-toolbar {
-          position: absolute;
-          bottom: 1.5rem;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          align-items: center;
-          gap: .75rem;
-          background: rgba(255, 255, 255, .08);
-          border: 1px solid rgba(255, 255, 255, .15);
-          padding: .45rem .6rem .45rem 1rem;
-          border-radius: 20px;
-          backdrop-filter: blur(6px);
-          max-width: calc(100vw - 2rem);
-        }
-    
-        .lightbox-caption {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: .78rem;
-          color: #f1f5f9;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-    
-        .lightbox-actions { display: flex; gap: .35rem; flex-shrink: 0; }
-    
-        .lightbox-action-btn {
-          position: relative;
-          width: 30px; height: 30px;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, .2);
-          background: rgba(255, 255, 255, .06);
-          color: #f1f5f9;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          text-decoration: none;
-          transition: background .15s ease;
-        }
-        .lightbox-action-btn:hover { background: rgba(255, 255, 255, .18); }
-        .lightbox-action-btn svg { width: 15px; height: 15px; }
-    
-        .lightbox-close {
-          position: absolute;
-          top: 1.25rem;
-          right: 1.5rem;
-          width: 38px; height: 38px;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, .2);
-          background: rgba(255, 255, 255, .06);
-          color: #f1f5f9;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: background .15s ease;
-        }
-        .lightbox-close:hover { background: rgba(255, 255, 255, .16); }
-        .lightbox-close svg { width: 18px; height: 18px; }
-    
-        .lightbox-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 44px; height: 44px;
-          border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, .2);
-          background: rgba(255, 255, 255, .06);
-          color: #f1f5f9;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: background .15s ease;
-        }
-        .lightbox-nav:hover { background: rgba(255, 255, 255, .16); }
-        .lightbox-nav svg { width: 20px; height: 20px; }
-        .lightbox-prev { left: 1.5rem; }
-        .lightbox-next { right: 1.5rem; }
-        @media (max-width: 640px) {
-          .lightbox-nav { width: 36px; height: 36px; }
-          .lightbox-prev { left: .5rem; }
-          .lightbox-next { right: .5rem; }
         }
     
         @keyframes fade-up {
-          from { opacity: 0; transform: translateY(16px); }
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulse {
@@ -1394,7 +1083,7 @@ data:
       <header class="bandeau">
         <div class="bandeau-inner">
           <a class="brand" href="https://khaddict.com">
-            <img class="brand-icon" src="/icons/khazix-pc.png" alt="" />
+            <img class="brand-icon" src="https://images.khaddict.com/icons/khazix-pc.png" alt="" />
             khaddict
           </a>
           <nav class="topnav">
@@ -1422,38 +1111,12 @@ data:
         </div>
       </header>
     
-      <main class="content">
-        <div class="gallery-wrap" id="tree"></div>
-      </main>
-    
-      <div class="lightbox" id="lightbox">
-        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous image">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="Next image">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-        <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-        <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-        <div class="lightbox-toolbar">
-          <div class="lightbox-caption" id="lightbox-caption"></div>
-          <div class="lightbox-actions">
-            <a class="lightbox-action-btn" id="lightbox-download" href="" download aria-label="Download">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>
-            </a>
-            <button class="lightbox-action-btn" id="lightbox-copy-link" type="button" aria-label="Copy link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-2.83 2.83a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg>
-              <span class="copy-toast" id="lightbox-copy-link-toast">copied</span>
-            </button>
-            <button class="lightbox-action-btn" id="lightbox-copy" type="button" aria-label="Copy image">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span class="copy-toast" id="lightbox-copy-toast">copied</span>
-            </button>
-          </div>
+      <main class="hero">
+        <div>
+          <h1>The <span class="highlight">blog</span> is not written yet.</h1>
+          <p>// coming soon</p>
         </div>
-      </div>
+      </main>
     
       <div class="footer-links">
         <a class="icon-link" href="https://github.com/khaddict" target="_blank" rel="noopener" aria-label="GitHub">
@@ -1571,238 +1234,6 @@ data:
             }, 900);
           });
         })();
-      </script>
-    
-      <script>
-        function fmt(b) {
-          if (b < 1024)              return b + ' B';
-          if (b < 1024 * 1024)       return (b / 1024).toFixed(0) + ' KB';
-          return (b / (1024 * 1024)).toFixed(1) + ' MB';
-        }
-    
-        async function loadDir(label, path, fit) {
-          const res   = await fetch(path);
-          const items = await res.json();
-          return {
-            label,
-            path,
-            fit,
-            files: items.filter(i => i.type === 'file').sort((a, b) => a.name.localeCompare(b.name))
-          };
-        }
-    
-        const lightbox          = document.getElementById('lightbox');
-        const lightboxImg       = document.getElementById('lightbox-img');
-        const lightboxCaption   = document.getElementById('lightbox-caption');
-        const lightboxDownload  = document.getElementById('lightbox-download');
-        const lightboxCopyBtn   = document.getElementById('lightbox-copy');
-        const lightboxCopyToast = document.getElementById('lightbox-copy-toast');
-        const lightboxCopyLinkBtn   = document.getElementById('lightbox-copy-link');
-        const lightboxCopyLinkToast = document.getElementById('lightbox-copy-link-toast');
-    
-        let lightboxFiles = [];
-        let lightboxIndex = 0;
-        let lightboxPath  = '';
-    
-        function showLightboxItem() {
-          const f   = lightboxFiles[lightboxIndex];
-          const url = lightboxPath + f.name;
-          lightboxImg.src = url;
-          lightboxCaption.textContent = f.name + '  ·  ' + fmt(f.size);
-          lightboxDownload.href = url;
-          lightboxDownload.download = f.name;
-        }
-    
-        function openLightbox(files, index, path) {
-          lightboxFiles = files;
-          lightboxIndex = index;
-          lightboxPath  = path;
-          showLightboxItem();
-          lightbox.classList.add('open');
-        }
-        function closeLightbox() {
-          lightbox.classList.remove('open');
-          lightboxImg.src = '';
-        }
-        function lightboxStep(delta) {
-          if (lightboxFiles.length < 2) return;
-          lightboxIndex = (lightboxIndex + delta + lightboxFiles.length) % lightboxFiles.length;
-          showLightboxItem();
-        }
-    
-        document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
-        document.getElementById('lightbox-prev').addEventListener('click', (e) => { e.stopPropagation(); lightboxStep(-1); });
-        document.getElementById('lightbox-next').addEventListener('click', (e) => { e.stopPropagation(); lightboxStep(1); });
-        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
-        document.addEventListener('keydown', (e) => {
-          if (!lightbox.classList.contains('open')) return;
-          if (e.key === 'Escape')     closeLightbox();
-          if (e.key === 'ArrowLeft')  lightboxStep(-1);
-          if (e.key === 'ArrowRight') lightboxStep(1);
-        });
-    
-        async function copyImageToClipboard(url) {
-          const res  = await fetch(url);
-          const blob = await res.blob();
-          if (blob.type === 'image/png') {
-            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-            return;
-          }
-          // Non-PNG sources (jpg, webp...) aren't universally clipboard-writable,
-          // so re-encode through a canvas to a PNG blob first.
-          const bitmap = await createImageBitmap(blob);
-          const canvas = document.createElement('canvas');
-          canvas.width  = bitmap.width;
-          canvas.height = bitmap.height;
-          canvas.getContext('2d').drawImage(bitmap, 0, 0);
-          const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-          await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-        }
-    
-        let lightboxCopyTimer = null;
-        lightboxCopyBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const f = lightboxFiles[lightboxIndex];
-          try { await copyImageToClipboard(lightboxPath + f.name); } catch { /* clipboard unavailable */ }
-          lightboxCopyBtn.classList.add('copied');
-          lightboxCopyToast.classList.add('show');
-          clearTimeout(lightboxCopyTimer);
-          lightboxCopyTimer = setTimeout(() => {
-            lightboxCopyToast.classList.remove('show');
-            lightboxCopyBtn.classList.remove('copied');
-          }, 900);
-        });
-    
-        let lightboxCopyLinkTimer = null;
-        lightboxCopyLinkBtn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const f = lightboxFiles[lightboxIndex];
-          try { await navigator.clipboard.writeText(location.origin + lightboxPath + f.name); } catch { /* clipboard unavailable */ }
-          lightboxCopyLinkBtn.classList.add('copied');
-          lightboxCopyLinkToast.classList.add('show');
-          clearTimeout(lightboxCopyLinkTimer);
-          lightboxCopyLinkTimer = setTimeout(() => {
-            lightboxCopyLinkToast.classList.remove('show');
-            lightboxCopyLinkBtn.classList.remove('copied');
-          }, 900);
-        });
-    
-        function renderDock({ path, fit, files }) {
-          const wrap = document.createElement('div');
-    
-          if (!files.length) {
-            const empty = document.createElement('div');
-            empty.className = 'dir-empty';
-            empty.textContent = '(empty)';
-            wrap.appendChild(empty);
-            return wrap;
-          }
-    
-          const dock = document.createElement('div');
-          dock.className = 'dock';
-    
-          files.forEach((f, i) => {
-            const link = path + f.name;
-            const item = document.createElement('a');
-            item.className = 'dock-item';
-            item.href = link;
-            item.target = '_blank';
-            item.rel = 'noopener';
-            item.innerHTML =
-              '<img src="' + path + 'thumbs/' + f.name + '" loading="lazy" alt="" style="object-fit:' + fit + '">' +
-              '<span class="dock-size">' + fmt(f.size) + '</span>' +
-              '<span class="dock-tooltip">' + f.name + '</span>';
-            item.addEventListener('click', (e) => {
-              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-              e.preventDefault();
-              openLightbox(files, i, path);
-            });
-            dock.appendChild(item);
-          });
-    
-          wrap.appendChild(dock);
-    
-          return wrap;
-        }
-    
-        function renderGalleryGrid({ path, files }) {
-          const wrap = document.createElement('div');
-    
-          if (!files.length) {
-            const empty = document.createElement('div');
-            empty.className = 'dir-empty';
-            empty.textContent = '(empty)';
-            wrap.appendChild(empty);
-            return wrap;
-          }
-    
-          const grid = document.createElement('div');
-          grid.className = 'gallery-grid';
-    
-          files.forEach((f, i) => {
-            const link = path + f.name;
-            const card = document.createElement('a');
-            card.className = 'gallery-card';
-            card.href = link;
-            card.target = '_blank';
-            card.rel = 'noopener';
-            card.innerHTML =
-              '<div class="gallery-thumb">' +
-                '<img src="' + path + 'thumbs/' + f.name + '" loading="lazy" alt="">' +
-                '<span class="gallery-size">' + fmt(f.size) + '</span>' +
-              '</div>';
-            card.addEventListener('click', (e) => {
-              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-              e.preventDefault();
-              openLightbox(files, i, path);
-            });
-            grid.appendChild(card);
-          });
-    
-          wrap.appendChild(grid);
-    
-          return wrap;
-        }
-    
-        async function init() {
-          const tree = document.getElementById('tree');
-          try {
-            const dirs = await Promise.all([
-              loadDir('icons',   '/icons/',   'contain'),
-              loadDir('gallery', '/gallery/', 'cover')
-            ]);
-    
-            const tabs   = document.createElement('div');
-            tabs.className = 'tabs';
-            const panels = document.createElement('div');
-    
-            dirs.forEach((d, i) => {
-              const panel = document.createElement('div');
-              panel.className = 'tab-panel' + (i === 0 ? ' active' : '');
-              panel.appendChild(i === 0 ? renderDock(d) : renderGalleryGrid(d));
-              panels.appendChild(panel);
-    
-              const tab = document.createElement('button');
-              tab.className = 'tab' + (i === 0 ? ' active' : '');
-              tab.type = 'button';
-              tab.innerHTML = d.label + ' <span class="tab-count">' + d.files.length + '</span>';
-              tab.addEventListener('click', () => {
-                tabs.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                panels.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                tab.classList.add('active');
-                panel.classList.add('active');
-              });
-              tabs.appendChild(tab);
-            });
-    
-            tree.appendChild(tabs);
-            tree.appendChild(panels);
-          } catch(e) {
-            tree.innerHTML = '<div class="dir-empty">Failed to load directory listing.</div>';
-          }
-        }
-    
-        init();
       </script>
     </body>
     </html>

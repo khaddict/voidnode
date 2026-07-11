@@ -8,6 +8,7 @@ on:
   pull_request:
     paths:
       - "argocd/apps/**"
+  workflow_dispatch:
 
 env:
   # renovate: depName=helm/helm datasource=github-releases

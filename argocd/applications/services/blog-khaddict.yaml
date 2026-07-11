@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: website-khaddict
+  name: blog-khaddict
   namespace: argocd
   labels:
     app.kubernetes.io/managed-by: argocd
@@ -15,13 +15,13 @@ spec:
   source:
     repoURL: https://github.com/khaddict/voidnode.git
     targetRevision: main
-    path: argocd/apps/website.khaddict.com
+    path: argocd/apps/blog.khaddict.com
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: website-khaddict
+    namespace: blog-khaddict
   syncPolicy:
     automated:
       prune: true

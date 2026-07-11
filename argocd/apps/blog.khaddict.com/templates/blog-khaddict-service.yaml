@@ -4,12 +4,12 @@ metadata:
   name: {{ .Values.service.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    {{- include "website-khaddict.labels" . | nindent 4 }}
+    {{- include "blog-khaddict.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
   selector:
-    {{- include "website-khaddict.selectorLabels" . | nindent 4 }}
+    {{- include "blog-khaddict.selectorLabels" . | nindent 4 }}
 

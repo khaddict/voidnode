@@ -224,7 +224,7 @@ The snippet is injected before `</head>` in the `index.html` of each tracked app
 | App | ConfigMap source |
 |-----|-----------------|
 | khaddict.com | `argocd/apps/www.khaddict.com/templates/www-khaddict-configmap.yaml` |
-| website.khaddict.com | `argocd/apps/website.khaddict.com/templates/website-khaddict-configmap.yaml` |
+| blog.khaddict.com | `argocd/apps/blog.khaddict.com/templates/blog-khaddict-configmap.yaml` |
 | images.khaddict.com | `argocd/apps/images.khaddict.com/templates/images-khaddict-configmap.yaml` |
 
 All three use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).

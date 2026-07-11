@@ -1,19 +1,19 @@
-{{- define "website-khaddict.name" -}}
+{{- define "blog-khaddict.name" -}}
 {{- default .Chart.Name .Values.app -}}
 {{- end -}}
 
-{{- define "website-khaddict.chart" -}}
+{{- define "blog-khaddict.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "website-khaddict.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "website-khaddict.name" . }}
+{{- define "blog-khaddict.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "blog-khaddict.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{- define "website-khaddict.labels" -}}
-{{ include "website-khaddict.selectorLabels" . }}
-helm.sh/chart: {{ include "website-khaddict.chart" . }}
+{{- define "blog-khaddict.labels" -}}
+{{ include "blog-khaddict.selectorLabels" . }}
+helm.sh/chart: {{ include "blog-khaddict.chart" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
