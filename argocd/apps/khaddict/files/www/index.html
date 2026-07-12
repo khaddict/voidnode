@@ -72,7 +72,7 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg:                  #0b0b10;
+        --bg:                  #1a1a22;
         --text:                #f1f5f9;
         --muted:               #94949f;
         --border:              rgba(255, 255, 255, .1);
@@ -80,8 +80,8 @@
         --accent-2:            #e879f9;
         --up:                  #4ade80;
         --down:                #f87171;
-        --surface:             #15151c;
-        --surface-translucent: rgba(11, 11, 16, .5);
+        --surface:             #22222c;
+        --surface-translucent: rgba(26, 26, 34, .5);
         --shadow:              rgba(0, 0, 0, .5);
         --blob-1:              rgba(139, 92, 246, .22);
         --blob-2:              rgba(192, 71, 219, .18);
@@ -98,9 +98,9 @@
     }
 
     :root[data-theme="dark"] {
-      --bg: #0b0b10; --text: #f1f5f9; --muted: #94949f; --border: rgba(255, 255, 255, .1);
+      --bg: #1a1a22; --text: #f1f5f9; --muted: #94949f; --border: rgba(255, 255, 255, .1);
       --accent: #a78bfa; --accent-2: #e879f9; --up: #4ade80; --down: #f87171;
-      --surface: #15151c; --surface-translucent: rgba(11, 11, 16, .5); --shadow: rgba(0, 0, 0, .5);
+      --surface: #22222c; --surface-translucent: rgba(26, 26, 34, .5); --shadow: rgba(0, 0, 0, .5);
       --blob-1: rgba(139, 92, 246, .22); --blob-2: rgba(192, 71, 219, .18);
       --danger-dim: rgba(239, 68, 68, .16);
     }
@@ -214,7 +214,9 @@
       position: absolute;
       top: calc(100% + .9rem);
       right: 0;
-      width: 340px;
+      width: fit-content;
+      min-width: 260px;
+      max-width: min(340px, calc(100vw - 2rem));
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -233,7 +235,12 @@
       flex-direction: column;
       gap: .4rem;
       padding: .45rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted);
+      white-space: nowrap;
     }
+    .dropdown-line.dropdown-msg { text-align: center; }
     .dropdown-line + .dropdown-line { border-top: 1px solid var(--border); }
 
     .dropdown-line-top {
@@ -252,9 +259,8 @@
       height: 16px;
     }
     .heartbeat-bar {
-      flex: 1;
-      min-width: 2px;
-      max-width: 5px;
+      flex: none;
+      width: 4px;
       height: 100%;
       border-radius: 1px;
       background: var(--muted);
@@ -642,7 +648,7 @@
           </button>
           <div class="dropdown" id="s-dropdown">
             <div id="s-inner">
-              <div class="dropdown-line" data-i18n="status.checking">checking systems…</div>
+              <div class="dropdown-line dropdown-msg" data-i18n="status.checking">checking systems…</div>
             </div>
           </div>
         </div>
@@ -844,7 +850,7 @@
         dot.className = `dot ${up === total ? 'up' : up === 0 ? 'down' : ''}`;
 
       } catch {
-        inner.innerHTML = `<div class="dropdown-line">${t('status.unreachable')}</div>`;
+        inner.innerHTML = `<div class="dropdown-line dropdown-msg">${t('status.unreachable')}</div>`;
       }
     }
 

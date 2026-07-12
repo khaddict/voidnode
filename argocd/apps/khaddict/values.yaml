@@ -18,19 +18,19 @@ httproute:
 
 sites:
   - name: www
-    replicas: 3
+    replicas: 2
     image: nginx:1.31.2
     host: www.khaddict.lab
     hasSitemap: true
     livenessInitialDelaySeconds: 15
   - name: blog
-    replicas: 3
+    replicas: 2
     image: nginx:1.31.2
     host: blog.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
   - name: images
-    replicas: 1
+    replicas: 2
     image: ghcr.io/khaddict/images-khaddict:bef3f0d
     host: images.khaddict.lab
     hasSitemap: false
