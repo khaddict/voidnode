@@ -150,6 +150,8 @@ Browser
 
 **Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down.
 
+If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#12-homelab-down-fallback-page).
+
 **Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `matomo` · `status`
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.

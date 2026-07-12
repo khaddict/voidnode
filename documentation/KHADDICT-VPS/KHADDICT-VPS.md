@@ -283,7 +283,7 @@ In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste the cont
 
 ## 12. Homelab down fallback page
 
-When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 9) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`, styled like the rest of the site. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
+When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 9) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`. It shares the same header, nav, live status widget (fetches `status.khaddict.com`, which stays up independently) and footer as the rest of the site, so it isn't just a bare error message. The brand icon/favicon are embedded as base64 rather than fetched from `images.khaddict.com`, since that domain is itself unreachable whenever this page is shown. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
 
 #### Issue the certificate
 

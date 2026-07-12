@@ -46,6 +46,7 @@ jobs:
               "- [ ] `apt update && apt upgrade -y && apt autoremove -y` on VMs & LXC",
               "- [ ] Highstate all minions",
               "- [ ] `certbot certificates` sanity check (revproxy + VPS)",
+              "- [ ] Test VPS failover page (stop HAProxy briefly, confirm fallback + auto-recovery)",
               "",
               "## Manual tools",
               "- [ ] New Uptime Kuma release (on VPS)",

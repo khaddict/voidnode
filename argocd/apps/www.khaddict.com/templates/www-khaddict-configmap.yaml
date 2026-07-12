@@ -1094,7 +1094,7 @@ data:
         .repo-link:hover { color: var(--accent); }
         .repo-link svg { width: 14px; height: 14px; }
     
-        /* deploy gag — relocated from the now-retired blog.khaddict.com */
+        /* deploy gag, relocated from the now-retired blog.khaddict.com */
         .deploy-panel {
           position: relative;
           display: flex;
@@ -1431,7 +1431,7 @@ data:
           });
         })();
     
-        // deploy gag — relocated verbatim from blog.khaddict.com, scoped so its
+        // deploy gag, relocated verbatim from blog.khaddict.com, scoped so its
         // identifiers (btn, log, deploy...) never collide with the rest of the page.
         (function () {
           const deployBtn = document.getElementById('deploy-btn');
