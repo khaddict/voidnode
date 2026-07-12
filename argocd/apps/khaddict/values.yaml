@@ -31,7 +31,7 @@ sites:
     livenessInitialDelaySeconds: 15
   - name: images
     replicas: 1
-    image: ghcr.io/khaddict/images-khaddict:f363cf7
+    image: ghcr.io/khaddict/images-khaddict:bef3f0d
     host: images.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 5
