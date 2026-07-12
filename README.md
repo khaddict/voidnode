@@ -116,9 +116,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | App | Description |
 |-----|-------------|
 | `dashboard.khaddict.com` | Dashboard (Homepage). Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
-| `www.khaddict.com` | Main static site (nginx, 3 replicas) |
-| `blog.khaddict.com` | Blog (nginx, 3 replicas) |
-| `images.khaddict.com` | Image hosting via nginx, ConfigMap-backed |
+| `www.khaddict.com` / `blog.khaddict.com` / `images.khaddict.com` | Single Helm chart (`argocd/apps/khaddict`), one `khaddict` namespace, per-site Deployment/Service/HTTPRoute templated from `values.yaml`. Shared files (404 page, security headers) live once under `files/shared/`. |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |

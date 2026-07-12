@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "argocd/apps/images.khaddict.com/images/**"
-      - "argocd/apps/images.khaddict.com/Dockerfile"
+      - "argocd/apps/khaddict/images-build/images/**"
+      - "argocd/apps/khaddict/images-build/Dockerfile"
   workflow_dispatch:
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: argocd/apps/images.khaddict.com
+          context: argocd/apps/khaddict/images-build
           push: true
           tags: |
             ghcr.io/khaddict/images-khaddict:${{ steps.sha.outputs.short }}
@@ -43,17 +43,12 @@ jobs:
       - name: Update image tag in values.yaml
         run: |
           sed -i "s|image: ghcr.io/khaddict/images-khaddict:.*|image: ghcr.io/khaddict/images-khaddict:${{ steps.sha.outputs.short }}|" \
-            argocd/apps/images.khaddict.com/values.yaml
-
-      - name: Update appVersion in Chart.yaml
-        run: |
-          sed -i "s|appVersion: .*|appVersion: \"${{ steps.sha.outputs.short }}\"|" \
-            argocd/apps/images.khaddict.com/Chart.yaml
+            argocd/apps/khaddict/values.yaml
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add argocd/apps/images.khaddict.com/values.yaml argocd/apps/images.khaddict.com/Chart.yaml
+          git add argocd/apps/khaddict/values.yaml
           git diff --cached --quiet || git commit -m "ci: update images-khaddict to ${{ steps.sha.outputs.short }}"
           git push

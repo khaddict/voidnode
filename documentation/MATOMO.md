@@ -221,11 +221,11 @@ In Matomo → **Administration → Système → Paramètres généraux**, disabl
 
 The snippet is injected before `</head>` in the `index.html` of each tracked app:
 
-| App | ConfigMap source |
+| App | Source file |
 |-----|-----------------|
-| khaddict.com | `argocd/apps/www.khaddict.com/templates/www-khaddict-configmap.yaml` |
-| blog.khaddict.com | `argocd/apps/blog.khaddict.com/templates/blog-khaddict-configmap.yaml` |
-| images.khaddict.com | `argocd/apps/images.khaddict.com/templates/images-khaddict-configmap.yaml` |
+| khaddict.com | `argocd/apps/khaddict/files/www/index.html` |
+| blog.khaddict.com | `argocd/apps/khaddict/files/blog/index.html` |
+| images.khaddict.com | `argocd/apps/khaddict/files/images/index.html` |
 
 All three use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
 
@@ -248,7 +248,7 @@ Snippet:
 <!-- End Matomo -->
 ```
 
-Deploy via ArgoCD sync of the `www-khaddict` application.
+Deploy via ArgoCD sync of the `khaddict` application.
 
 ---
 

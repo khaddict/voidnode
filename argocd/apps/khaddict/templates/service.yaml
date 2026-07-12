@@ -1,0 +1,17 @@
+{{- range $site := .Values.sites }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $site.name }}-khaddict
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
+spec:
+  type: {{ $.Values.service.type }}
+  ports:
+    - port: {{ $.Values.service.port }}
+      targetPort: {{ $.Values.service.targetPort }}
+  selector:
+    {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 4 }}
+{{- end }}

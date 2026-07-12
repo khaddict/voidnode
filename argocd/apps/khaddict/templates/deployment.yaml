@@ -1,35 +1,43 @@
+{{- range $site := .Values.sites }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deployment.name }}
-  namespace: {{ .Values.namespace }}
+  name: {{ $site.name }}-khaddict
+  namespace: {{ $.Values.namespace }}
   labels:
-    {{- include "www-khaddict.labels" . | nindent 4 }}
+    {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
 spec:
   revisionHistoryLimit: 3
-  replicas: {{ .Values.deployment.replicas }}
+  replicas: {{ $site.replicas }}
   selector:
     matchLabels:
-      {{- include "www-khaddict.selectorLabels" . | nindent 6 }}
+      {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "www-khaddict.selectorLabels" . | nindent 8 }}
+        {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 8 }}
     spec:
       containers:
-      - name: {{ .Values.app }}
-        image: {{ .Values.deployment.image }}
-        imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+      - name: {{ $site.name }}-khaddict
+        image: {{ $site.image }}
+        imagePullPolicy: IfNotPresent
         resources:
-          {{- toYaml .Values.deployment.resources | nindent 10 }}
+          {{- toYaml $.Values.resources | nindent 10 }}
         ports:
-        - containerPort: {{ .Values.service.targetPort }}
-        {{- if .Values.probes.enabled }}
+        - containerPort: {{ $.Values.service.targetPort }}
         livenessProbe:
-          {{- toYaml .Values.probes.liveness | nindent 10 }}
+          httpGet:
+            path: /
+            port: {{ $.Values.service.targetPort }}
+          initialDelaySeconds: {{ $site.livenessInitialDelaySeconds }}
+          periodSeconds: 10
         readinessProbe:
-          {{- toYaml .Values.probes.readiness | nindent 10 }}
-        {{- end }}
+          httpGet:
+            path: /
+            port: {{ $.Values.service.targetPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
         volumeMounts:
         - name: html-volume
           mountPath: /usr/share/nginx/html/index.html
@@ -37,9 +45,11 @@ spec:
         - name: html-volume
           mountPath: /usr/share/nginx/html/robots.txt
           subPath: robots.txt
+        {{- if $site.hasSitemap }}
         - name: html-volume
           mountPath: /usr/share/nginx/html/sitemap.xml
           subPath: sitemap.xml
+        {{- end }}
         - name: html-volume
           mountPath: /usr/share/nginx/html/security.txt
           subPath: security.txt
@@ -55,4 +65,5 @@ spec:
       volumes:
       - name: html-volume
         configMap:
-          name: {{ .Values.deployment.name }}-html
+          name: {{ $site.name }}-khaddict-html
+{{- end }}

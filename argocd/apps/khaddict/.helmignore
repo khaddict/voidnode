@@ -1,0 +1,4 @@
+# Docker build context for the images-khaddict image (raw icons/gallery assets,
+# Dockerfile, build script). Not consumed by any Helm template, excluded so
+# Helm doesn't read/hash these binaries on every template/lint/sync.
+images-build

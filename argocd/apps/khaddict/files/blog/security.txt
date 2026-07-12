@@ -1,0 +1,4 @@
+Contact: mailto:contact@khaddict.com
+Expires: 2029-12-31T22:59:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://blog.khaddict.com/.well-known/security.txt
