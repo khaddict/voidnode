@@ -1,3 +1,4 @@
+{{- $content := index .Subcharts "khaddict-com" }}
 {{- range $site := .Values.sites }}
 ---
 apiVersion: v1
@@ -10,23 +11,38 @@ metadata:
 data:
 {{- if eq $site.name "images" }}
   default.conf: |
-{{ $.Files.Get "files/images/default.conf" | indent 4 }}
+{{ $content.Files.Get "files/images/default.conf" | indent 4 }}
 {{- else }}
   default.conf: |
-{{ $.Files.Get "files/shared/default.conf" | indent 4 }}
+{{ $content.Files.Get "files/shared/default.conf" | indent 4 }}
 {{- end }}
   security-headers.conf: |
-{{ $.Files.Get "files/shared/security-headers.conf" | indent 4 }}
+{{ $content.Files.Get "files/shared/security-headers.conf" | indent 4 }}
   robots.txt: |
-{{ $.Files.Get "files/shared/robots.txt" | indent 4 }}
+{{ $content.Files.Get "files/shared/robots.txt" | indent 4 }}
 {{- if $site.hasSitemap }}
   sitemap.xml: |
-{{ $.Files.Get (printf "files/%s/sitemap.xml" $site.name) | indent 4 }}
+{{ $content.Files.Get (printf "files/%s/sitemap.xml" $site.name) | indent 4 }}
 {{- end }}
   security.txt: |
-{{ $.Files.Get (printf "files/%s/security.txt" $site.name) | indent 4 }}
+{{ $content.Files.Get (printf "files/%s/security.txt" $site.name) | indent 4 }}
   404.html: |
-{{ $.Files.Get "files/shared/404.html" | indent 4 }}
+{{ $content.Files.Get "files/shared/404.html" | indent 4 }}
   index.html: |
-{{ $.Files.Get (printf "files/%s/index.html" $site.name) | indent 4 }}
+{{ $content.Files.Get (printf "files/%s/index.html" $site.name) | indent 4 }}
+{{- if eq $site.name "blog" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blog-khaddict-posts
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
+data:
+{{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
+  {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}: |
+{{ $content.Files.Get $path | indent 4 }}
+{{- end }}
+{{- end }}
 {{- end }}

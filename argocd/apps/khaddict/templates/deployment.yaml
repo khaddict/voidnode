@@ -1,3 +1,4 @@
+{{- $content := index .Subcharts "khaddict-com" }}
 {{- range $site := .Values.sites }}
 ---
 apiVersion: apps/v1
@@ -20,7 +21,7 @@ spec:
     spec:
       containers:
       - name: {{ $site.name }}-khaddict
-        image: {{ $site.image }}
+        image: {{ $site.image.repository }}:{{ $site.image.tag }}
         imagePullPolicy: IfNotPresent
         resources:
           {{- toYaml $.Values.resources | nindent 10 }}
@@ -62,8 +63,22 @@ spec:
         - name: html-volume
           mountPath: /etc/nginx/security-headers.conf
           subPath: security-headers.conf
+        {{- if eq $site.name "blog" }}
+        - name: posts-volume
+          mountPath: /usr/share/nginx/html/posts
+        {{- end }}
       volumes:
       - name: html-volume
         configMap:
           name: {{ $site.name }}-khaddict-html
+      {{- if eq $site.name "blog" }}
+      - name: posts-volume
+        configMap:
+          name: blog-khaddict-posts
+          items:
+          {{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
+          - key: {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}
+            path: {{ $path | replace "files/blog/posts/" "" }}
+          {{- end }}
+      {{- end }}
 {{- end }}
