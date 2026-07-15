@@ -6,7 +6,7 @@ trivy: "0.72.0"
 # renovate: depName=derailed/k9s datasource=github-releases
 k9s: "0.51.0"
 # renovate: depName=prometheus/prometheus datasource=github-releases
-prometheus: "3.13.0"
+prometheus: "3.13.1"
 # renovate: depName=prometheus/alertmanager datasource=github-releases
 alertmanager: "0.33.1"
 # renovate: depName=mikefarah/yq datasource=github-releases
