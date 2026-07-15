@@ -116,7 +116,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | App | Description |
 |-----|-------------|
 | `dashboard.khaddict.com` | Dashboard (Homepage). Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
-| `www.khaddict.com` / `blog.khaddict.com` / `images.khaddict.com` | Single Helm chart (`argocd/apps/khaddict`), one `khaddict` namespace, per-site Deployment/Service/HTTPRoute templated from `values.yaml`. Shared files (404 page, security headers) live once under `files/shared/`. |
+| `www.khaddict.com` / `blog.khaddict.com` / `images.khaddict.com` / `projects.khaddict.com` | Helm chart (`argocd/apps/khaddict`), one `khaddict` namespace, per-site Deployment/Service/HTTPRoute templated from `values.yaml`. Site content (HTML/CSS/JS, shared 404 page, security headers) lives in the separate [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo, pulled in as a Helm subchart dependency published to `oci://ghcr.io/khaddict/charts`. |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
@@ -150,7 +150,7 @@ Browser
 
 If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#12-homelab-down-fallback-page).
 
-**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `matomo` · `status`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `projects` · `matomo` · `status`
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 

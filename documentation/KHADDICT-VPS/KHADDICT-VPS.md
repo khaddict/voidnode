@@ -9,6 +9,7 @@
 | blog                | CNAME | khaddict.com.       | Auto |
 | dashboard           | CNAME | khaddict.com.       | Auto |
 | images              | CNAME | khaddict.com.       | Auto |
+| projects            | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |
 | matomo              | CNAME | khaddict.com.       | Auto |
 
@@ -302,6 +303,7 @@ certbot certonly \
   -d 'blog.khaddict.com' \
   -d 'dashboard.khaddict.com' \
   -d 'images.khaddict.com' \
+  -d 'projects.khaddict.com' \
   -d 'matomo.khaddict.com'
 ```
 
@@ -311,7 +313,7 @@ certbot certonly \
 mkdir -p /var/www/fallback
 ```
 
-Copy [`fallback-index.html`](fallback-index.html) to `/var/www/fallback/index.html`.
+Copy [`vps-fallback/index.html`](https://github.com/khaddict/khaddict-com/blob/main/vps-fallback/index.html) (from the `khaddict-com` repo) to `/var/www/fallback/index.html`.
 
 #### Create local HTTPS vhost for the fallback page
 

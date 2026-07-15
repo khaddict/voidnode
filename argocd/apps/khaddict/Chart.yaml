@@ -7,5 +7,10 @@ appVersion: "1.31.2"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/khaddict
+  - https://github.com/khaddict/khaddict-com
 maintainers:
   - name: platform
+dependencies:
+  - name: khaddict-com
+    version: ">=0.1.0"
+    repository: "oci://ghcr.io/khaddict/charts"

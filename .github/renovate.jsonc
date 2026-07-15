@@ -19,6 +19,16 @@
     {
       "matchDepNames": ["kubernetes/kubernetes"],
       "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/khaddict/images-khaddict"],
+      "groupName": "images-khaddict"
+    },
+    {
+      "matchDatasources": ["helm"],
+      "matchPackageNames": ["khaddict-com"],
+      "groupName": "khaddict-com content chart"
     }
   ],
   "customManagers": [
