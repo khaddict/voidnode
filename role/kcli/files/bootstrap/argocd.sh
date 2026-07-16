@@ -6,7 +6,7 @@ ARGOCD_NAMESPACE="argocd"
 export VAULT_ADDR="https://vault.khaddict.lab:8200/"
 export VAULT_TOKEN="${VAULT_TOKEN:-$(cat ~/.vault-token)}"
 # renovate: depName=argo-cd datasource=helm registryUrl=https://argoproj.github.io/argo-helm
-VERSION="10.1.3"
+VERSION="10.1.4"
 
 APP_OF_APPS_FILE="/root/bootstrap/voidnode-app-of-apps.yaml"
 ARGOCD_HTTPROUTE_FILE="/root/bootstrap/argocd-httproute.yaml"
