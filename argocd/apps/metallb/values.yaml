@@ -349,7 +349,7 @@ metallb:
       enabled: true
       image:
         repository: quay.io/frrouting/frr
-        tag: 10.6.1
+        tag: 10.7.0
         pullPolicy: IfNotPresent
       metricsPort: 7473
       resources: {}
