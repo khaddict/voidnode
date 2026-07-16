@@ -33,6 +33,12 @@ data:
   fr-index.html: |
 {{ $content.Files.Get (printf "files/%s/fr/index.html" $site.name) | indent 4 }}
 {{- if eq $site.name "blog" }}
+  feed.xml: |
+{{ $content.Files.Get "files/blog/feed.xml" | indent 4 }}
+  fr-feed.xml: |
+{{ $content.Files.Get "files/blog/fr/feed.xml" | indent 4 }}
+{{- end }}
+{{- if eq $site.name "blog" }}
 ---
 apiVersion: v1
 kind: ConfigMap

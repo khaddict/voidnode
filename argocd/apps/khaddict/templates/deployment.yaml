@@ -67,6 +67,12 @@ spec:
           mountPath: /etc/nginx/security-headers.conf
           subPath: security-headers.conf
         {{- if eq $site.name "blog" }}
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/feed.xml
+          subPath: feed.xml
+        - name: html-volume
+          mountPath: /usr/share/nginx/html/fr/feed.xml
+          subPath: fr-feed.xml
         - name: posts-volume
           mountPath: /usr/share/nginx/html/posts
         - name: posts-volume-fr
