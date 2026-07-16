@@ -30,6 +30,8 @@ data:
 {{ $content.Files.Get "files/shared/404.html" | indent 4 }}
   index.html: |
 {{ $content.Files.Get (printf "files/%s/index.html" $site.name) | indent 4 }}
+  fr-index.html: |
+{{ $content.Files.Get (printf "files/%s/fr/index.html" $site.name) | indent 4 }}
 {{- if eq $site.name "blog" }}
 ---
 apiVersion: v1

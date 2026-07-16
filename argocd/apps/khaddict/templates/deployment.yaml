@@ -44,6 +44,9 @@ spec:
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html
         - name: html-volume
+          mountPath: /usr/share/nginx/html/fr/index.html
+          subPath: fr-index.html
+        - name: html-volume
           mountPath: /usr/share/nginx/html/robots.txt
           subPath: robots.txt
         {{- if $site.hasSitemap }}
