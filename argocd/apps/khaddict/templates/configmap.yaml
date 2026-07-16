@@ -46,5 +46,18 @@ data:
   {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}: |
 {{ $content.Files.Get $path | indent 4 }}
 {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blog-khaddict-posts-fr
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
+data:
+{{- range $path, $bytes := $content.Files.Glob "files/blog/fr/posts/**" }}
+  {{ $path | replace "files/blog/fr/posts/" "" | replace "/" "-" | quote }}: |
+{{ $content.Files.Get $path | indent 4 }}
+{{- end }}
 {{- end }}
 {{- end }}

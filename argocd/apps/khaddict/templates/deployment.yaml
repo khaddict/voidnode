@@ -69,6 +69,8 @@ spec:
         {{- if eq $site.name "blog" }}
         - name: posts-volume
           mountPath: /usr/share/nginx/html/posts
+        - name: posts-volume-fr
+          mountPath: /usr/share/nginx/html/fr/posts
         {{- end }}
       volumes:
       - name: html-volume
@@ -82,6 +84,14 @@ spec:
           {{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
           - key: {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}
             path: {{ $path | replace "files/blog/posts/" "" }}
+          {{- end }}
+      - name: posts-volume-fr
+        configMap:
+          name: blog-khaddict-posts-fr
+          items:
+          {{- range $path, $bytes := $content.Files.Glob "files/blog/fr/posts/**" }}
+          - key: {{ $path | replace "files/blog/fr/posts/" "" | replace "/" "-" | quote }}
+            path: {{ $path | replace "files/blog/fr/posts/" "" }}
           {{- end }}
       {{- end }}
 {{- end }}
