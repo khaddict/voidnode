@@ -146,9 +146,9 @@ Browser
           └── matomo.khaddict.com    → Matomo LXC
 ```
 
-**Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down.
+**Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down. DNS on the VPS is resolved via its own ISP resolvers, never through the tunnel (see [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#9-configure-the-wireguard-tunnel-to-the-homelab)), keeping the VPS's own name resolution, including for the Discord alert webhook, independent of whether the homelab, and therefore the tunnel, is reachable.
 
-If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#12-homelab-down-fallback-page).
+If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
 **Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `projects` · `matomo` · `status`
 

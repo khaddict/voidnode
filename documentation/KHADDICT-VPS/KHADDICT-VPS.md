@@ -197,9 +197,86 @@ apt install -y nginx libnginx-mod-stream
 
 ---
 
-## 9. Configure nginx stream proxy
+## 9. Configure the WireGuard tunnel to the homelab
 
-nginx uses **SNI-based TCP routing** on port 443. `status.khaddict.com` is served directly from the VPS (SSL termination local, proxied to Uptime Kuma on `localhost:3001`) so it remains available even when the homelab is down. `khaddict.com` and its subdomains go through the `homelab_failover` upstream: normally forwarded to HAProxy (`10.40.0.2:443`) via the WireGuard tunnel, but automatically failed over to a local static page (section 12) if HAProxy becomes unreachable. PROXY protocol is used so HAProxy receives the real client IP.
+The tunnel should carry only the TCP passthrough to HAProxy at `revproxy` (section 10) and
+the Uptime Kuma widget scrape allowed by the `EDGE` firewall rules. It must **not** be used
+for DNS, and the reasoning matters more than the rule itself: `opnsense.khaddict.lab`
+(Unbound, `10.10.0.1`) lives inside the homelab, reachable only across this same tunnel. If
+the VPS's DNS resolution depends on that tunnel, then the one scenario where an external
+watchdog is most needed (the whole homelab, tunnel included, being unreachable) is also the
+scenario where the VPS loses the ability to resolve *any* name, including `discord.com` for
+Uptime Kuma's own alert webhook. Routing DNS through the tunnel quietly turns "external,
+independent monitoring" into "monitoring that depends on the thing it's supposed to watch,"
+which defeats the point of running the watcher outside the homelab in the first place.
+Keeping the VPS on its own ISP resolvers avoids that circular dependency entirely.
+
+#### Install WireGuard
+
+```bash
+apt install -y wireguard
+```
+
+#### Generate keys
+
+```bash
+wg genkey | tee /etc/wireguard/privatekey | wg pubkey > /etc/wireguard/publickey
+```
+
+#### Create `/etc/wireguard/wg0.conf`
+
+```ini
+[Interface]
+PrivateKey = <VPS private key>
+Address = 10.10.0.2/24
+
+[Peer]
+PublicKey = <OPNsense public key>
+Endpoint = XXX.XXX.XXX.XXX:51820
+AllowedIPs = 10.0.0.0/8
+PersistentKeepalive = 25
+```
+
+> **Do not add a `DNS =` line here.** `wg-quick` turns it into a catch-all `~.` routing
+> domain on `wg0` via systemd-resolved, which forwards **every** DNS query, not just
+> `*.khaddict.lab`, through the tunnel. The VPS has no functional need to resolve
+> `*.khaddict.lab`: nginx routes by SNI/IP (section 10), and Uptime Kuma's targets are
+> public names resolved by the VPS's own ISP resolver. If a `.lab` name is ever needed on
+> the VPS, prefer a static `/etc/hosts` entry over `~.`, since it survives an Unbound outage.
+
+#### Bring up the tunnel and enable on boot
+
+```bash
+wg-quick up wg0
+systemctl enable wg-quick@wg0
+```
+
+#### Verify DNS is not routed through the tunnel
+
+```bash
+resolvectl status wg0
+```
+
+Expected: no `DNS Servers:` line and no `DNS Domain: ~.` under `Link (wg0)`. DNS should only
+appear against `ens3`, pointing at the Infomaniak resolvers.
+
+#### Verify the alert path survives a full homelab outage
+
+```bash
+wg-quick down wg0
+resolvectl query discord.com           # must resolve -> Discord webhook can be delivered
+resolvectl query matomo.khaddict.com   # must resolve -> monitored target reachable
+wg-quick up wg0
+```
+
+If both resolve while `wg0` is down, Discord alerts are sent immediately even when the
+homelab is fully offline.
+
+---
+
+## 10. Configure nginx stream proxy
+
+nginx uses **SNI-based TCP routing** on port 443. `status.khaddict.com` is served directly from the VPS (SSL termination local, proxied to Uptime Kuma on `localhost:3001`) so it remains available even when the homelab is down. `khaddict.com` and its subdomains go through the `homelab_failover` upstream: normally forwarded to HAProxy (`10.40.0.2:443`) via the WireGuard tunnel, but automatically failed over to a local static page (section 13) if HAProxy becomes unreachable. PROXY protocol is used so HAProxy receives the real client IP.
 
 #### Add stream include to nginx.conf
 
@@ -258,7 +335,7 @@ nginx -t
 systemctl reload nginx.service
 ```
 
-## 10. Uptime Kuma initial setup
+## 11. Uptime Kuma initial setup
 
 Open the application in your browser:
 
@@ -276,15 +353,15 @@ Uptime Kuma is now ready to use.
 
 ---
 
-## 11. Custom CSS theme
+## 12. Custom CSS theme
 
 In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste the content of [`uptime-kuma-theme.css`](uptime-kuma-theme.css).
 
 ---
 
-## 12. Homelab down fallback page
+## 13. Homelab down fallback page
 
-When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 9) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`. It shares the same header, nav, live status widget (fetches `status.khaddict.com`, which stays up independently) and footer as the rest of the site, so it isn't just a bare error message. The brand icon/favicon are embedded as base64 rather than fetched from `images.khaddict.com`, since that domain is itself unreachable whenever this page is shown. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
+When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 10) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`. It shares the same header, nav, live status widget (fetches `status.khaddict.com`, which stays up independently) and footer as the rest of the site, so it isn't just a bare error message. The brand icon/favicon are embedded as base64 rather than fetched from `images.khaddict.com`, since that domain is itself unreachable whenever this page is shown. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
 
 #### Issue the certificate
 
