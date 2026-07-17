@@ -15,7 +15,7 @@ The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` L
 - [GEEKOM A9 Max Mini PC](https://www.geekom.fr/geekom-a9-max-mini-pc)
 - [128GB DDR5-5600](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)
 - [4TB Samsung 990 EVO Plus NVMe](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)
-- [TP-Link TL-SG108E switch](https://www.tp-link.com/fr/business-networking/soho-switch-easy-smart/tl-sg108e)
+- [Unifi Switch Lite 8 PoE](https://eu.store.ui.com/eu/en/products/usw-lite-8-poe)
 
 ## Network architecture
 
