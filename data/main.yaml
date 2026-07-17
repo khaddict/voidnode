@@ -406,94 +406,6 @@ pve:
       backup: true
       <<: *vlan_edge
 
-    rke2cp:
-      vmid: 120
-      description: "Rke2cp VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      exporters:
-        blackbox: false
-        node: false
-      ip: 10.40.0.11
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 4
-        disks:
-          - name: scsi0
-            size_gb: 50
-      backup: false
-      <<: *vlan_edge
-
-    rke2w1:
-      vmid: 121
-      description: "Rke2w1 VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      exporters:
-        blackbox: false
-        node: false
-      ip: 10.40.0.12
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 4
-        disks:
-          - name: scsi0
-            size_gb: 50
-      backup: false
-      <<: *vlan_edge
-
-    rke2w2:
-      vmid: 122
-      description: "Rke2w2 VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      exporters:
-        blackbox: false
-        node: false
-      ip: 10.40.0.13
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 8192
-        cpu:
-          sockets: 1
-          cores: 4
-        disks:
-          - name: scsi0
-            size_gb: 50
-      backup: false
-      <<: *vlan_edge
-
-    testing:
-      vmid: 123
-      description: "Testing VM"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      exporters:
-        blackbox: false
-        node: false
-      ip: 10.40.0.14
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 2048
-        cpu:
-          sockets: 1
-          cores: 2
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: false
-      <<: *vlan_edge
-
     # [end:vms]
 
   lxc:
@@ -570,6 +482,26 @@ pve:
         rootfs:
           storage: local-lvm
           size_gb: 50
+      backup: true
+      <<: *vlan_edge
+
+    unifi:
+      vmid: 120
+      description: "Unifi network controller"
+      tags: "edge,lxc"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.40.0.11
+      main_iface: eth0
+      ssh: null
+      hardware:
+        ram_mb: 4096
+        cpu:
+          cores: 2
+        rootfs:
+          storage: local-lvm
+          size_gb: 20
       backup: true
       <<: *vlan_edge
 
