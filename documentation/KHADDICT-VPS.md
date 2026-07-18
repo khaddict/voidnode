@@ -141,6 +141,10 @@ git clone https://github.com/louislam/uptime-kuma.git
 cd uptime-kuma
 ```
 
+> The clone itself is now a `git.latest` state in `role.vps` (section 14), which keeps
+> `/root/uptime-kuma` checked out to `master`. `npm run setup` below is **not** automated:
+> it still needs to be re-run by hand after Salt pulls a new revision.
+
 #### Install dependencies
 
 ```bash
@@ -160,7 +164,9 @@ pm2 install pm2-logrotate
 
 #### Create PM2 ecosystem file
 
-Copy [`ecosystem.config.js`](ecosystem.config.js) to `/root/uptime-kuma/ecosystem.config.js`.
+Managed by `role.vps` (section 14), sourced from
+[`ecosystem.config.js`](../role/vps/files/ecosystem.config.js) and deployed to
+`/root/uptime-kuma/ecosystem.config.js`.
 
 #### Start Uptime Kuma
 
@@ -194,6 +200,13 @@ Expected output:
 ```bash
 apt install -y nginx libnginx-mod-stream
 ```
+
+> **This package install, and every file-copy step from here through section 13, is now
+> managed by `role.vps` in the `voidnode` Salt repo once the VPS is bootstrapped as a minion
+> (section 14).** They're kept below as-is because they describe what Salt is actually doing
+> and remain the reference for a from-scratch bootstrap before Salt takes over. Once the
+> minion is running, edit `role/vps/init.sls` in `voidnode` instead of these files directly.
+> A manual edit on the VPS will be silently reverted on the next highstate.
 
 ---
 
@@ -294,7 +307,7 @@ stream {
 mkdir -p /etc/nginx/stream-enabled
 ```
 
-Copy [`khaddict-stream.conf`](khaddict-stream.conf) to `/etc/nginx/stream-enabled/khaddict.conf`.
+Copy [`khaddict-stream.conf`](../role/vps/files/khaddict-stream.conf) to `/etc/nginx/stream-enabled/khaddict.conf`.
 
 #### Issue TLS certificate for status.khaddict.com
 
@@ -311,7 +324,7 @@ certbot certonly \
 
 #### Create local HTTPS vhost for Uptime Kuma
 
-Copy [`status.khaddict.com.conf`](status.khaddict.com.conf) to `/etc/nginx/sites-available/status.khaddict.com`:
+Copy [`status.khaddict.com`](../role/vps/files/status.khaddict.com) to `/etc/nginx/sites-available/status.khaddict.com`:
 
 ```bash
 ln -sf /etc/nginx/sites-available/status.khaddict.com /etc/nginx/sites-enabled/
@@ -319,7 +332,7 @@ ln -sf /etc/nginx/sites-available/status.khaddict.com /etc/nginx/sites-enabled/
 
 #### Configure HTTP redirect site
 
-Copy [`khaddict.com.conf`](khaddict.com.conf) to `/etc/nginx/sites-available/khaddict.com`.
+Copy [`khaddict.com`](../role/vps/files/khaddict.com) to `/etc/nginx/sites-available/khaddict.com`.
 
 #### Enable site
 
@@ -355,7 +368,10 @@ Uptime Kuma is now ready to use.
 
 ## 12. Custom CSS theme
 
-In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste the content of [`uptime-kuma-theme.css`](uptime-kuma-theme.css).
+In Uptime Kuma, go to **Status Page → Edit → Custom CSS** and paste the content of
+[`uptime-kuma-theme.css`](../role/vps/files/uptime-kuma-theme.css). This one lives in
+`role/vps/files/` for safekeeping only: Uptime Kuma stores Custom CSS in its own SQLite
+database, not a file Salt could manage, so this stays a manual copy-paste.
 
 ---
 
@@ -386,15 +402,18 @@ certbot certonly \
 
 #### Create the fallback page content
 
-```bash
-mkdir -p /var/www/fallback
-```
-
-Copy [`vps-fallback/index.html`](https://github.com/khaddict/khaddict-com/blob/main/vps-fallback/index.html) (from the `khaddict-com` repo) to `/var/www/fallback/index.html`.
+`/var/www/fallback/index.html` is **not** a one-time manual copy. `role.vps` manages it as a
+`file.managed` state sourced directly from
+`https://raw.githubusercontent.com/khaddict/khaddict-com/main/vps-fallback/index.html`, with
+`use_etag: True`. On every highstate, Salt sends the cached ETag back to GitHub; a `304` means
+no change and nothing is re-downloaded, a `200` means the page changed and Salt rewrites the
+file. This requires `vps-fallback/index.html` to actually be committed in `khaddict-com` (it
+isn't gitignored there). See section 14 for how the highstate that keeps this in sync gets
+triggered.
 
 #### Create local HTTPS vhost for the fallback page
 
-Copy [`fallback.khaddict.com.conf`](fallback.khaddict.com.conf) to `/etc/nginx/sites-available/fallback.khaddict.com`. It returns a real `503 Service Unavailable` status while serving the styled page.
+Copy [`fallback.khaddict.com`](../role/vps/files/fallback.khaddict.com) to `/etc/nginx/sites-available/fallback.khaddict.com`. It returns a real `503 Service Unavailable` status while serving the styled page.
 
 ```bash
 ln -sf /etc/nginx/sites-available/fallback.khaddict.com /etc/nginx/sites-enabled/
@@ -408,3 +427,60 @@ systemctl reload nginx.service
 ```
 
 Test by stopping HAProxy on `revproxy` (or blocking the WireGuard tunnel) and hitting any of the domains covered above. It should switch to the fallback page within `fail_timeout` (10s) of the first failed attempt, and switch back automatically once HAProxy is reachable again.
+
+---
+
+## 14. Configuration management via SaltStack
+
+Unlike the rest of the fleet, the VPS is external and not in `data/main.yaml`'s Proxmox
+inventory, so it doesn't get the usual `global` states (see `top.sls` in `voidnode`, which
+excludes it from the `'*'` match by minion ID). It still runs as a regular Salt minion, just
+with a deliberately narrow scope: `independent.vps` for the one-time bootstrap, `role.vps` for
+everything ongoing.
+
+#### One-time bootstrap
+
+The minion package itself is installed via `salt-ssh`, not by hand, from `saltmaster.khaddict.lab`:
+
+```bash
+salt-ssh --user=root --priv=/root/.ssh/id_ed25519 --ssh-option="Port=22222" -i khaddict-vps state.sls independent.vps
+```
+
+This targets a roster entry (`/etc/salt/roster` on the saltmaster, not committed to the repo)
+since the VPS listens on the non-default SSH port configured back in section 3:
+
+```yaml
+khaddict-vps:
+  host: <VPS public IP>
+  port: 22222
+  user: root
+  priv: /root/.ssh/id_ed25519
+```
+
+`independent.vps` (`independent/vps.sls` in `voidnode`) installs `salt-minion` and the public
+Debian/Ubuntu apt sources. Nothing here assumes Proxmox inventory. Once the minion checks in:
+
+```bash
+salt-key -l unaccepted   # should list khaddict-vps
+salt-key -a khaddict-vps -y
+```
+
+#### Ongoing management
+
+From here on, `role.vps` (`role/vps/init.sls`) is what actually keeps the VPS configured:
+nginx itself, `/etc/nginx/nginx.conf`, the stream module config (section 10), the three vhosts
+in `sites-available`/`sites-enabled` (section 10, 13), and the fallback page content (section
+13's `use_etag` mechanism). All sourced from `role/vps/files/` in `voidnode`, applied with:
+
+```bash
+salt khaddict-vps state.apply
+```
+
+or, run locally on the VPS itself:
+
+```bash
+salt-call state.highstate
+```
+
+Certificates (certbot) and the WireGuard tunnel (section 9) stay manual. Salt doesn't manage
+either.

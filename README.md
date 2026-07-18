@@ -36,7 +36,7 @@ ISP ◄── x.x.x.x ◄── Freebox (.254) ◄── (.253 - WAN) OPNsense (
 
 All public traffic transits through an Infomaniak VPS before reaching the homelab. The VPS acts as a TCP passthrough proxy and never sees the TLS content. The connection between the VPS and the lab is maintained over a WireGuard tunnel, which means the residential IP is never exposed publicly. Every `*.khaddict.com` request hits the VPS first, gets forwarded through the tunnel, and lands on HAProxy at `revproxy` for SSL termination and routing.
 
-[View network diagram](documentation/DIAGRAM.png)
+![Network diagram](documentation/DIAGRAM.png)
 
 Firewall policy follows a least-privilege model:
 
@@ -127,8 +127,9 @@ Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<
 
 All Debian/Ubuntu VMs are managed by SaltStack. States are organized in three layers:
 
-- `global/`: applied to every host: networking, SSH hardening, user management, DNS resolution, CA certificate trust, Promtail, node-exporter, blackbox-exporter, Vault client configuration
-- `role/`: per-service states applied to specific minions: `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `vault`
+- `global/`: applied to every host in `data/main.yaml`'s Proxmox inventory: networking, SSH hardening, user management, DNS resolution, CA certificate trust, Promtail, node-exporter, blackbox-exporter, Vault client configuration. The external VPS (see "External exposure" below) is excluded by minion ID in `top.sls`, since it isn't Proxmox-managed and several of these states assume that inventory.
+- `role/`: per-service states applied to specific minions: `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `vault`, `vps`
+- `independent/`: minimal one-time bootstrap states (`vm.sls`, `lxc.sls`, `vps.sls`) applied once via `salt-ssh` to turn a fresh host into a minion, before `global`/`role` states take over on an ongoing basis
 - `data/`: YAML source of truth consumed by states: `main.yaml` (full inventory), `versions.yaml` (pinned versions), `packages.yaml`
 
 Minions authenticate to Vault via AppRole (`auth/salt-minions`). Each minion has a Vault entity with a `minion-id` metadata tag. The `minion-isolated` policy uses `{{identity.entity.metadata.minion-id}}` templating so that, for example, `netbox` cannot read `registry`'s secrets and vice versa.
@@ -146,9 +147,9 @@ Browser
           └── matomo.khaddict.com    → Matomo LXC
 ```
 
-**Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down. DNS on the VPS is resolved via its own ISP resolvers, never through the tunnel (see [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#9-configure-the-wireguard-tunnel-to-the-homelab)), keeping the VPS's own name resolution, including for the Discord alert webhook, independent of whether the homelab, and therefore the tunnel, is reachable.
+**Uptime Kuma** runs directly on the VPS (Node.js + PM2). nginx terminates TLS for `status.khaddict.com` locally and proxies straight to it on `localhost`, entirely bypassing WireGuard/HAProxy, so the status page stays up even if the entire homelab goes down. DNS on the VPS is resolved via its own ISP resolvers, never through the tunnel (see [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#9-configure-the-wireguard-tunnel-to-the-homelab)), keeping the VPS's own name resolution, including for the Discord alert webhook, independent of whether the homelab, and therefore the tunnel, is reachable.
 
-If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md#13-homelab-down-fallback-page).
+If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
 **Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `projects` · `matomo` · `status`
 
@@ -158,7 +159,7 @@ SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automaticall
 
 Full VM/LXC inventory with hardware specs, VLAN assignments, IPs, and backup flags: [data/main.yaml](data/main.yaml).  
 Firewall rules: [documentation/FIREWALL-RULES.md](documentation/FIREWALL-RULES.md).  
-VPS setup: [documentation/KHADDICT-VPS/KHADDICT-VPS.md](documentation/KHADDICT-VPS/KHADDICT-VPS.md).  
+VPS setup: [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md).  
 Talos & Kubernetes upgrades: [documentation/KUBERNETES-UPGRADE.md](documentation/KUBERNETES-UPGRADE.md).  
 Vault ACL policies: [documentation/VAULT-ACL-POLICIES.md](documentation/VAULT-ACL-POLICIES.md).
 
