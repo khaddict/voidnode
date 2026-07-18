@@ -14,6 +14,7 @@ include:
     - target: /srv/saltgui
     - force_clone: True
     - force_reset: True
+    - force_fetch: True
 
 saltgui_user:
   user.present:
