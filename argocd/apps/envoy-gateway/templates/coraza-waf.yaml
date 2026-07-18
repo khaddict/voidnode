@@ -26,6 +26,25 @@ spec:
           # PromQL aggregate functions (count, sum, avg) trigger SQL injection rules 942xxx. Exclude the query arg on the VM API (vmsingle only)
           - "SecRule REQUEST_URI \"@beginsWith /api/v1/\" \"id:106,phase:1,pass,nolog,chain\""
           - "SecRule REQUEST_HEADERS:Host \"@streq vmsingle.khaddict.lab\" \"ctl:ruleRemoveByTag=attack-sqli\""
+          # remark42's own iframe-close query param (?selfClose) contains the substring
+          # "fClose", which rule 933150 flags as the PHP fclose() function name. False
+          # positive; shows up both as its own query string on /web/iframe.html and
+          # inside the auth callback's "from=" redirect target, so it's excluded for
+          # the whole /remark42/ prefix rather than just /remark42/auth/.
+          - "SecRule REQUEST_URI \"@beginsWith /remark42/\" \"id:107,phase:1,pass,nolog,chain\""
+          - "SecRule REQUEST_HEADERS:Host \"@streq blog.khaddict.lab\" \"ctl:ruleRemoveById=933150\""
+          # remark42 passes the commented-on page's full URL as a query arg (url=...)
+          # on most of its API endpoints (vote, post comment, find, ...). A full URL
+          # inside a query string commonly trips the CRS RFI (remote file inclusion)
+          # rules as a false positive. Scoped to remark42's own path/host only.
+          - "SecRule REQUEST_URI \"@beginsWith /remark42/\" \"id:108,phase:1,pass,nolog,chain\""
+          - "SecRule REQUEST_HEADERS:Host \"@streq blog.khaddict.lab\" \"ctl:ruleRemoveByTag=attack-rfi\""
+          # remark42's own REST API uses PUT (vote, edit comment, pin, block user,
+          # read-only, verify) and DELETE (delete comment/user) throughout — CRS's
+          # method-enforcement rule (911100) only allows a default method allowlist
+          # that excludes both, blocking most write actions in the widget.
+          - "SecRule REQUEST_URI \"@beginsWith /remark42/\" \"id:109,phase:1,pass,nolog,chain\""
+          - "SecRule REQUEST_HEADERS:Host \"@streq blog.khaddict.lab\" \"ctl:ruleRemoveById=911100\""
           # Include CRS rules embedded in the wasm image
           - "Include @owasp_crs/*.conf"
           # Blocking mode

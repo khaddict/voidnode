@@ -1,0 +1,11 @@
+apiVersion: v2
+name: remark42
+description: A Helm chart for remark42 (self-hosted blog comments)
+type: application
+version: 0.1.0
+appVersion: "1.16.4"
+home: https://github.com/khaddict/voidnode
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/remark42
+maintainers:
+  - name: platform

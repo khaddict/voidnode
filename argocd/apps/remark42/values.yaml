@@ -1,0 +1,63 @@
+app: remark42
+namespace: remark42
+
+deployment:
+  name: remark42
+  replicas: 1
+  image: ghcr.io/khaddict/remark42:4785748
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+service:
+  name: remark42
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+probes:
+  enabled: true
+  liveness:
+    httpGet:
+      path: /web/embed.js
+      port: 8080
+    initialDelaySeconds: 20
+    periodSeconds: 15
+  readiness:
+    httpGet:
+      path: /web/embed.js
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+persistence:
+  enabled: true
+  storage: 5Gi
+  storageClassName: local-path
+  volumeName: ""
+
+secret:
+  name: remark42-env
+
+httproute:
+  host: blog.khaddict.lab
+  gatewayName: envoy-gateway
+  pathPrefix: /remark42
+
+env:
+  REMARK_URL: https://blog.khaddict.com/remark42
+  SITE: khaddict-blog
+  AUTH_GITHUB_CID: <path:kv/data/kubernetes/remark42#AUTH_GITHUB_CID>
+  AUTH_GITHUB_CSEC: <path:kv/data/kubernetes/remark42#AUTH_GITHUB_CSEC>
+  ADMIN_SHARED_ID: "github_6e734ebec3461a0cf10e30d2072c62018a5b790e"
+  ADMIN_SHARED_EMAIL: "contact@khaddict.com"
+  STORE_BOLT_PATH: /srv/var
+  BACKUP_PATH: /srv/var/backup
+  IMAGE_MAX_SIZE: "10485760"
+  SECRET: <path:kv/data/kubernetes/remark42#SECRET>
+  ADMIN_PASSWD: <path:kv/data/kubernetes/remark42#ADMIN_PASSWORD>

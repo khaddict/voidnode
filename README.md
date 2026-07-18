@@ -106,7 +106,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 |-----|------|
 | [MetalLB](https://metallb.io/) | Allocates LoadBalancer IPs from the EDGE subnet (L2 mode) |
 | [Envoy Gateway](https://gateway.envoyproxy.io/) | Implements Kubernetes Gateway API; all services are exposed via HTTPRoute |
-| [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | Provides `local-path` StorageClass backed by `/opt/local-path-provisioner` on the node |
+| [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | Provides `local-path` StorageClass backed by `/var/local-path-provisioner` on the node |
 | [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | Exposes resource metrics for HPA and kubectl top |
 | [VictoriaMetrics](https://victoriametrics.com/) | Metrics stack (vmsingle + vmagent + vmalert) for cluster observability, alerts routed to Alertmanager |
 | `node-shell` | Privileged DaemonSet giving a root shell on any worker node for debugging |
@@ -120,6 +120,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
+| `remark42` | Comment widget for `blog.khaddict.com`, embedded as an iframe. GitHub-only auth, 5Gi PVC (BoltDB storage + backups), secrets from Vault at `kv/data/kubernetes/remark42`. |
 
 Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<path:kv/data/kubernetes/<app>#FIELD>` annotations, authenticated with a long-lived Vault token.
 
