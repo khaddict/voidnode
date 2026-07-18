@@ -232,7 +232,7 @@ tasks:
       username: root
       timeout: 180
       cmd: |
-        salt-ssh --user=root -i --priv=/root/.ssh/id_ed25519 <% ctx().ip %> state.sls independent
+        salt-ssh --user=root -i --priv=/root/.ssh/id_ed25519 <% ctx().ip %> state.sls independent.vm
     next:
       - when: <% succeeded() %>
         do: purge_cloudinit_netplan

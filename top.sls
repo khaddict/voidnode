@@ -1,6 +1,8 @@
+{% set global_excludes = ['khaddict-vps'] %}
+
 {{ saltenv }}:
-# All hosts configuration
-  '*':
+  '* and not {{ global_excludes|join(" and not ") }}':
+    - match: compound
     - global
 
 # Per role configuration
@@ -42,3 +44,6 @@
 
   'voidnode':
     - role.pve
+
+  'khaddict-vps':
+    - role.vps
