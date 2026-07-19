@@ -219,16 +219,18 @@ In Matomo → **Administration → Système → Paramètres généraux**, disabl
 
 ## 10. Tracking snippet
 
-The snippet is injected before `</head>` in the `index.html` of each tracked app:
+The snippet is baked in before `</head>` at build time, by `build.py` in the `khaddict-com` repo, which renders it from these Jinja2 templates (`templates/` is the only source of truth there, not the generated `files/**` output):
 
-| App | Source file (in the `khaddict-com` repo) |
+| App | Template (in the `khaddict-com` repo) |
 |-----|-----------------|
-| khaddict.com | `files/www/index.html` |
-| blog.khaddict.com | `files/blog/index.html` |
-| images.khaddict.com | `files/images/index.html` |
-| projects.khaddict.com | `files/projects/index.html` |
+| khaddict.com | `templates/pages/www.html.j2` |
+| blog.khaddict.com | `templates/pages/blog.html.j2` |
+| blog posts | `templates/pages/post.html.j2` |
+| images.khaddict.com | `templates/pages/images.html.j2` |
+| projects.khaddict.com | `templates/pages/projects.html.j2` |
+| shared 404 page | `templates/pages/404.html.j2` |
 
-All four use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
+All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
 
 Snippet:
 
@@ -249,7 +251,7 @@ Snippet:
 <!-- End Matomo -->
 ```
 
-Deploy via ArgoCD sync of the `khaddict` application.
+Ships through `khaddict-com`'s normal publish pipeline: `build.py` renders it into the static site, `publish-chart.yaml` packages and pushes the chart, Renovate bumps the dependency version in `voidnode`'s `Chart.yaml`, and ArgoCD syncs the `khaddict` application.
 
 ---
 
