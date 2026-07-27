@@ -406,6 +406,28 @@ pve:
       backup: true
       <<: *vlan_edge
 
+    website:
+      vmid: 121
+      description: "Staging environment for testing website changes before production"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.40.0.12
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      backup: true
+      <<: *vlan_edge
+
     # [end:vms]
 
   lxc:

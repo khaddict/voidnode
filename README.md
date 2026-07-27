@@ -91,6 +91,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
+| `website.khaddict.lab` | VM | Staging environment for previewing [`khaddict-com`](https://github.com/khaddict/khaddict-com) branches before merging to `main`. `khaddict-com` is cloned to `/srv/khaddict-com` (one-time `git.cloned`, not kept in sync by Salt) and served by nginx at `/www/`, `/blog/`, `/projects/`, `/images/`; check out a branch and rerun `build.py` by hand to preview it. |
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `images.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
@@ -130,7 +131,7 @@ Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<
 All Debian/Ubuntu VMs are managed by SaltStack. States are organized in three layers:
 
 - `global/`: applied to every host in `data/main.yaml`'s Proxmox inventory: networking, SSH hardening, user management, DNS resolution, CA certificate trust, Promtail, node-exporter, blackbox-exporter, Vault client configuration. The external VPS (see "External exposure" below) is excluded by minion ID in `top.sls`, since it isn't Proxmox-managed and several of these states assume that inventory.
-- `role/`: per-service states applied to specific minions: `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `vault`, `vps`
+- `role/`: per-service states applied to specific minions: `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `vault`, `vps`, `website`
 - `independent/`: minimal one-time bootstrap states (`vm.sls`, `lxc.sls`, `vps.sls`) applied once via `salt-ssh` to turn a fresh host into a minion, before `global`/`role` states take over on an ongoing basis
 - `data/`: YAML source of truth consumed by states: `main.yaml` (full inventory), `versions.yaml` (pinned versions), `packages.yaml`
 
