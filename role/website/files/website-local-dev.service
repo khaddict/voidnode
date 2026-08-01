@@ -1,0 +1,14 @@
+[Unit]
+Description=khaddict-com local dev stack (podman-compose)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/website-local-dev
+ExecStart=/usr/bin/podman-compose up -d
+ExecStop=/usr/bin/podman-compose down
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
