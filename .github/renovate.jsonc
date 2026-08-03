@@ -22,8 +22,8 @@
     },
     {
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/khaddict/images-khaddict"],
-      "groupName": "images-khaddict"
+      "matchPackageNames": ["ghcr.io/khaddict/media-khaddict"],
+      "groupName": "media-khaddict"
     },
     {
       "matchDatasources": ["helm"],

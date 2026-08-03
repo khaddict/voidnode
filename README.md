@@ -1,6 +1,6 @@
 # Voidnode – Single node, segmented & secure
 
-<img src="https://images.khaddict.com/gallery/voidnode-khazix-wallpaper.png" alt="Voidnode architecture" style="width:100%;">
+<img src="https://media.khaddict.com/gallery/voidnode-khazix-wallpaper.png" alt="Voidnode architecture" style="width:100%;">
 
 ## Introduction
 
@@ -91,8 +91,8 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
-| `website.khaddict.lab` | VM | Staging environment for previewing [`khaddict-com`](https://github.com/khaddict/khaddict-com) branches before merging to `main`. `khaddict-com` is cloned to `/srv/khaddict-com` (one-time `git.cloned`, not kept in sync by Salt) and served by nginx at `/www/`, `/blog/`, `/projects/`, `/images/`; check out a branch and rerun `build.py` by hand to preview it. |
-| `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `images.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
+| `website.khaddict.lab` | VM | Staging environment for previewing [`khaddict-com`](https://github.com/khaddict/khaddict-com) branches before merging to `main`. `khaddict-com` is cloned to `/srv/khaddict-com` (one-time `git.cloned`, not kept in sync by Salt); check out a branch and rerun `build.py` by hand. A podman-compose stack (`website-local-dev` systemd unit) mirrors the production layout: one nginx container per site (`www`, `blog`, `media`, `projects`) plus an edge nginx reverse-proxying each at `<site>.website.khaddict.lab`. |
+| `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `media.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
 | `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
@@ -118,7 +118,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | App | Description |
 |-----|-------------|
 | `dashboard.khaddict.com` | Dashboard (Homepage). Aggregates widgets from PVE, ArgoCD, PBS, Prometheus, Grafana, OPNsense. Secrets injected from Vault via AVP. |
-| `www.khaddict.com` / `blog.khaddict.com` / `images.khaddict.com` / `projects.khaddict.com` | Helm chart (`argocd/apps/khaddict`), one `khaddict` namespace, per-site Deployment/Service/HTTPRoute templated from `values.yaml`. Site content (HTML/CSS/JS, shared 404 page, security headers) lives in the separate [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo, pulled in as a Helm subchart dependency published to `oci://ghcr.io/khaddict/charts`. |
+| `www.khaddict.com` / `blog.khaddict.com` / `media.khaddict.com` / `projects.khaddict.com` | Helm chart (`argocd/apps/khaddict`), one `khaddict` namespace, per-site Deployment/Service/HTTPRoute templated from `values.yaml`. Site content (HTML/CSS/JS, shared 404 page, security headers) lives in the separate [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo, pulled in as a Helm subchart dependency published to `oci://ghcr.io/khaddict/charts`. |
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
@@ -154,7 +154,7 @@ Browser
 
 If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
-**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `images` · `projects` · `matomo` · `status`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `matomo` · `status`
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 

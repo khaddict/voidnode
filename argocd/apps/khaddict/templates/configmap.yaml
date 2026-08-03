@@ -9,9 +9,9 @@ metadata:
   labels:
     {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
 data:
-{{- if eq $site.name "images" }}
+{{- if eq $site.name "media" }}
   default.conf: |
-{{ $content.Files.Get "files/images/default.conf" | indent 4 }}
+{{ $content.Files.Get "files/media/default.conf" | indent 4 }}
 {{- else }}
   default.conf: |
 {{ $content.Files.Get "files/shared/default.conf" | indent 4 }}
