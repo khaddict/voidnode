@@ -92,6 +92,18 @@ nginx_not_used_here:
     - require:
       - file: /srv/website-local-dev/edge
 
+/srv/website-local-dev/security-headers.conf:
+  file.managed:
+    - source: salt://role/website/local-dev/security-headers.conf
+    - template: jinja
+    - mode: 644
+    - user: root
+    - group: root
+    - context:
+        domain: {{ domain }}
+    - require:
+      - file: /srv/website-local-dev
+
 /etc/systemd/system/website-local-dev.service:
   file.managed:
     - source: salt://role/website/files/website-local-dev.service
@@ -108,10 +120,12 @@ website-local-dev:
       - file: /srv/website-local-dev/docker-compose.yml
       - file: /srv/website-local-dev/.env
       - file: /srv/website-local-dev/edge/nginx.conf
+      - file: /srv/website-local-dev/security-headers.conf
       - file: /etc/systemd/system/website-local-dev.service
       - cmd: website_build
     - watch:
       - file: /srv/website-local-dev/docker-compose.yml
       - file: /srv/website-local-dev/.env
       - file: /srv/website-local-dev/edge/nginx.conf
+      - file: /srv/website-local-dev/security-headers.conf
       - file: /etc/systemd/system/website-local-dev.service

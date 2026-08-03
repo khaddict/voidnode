@@ -23,7 +23,7 @@ services:
       - ${CONTENT}/www/security.txt:/usr/share/nginx/html/security.txt:ro
       - ${CONTENT}/shared/404.html:/usr/share/nginx/html/404.html:ro
       - ${CONTENT}/shared/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${CONTENT}/shared/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   blog:
     image: docker.io/library/nginx:1.31.3
@@ -38,7 +38,7 @@ services:
       - ${CONTENT}/blog/posts:/usr/share/nginx/html/posts:ro
       - ${CONTENT}/blog/fr/posts:/usr/share/nginx/html/fr/posts:ro
       - ${CONTENT}/shared/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${CONTENT}/shared/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   projects:
     image: docker.io/library/nginx:1.31.3
@@ -49,10 +49,10 @@ services:
       - ${CONTENT}/projects/security.txt:/usr/share/nginx/html/security.txt:ro
       - ${CONTENT}/shared/404.html:/usr/share/nginx/html/404.html:ro
       - ${CONTENT}/shared/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${CONTENT}/shared/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   media:
-    image: ghcr.io/khaddict/media-khaddict:0.1.21
+    image: ghcr.io/khaddict/media-khaddict:0.1.29
     volumes:
       - ${CONTENT}/media/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/media/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
@@ -60,4 +60,4 @@ services:
       - ${CONTENT}/media/security.txt:/usr/share/nginx/html/security.txt:ro
       - ${CONTENT}/shared/404.html:/usr/share/nginx/html/404.html:ro
       - ${CONTENT}/media/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${CONTENT}/shared/security-headers.conf:/etc/nginx/security-headers.conf:ro
+      - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
