@@ -33,12 +33,12 @@ sites:
     host: blog.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
-  - name: images
+  - name: media
     replicas: 2
     image:
-      repository: ghcr.io/khaddict/images-khaddict
-      tag: "0.1.21"
-    host: images.khaddict.lab
+      repository: ghcr.io/khaddict/media-khaddict
+      tag: "0.1.29"
+    host: media.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 5
   - name: projects

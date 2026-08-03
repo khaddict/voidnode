@@ -226,7 +226,7 @@ The snippet is baked in before `</head>` at build time, by `build.py` in the `kh
 | khaddict.com | `templates/pages/www.html.j2` |
 | blog.khaddict.com | `templates/pages/blog.html.j2` |
 | blog posts | `templates/pages/post.html.j2` |
-| images.khaddict.com | `templates/pages/images.html.j2` |
+| media.khaddict.com | `templates/pages/media.html.j2` |
 | projects.khaddict.com | `templates/pages/projects.html.j2` |
 | shared 404 page | `templates/pages/404.html.j2` |
 

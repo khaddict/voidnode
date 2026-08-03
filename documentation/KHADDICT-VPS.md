@@ -8,7 +8,7 @@
 | www                 | CNAME | khaddict.com.       | Auto |
 | blog                | CNAME | khaddict.com.       | Auto |
 | dashboard           | CNAME | khaddict.com.       | Auto |
-| images              | CNAME | khaddict.com.       | Auto |
+| media               | CNAME | khaddict.com.       | Auto |
 | projects            | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |
 | matomo              | CNAME | khaddict.com.       | Auto |
@@ -377,7 +377,7 @@ database, not a file Salt could manage, so this stays a manual copy-paste.
 
 ## 13. Homelab down fallback page
 
-When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 10) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`. It shares the same header, nav, live status widget (fetches `status.khaddict.com`, which stays up independently) and footer as the rest of the site, so it isn't just a bare error message. The brand icon/favicon are embedded as base64 rather than fetched from `images.khaddict.com`, since that domain is itself unreachable whenever this page is shown. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
+When HAProxy (`10.40.0.2:443`) is unreachable, the `homelab_failover` upstream (section 10) falls back to a static page served locally on the VPS, on `127.0.0.1:8443`. It shares the same header, nav, live status widget (fetches `status.khaddict.com`, which stays up independently) and footer as the rest of the site, so it isn't just a bare error message. The brand icon/favicon are embedded as base64 rather than fetched from `media.khaddict.com`, since that domain is itself unreachable whenever this page is shown. It covers `khaddict.com` and all its subdomains except `status.khaddict.com` (has its own always-on path).
 
 #### Issue the certificate
 
@@ -395,7 +395,7 @@ certbot certonly \
   -d 'www.khaddict.com' \
   -d 'blog.khaddict.com' \
   -d 'dashboard.khaddict.com' \
-  -d 'images.khaddict.com' \
+  -d 'media.khaddict.com' \
   -d 'projects.khaddict.com' \
   -d 'matomo.khaddict.com'
 ```
