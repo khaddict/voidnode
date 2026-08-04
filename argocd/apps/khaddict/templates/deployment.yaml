@@ -22,7 +22,7 @@ spec:
       containers:
       - name: {{ $site.name }}-khaddict
         image: {{ $site.image.repository }}:{{ $site.image.tag }}
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
           {{- toYaml $.Values.resources | nindent 10 }}
         ports:
