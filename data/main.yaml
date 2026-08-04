@@ -418,10 +418,10 @@ pve:
       main_iface: *default_iface
       ssh: null
       hardware:
-        ram_mb: 2048
+        ram_mb: 4096
         cpu:
           sockets: 1
-          cores: 2
+          cores: 3
         disks:
           - name: scsi0
             size_gb: 20

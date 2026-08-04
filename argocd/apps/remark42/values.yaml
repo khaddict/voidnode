@@ -4,7 +4,7 @@ namespace: remark42
 deployment:
   name: remark42
   replicas: 1
-  image: ghcr.io/khaddict/remark42:4785748
+  image: ghcr.io/khaddict/remark42:55d4f18
   imagePullPolicy: IfNotPresent
   resources:
     requests:
