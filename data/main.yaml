@@ -428,6 +428,29 @@ pve:
       backup: true
       <<: *vlan_edge
 
+    pihole:
+      vmid: 122
+      description: "Network-wide DNS ad-blocking and DNS server"
+      # net1/eth1 on vmbr0: 192.168.0.249/24, gw 192.168.0.254
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.40.0.13
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      backup: true
+      <<: *vlan_edge
+
     # [end:vms]
 
   lxc:
@@ -510,6 +533,7 @@ pve:
     unifi:
       vmid: 120
       description: "Unifi network controller"
+      # net1/eth1 on vmbr0: 192.168.0.252/24, gw 192.168.0.254
       tags: "edge,lxc"
       exporters:
         blackbox: true

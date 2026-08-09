@@ -27,6 +27,9 @@
   'pbs':
     - role.pbs
 
+  'pihole':
+    - role.pihole
+
   'prometheus':
     - role.prometheus
 

@@ -68,3 +68,5 @@ services:
   opnsense:
     password: <path:kv/data/kubernetes/homepage#opnsense_password>
     username: <path:kv/data/kubernetes/homepage#opnsense_username>
+  pihole:
+    password: <path:kv/data/kubernetes/homepage#pihole_password>
