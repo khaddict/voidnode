@@ -24,7 +24,7 @@ app.add_middleware(
         "https://www.khaddict.com",
         "https://khaddict.com",
     ],
-    allow_methods=["POST"],
+    allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
     expose_headers=["Retry-After"],
 )
@@ -42,6 +42,10 @@ ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
 
 RATE_LIMIT_SECONDS = 30
 _last_request_at: dict[str, float] = {}
+
+STATUS_CACHE_SECONDS = 10
+STATUS_TIMEOUT_SEC = 3
+_status_cache = {"online": False, "checked_at": 0.0}
 
 # must match the swatches offered in www.html.j2
 ALLOWED_TEXT_COLORS = {
@@ -221,6 +225,25 @@ async def post_image(request: Request, file: UploadFile = File(...)):
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar image draw failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+
+
+@app.get("/busybar/status")
+async def busybar_status():
+    now = time.monotonic()
+    if now - _status_cache["checked_at"] < STATUS_CACHE_SECONDS:
+        return {"online": _status_cache["online"]}
+
+    online = False
+    try:
+        async with httpx.AsyncClient(timeout=STATUS_TIMEOUT_SEC) as client:
+            resp = await client.get(f"{BUSYBAR_URL}/api/status", headers=busybar_headers())
+            online = resp.status_code == 200
+    except httpx.HTTPError:
+        online = False
+
+    _status_cache["online"] = online
+    _status_cache["checked_at"] = now
+    return {"online": online}
 
 
 @app.get("/healthz")
