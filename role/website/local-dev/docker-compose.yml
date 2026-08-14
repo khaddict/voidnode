@@ -52,7 +52,7 @@ services:
       - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   media:
-    image: ghcr.io/khaddict/media-khaddict:0.1.37
+    image: ghcr.io/khaddict/media-khaddict:0.1.42
     volumes:
       - ${CONTENT}/media/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/media/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
