@@ -6,6 +6,9 @@
     - global
 
 # Per role configuration
+  'api':
+    - role.api
+
   'easypki':
     - role.easypki
 
@@ -41,6 +44,9 @@
 
   'stackstorm':
     - role.stackstorm
+
+  'unifi':
+    - role.unifi
 
   'vault':
     - role.vault

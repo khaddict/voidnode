@@ -8,7 +8,7 @@ I used to run a fully HA homelab ([homelab](https://github.com/khaddict/homelab)
 
 Because of that, I decided to move to something simpler. By simpler, I mean less high availability. I now assume that if the node goes down, it's not a big deal. After all, it's just a homelab.
 
-The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` LAN, split into four VLANs for clear workload separation. Each VLAN has its own firewall rules: segments can only reach what they need, nothing more.
+The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` LAN, split into five VLANs for clear workload separation. Each VLAN has its own firewall rules: segments can only reach what they need, nothing more.
 
 ## Hardware
 
@@ -16,6 +16,9 @@ The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` L
 - [128GB DDR5-5600](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)
 - [4TB Samsung 990 EVO Plus NVMe](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)
 - [Unifi Switch Lite 8 PoE](https://eu.store.ui.com/eu/en/products/usw-lite-8-poe)
+- [Unifi U7 Pro](https://eu.store.ui.com/eu/en/products/u7-pro)
+- [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/): runs [Kodi](https://kodi.tv/), unrelated to the lab's network/services
+- [JetKVM](https://jetkvm.com/): remote KVM for the GEEKOM Mini PC (out-of-band console access to voidnode)
 
 ## Network architecture
 
@@ -31,7 +34,8 @@ ISP ◄── x.x.x.x ◄── Freebox (.254) ◄── (.253 - WAN) OPNsense (
                                                         ├── VLAN 10 – CORE   10.10.0.0/24   core infrastructure
                                                         ├── VLAN 20 – ADMIN  10.20.0.0/24   management & automation
                                                         ├── VLAN 30 – INFRA  10.30.0.0/24   observability
-                                                        └── VLAN 40 – EDGE   10.40.0.0/24   external-facing services
+                                                        ├── VLAN 40 – EDGE   10.40.0.0/24   external-facing services
+                                                        └── VLAN 50 – IOT    10.50.0.0/24   public-facing IoT devices
 ```
 
 All public traffic transits through an Infomaniak VPS before reaching the homelab. The VPS acts as a TCP passthrough proxy and never sees the TLS content. The connection between the VPS and the lab is maintained over a WireGuard tunnel, which means the residential IP is never exposed publicly. Every `*.khaddict.com` request hits the VPS first, gets forwarded through the tunnel, and lands on HAProxy at `revproxy` for SSL termination and routing.
@@ -44,8 +48,9 @@ Firewall policy follows a least-privilege model:
 - **ADMIN** can reach **INFRA** and **EDGE**
 - **INFRA** can reach **EDGE**
 - **EDGE** can only reach Vault and SaltMaster; it cannot initiate connections back to **ADMIN** or **INFRA**
+- **IOT** cannot initiate anything outside its own segment, not even to the internet
 
-A few explicit exceptions exist: Prometheus scraping across all VLANs, StackStorm SSH into PVE, and Kubernetes widget calls reaching their respective backends.
+A few explicit exceptions exist: Prometheus scraping across all VLANs, StackStorm SSH into PVE, Kubernetes widget calls reaching their respective backends, and the `api` VM (EDGE) reaching specific IoT devices on the IOT VLAN.
 
 ## VLAN 10 – CORE `10.10.0.0/24`
 
@@ -82,7 +87,7 @@ Observability stack. Read-only access to the rest of the infrastructure: Prometh
 
 ## VLAN 40 – EDGE `10.40.0.0/24`
 
-External-facing services. Can reach Vault (secrets), SaltMaster (configuration), and Loki (log shipping), but cannot reach ADMIN or INFRA otherwise.
+External-facing services. Can reach Vault (secrets), SaltMaster (configuration), and Loki (log shipping), but cannot reach ADMIN or INFRA otherwise. The `api` VM additionally holds a narrow exception to reach specific devices on the IOT VLAN (see below).
 
 | Host | Type | Description |
 |------|------|-------------|
@@ -92,11 +97,20 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
 | `website.khaddict.lab` | VM | Staging environment for previewing [`khaddict-com`](https://github.com/khaddict/khaddict-com) branches before merging to `main`. `khaddict-com` is cloned to `/srv/khaddict-com` (one-time `git.cloned`, not kept in sync by Salt); check out a branch and rerun `build.py` by hand. A podman-compose stack (`website-local-dev` systemd unit) mirrors the production layout: one nginx container per site (`www`, `blog`, `media`, `projects`) plus an edge nginx reverse-proxying each at `<site>.website.khaddict.lab`. |
+| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. First endpoint pushes short visitor messages to the BUSY Bar's local `display/draw` API; more IoT devices may be added behind the same gateway later. Holds the sole firewall exception from EDGE into the IOT VLAN. |
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `media.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
 | `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
-| `unifi.khaddict.lab` | LXC | Unifi network controller. Manages the Unifi Switch Lite 8 PoE. |
+| `unifi.khaddict.lab` | LXC | Unifi network controller. Manages the Unifi Switch Lite 8 PoE and the Unifi U7 Pro AP. |
+
+## VLAN 50 – IOT `10.50.0.0/24`
+
+Public-facing IoT devices. Joins a dedicated Wi-Fi SSID broadcast by the Unifi U7 Pro AP. Denied by default in every direction, including internet. The only traffic allowed is DNS/NTP to the firewall. The `api` VM (EDGE) is granted narrow, per-device exceptions to reach into this VLAN; nothing here can initiate a connection back out.
+
+| Host | Type | Description |
+|------|------|-------------|
+| BUSY Bar | Device | [BUSY Bar](https://busy.app/) concentration timer, 72×16 LED display. Driven by the `api` VM over its local HTTP API (`POST /api/display/draw`), which lets visitors of `khaddict.com` push short messages to the physical display. First device on this VLAN; more IoT gadgets may join the same segment later. |
 
 ## Kubernetes cluster
 

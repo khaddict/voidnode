@@ -1,11 +1,12 @@
 # Network flows
 
-| From → To | CORE | ADMIN | INFRA | EDGE | VAULT | SALTMASTER | LOKI | INTERNET |
-|----------|----|-----|-----|----|-----|----------|----|--------|
-| CORE      | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| ADMIN     | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| INFRA     | ✖* | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
-| EDGE      | ✖* | ✖* | ✖* | ✔ | ✔ | ✔ | ✔ | ✔ |
+| From → To | CORE | ADMIN | INFRA | EDGE | IOT | VAULT | SALTMASTER | LOKI | INTERNET |
+|----------|----|-----|-----|----|----|-----|----------|----|--------|
+| CORE      | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
+| ADMIN     | ✖* | ✔ | ✔ | ✔ | ✖ | ✔ | ✔ | ✔ | ✔ |
+| INFRA     | ✖* | ✖* | ✔ | ✔ | ✖ | ✔ | ✔ | ✔ | ✔ |
+| EDGE      | ✖* | ✖* | ✖* | ✔ | ✖* | ✔ | ✔ | ✔ | ✔ |
+| IOT       | ✖ | ✖ | ✖ | ✖ | ✔ | ✖ | ✖ | ✖ | ✖ |
 
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `TCP/9100` to scrape node_exporter metrics.  
 \* **Exception**: `PROMETHEUS` (`INFRA`) → `CORE` `ICMP` to run blackbox_exporter probes.  
@@ -19,6 +20,7 @@
 \* **Exception**: `K8S` (`EDGE`) → `GRAFANA` (`INFRA`) `TCP/3000` for Homepage widget access to Grafana.  
 \* **Exception**: `K8S` (`EDGE`) → `ALERTMANAGER` (`INFRA`) `TCP/9093` for VMAlert to send alerts to AlertManager.  
 \* **Exception**: `K8S` (`EDGE`) → `This Firewall` (`CORE`) `TCP/443` for Homepage widget access to the firewall.  
+\* **Exception**: `API` (`EDGE`) → `BUSY_BAR` (`IOT`) `TCP/80` to push messages to the BUSY Bar display.  
 
 # VLAN 10 CORE
 
@@ -74,7 +76,15 @@
 | EDGE | 11 | PASS | TCP | K8S | REGISTRY | 443 | Allow K8S access to the registry |
 | EDGE | 12 | PASS | TCP | K8S | This Firewall | 443 | Allow Homepage widget access to the firewall |
 | EDGE | 13 | PASS | TCP | REVPROXY | STATUS | 3001 | Allow HAProxy to reach Uptime Kuma on VPS via WireGuard |
-| EDGE | 14 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
+| EDGE | 14 | PASS | TCP | API | BUSY_BAR | 80 | Allow API to push messages to the BUSY Bar display |
+| EDGE | 15 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
+
+# VLAN 50 IOT
+
+| VLAN | Order | Action | Protocol | Source | Destination | Port | Description |
+|---|---|---|---|---|---|---|---|
+| IOT | 1 | PASS | TCP/UDP | IOT net | This Firewall | 53 | Allow DNS access to the firewall |
+| IOT | 2 | PASS | UDP | IOT net | This Firewall | 123 | Allow NTP access to the firewall |
 
 # WAN
 

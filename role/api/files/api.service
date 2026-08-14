@@ -1,0 +1,39 @@
+[Unit]
+Description=api - public gateway to IoT devices
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=api
+Group=api
+WorkingDirectory=/opt/api/app
+ExecStart=/opt/api/venv/bin/gunicorn --config /opt/api/gunicorn.py main:app
+Restart=on-failure
+RestartSec=5
+
+# stateless, never writes to disk, safe to sandbox tightly
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RemoveIPC=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

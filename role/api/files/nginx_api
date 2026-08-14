@@ -1,0 +1,24 @@
+server {
+    listen 80;
+    server_name {{ fqdn }};
+    client_max_body_size 6M;
+    client_body_timeout 10s;
+    client_header_timeout 10s;
+
+    # recover the real client IP from haproxy, not haproxy's own address
+    set_real_ip_from 10.40.0.0/24;
+    real_ip_header X-Forwarded-For;
+    real_ip_recursive on;
+
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

@@ -1,0 +1,8 @@
+[Unit]
+Description=Set UniFi AP LED brightness based on time of day
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/unifi-ap-led-schedule.sh
