@@ -26,12 +26,18 @@ probes:
     httpGet:
       path: /
       port: http
+      httpHeaders:
+        - name: Host
+          value: dashboard.khaddict.lab
     initialDelaySeconds: 30
     periodSeconds: 10
   readiness:
     httpGet:
       path: /
       port: http
+      httpHeaders:
+        - name: Host
+          value: dashboard.khaddict.lab
     initialDelaySeconds: 10
     periodSeconds: 5
 
