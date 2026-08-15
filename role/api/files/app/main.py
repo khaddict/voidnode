@@ -2,6 +2,7 @@ import json
 import logging
 import time
 import unicodedata
+from datetime import datetime, timezone
 from io import BytesIO
 
 import httpx
@@ -50,6 +51,26 @@ _last_request_at: dict[str, float] = {}
 STATUS_CACHE_SECONDS = 10
 STATUS_TIMEOUT_SEC = 3
 _status_cache = {"online": False, "checked_at": 0.0}
+
+# in-memory only, like the rate limiter: resets on restart, good enough for a fun counter
+_message_stats = {"date": None, "count": 0}
+
+
+def _roll_message_stats_if_new_day() -> None:
+    today = datetime.now(timezone.utc).date().isoformat()
+    if _message_stats["date"] != today:
+        _message_stats["date"] = today
+        _message_stats["count"] = 0
+
+
+def record_message_sent() -> None:
+    _roll_message_stats_if_new_day()
+    _message_stats["count"] += 1
+
+
+def messages_sent_today() -> int:
+    _roll_message_stats_if_new_day()
+    return _message_stats["count"]
 
 # must match the swatches offered in www.html.j2
 ALLOWED_TEXT_COLORS = {
@@ -221,6 +242,7 @@ async def post_message(body: WallMessage, request: Request, background_tasks: Ba
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar draw failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    record_message_sent()
     background_tasks.add_task(notify_discord_text, body.message, body.color, client_ip(request))
 
 
@@ -268,6 +290,7 @@ async def post_image(request: Request, background_tasks: BackgroundTasks, file: 
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar image draw failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    record_message_sent()
     background_tasks.add_task(notify_discord_image, png_bytes, client_ip(request))
 
 
@@ -275,7 +298,7 @@ async def post_image(request: Request, background_tasks: BackgroundTasks, file: 
 async def busybar_status():
     now = time.monotonic()
     if now - _status_cache["checked_at"] < STATUS_CACHE_SECONDS:
-        return {"online": _status_cache["online"]}
+        return {"online": _status_cache["online"], "messages_today": messages_sent_today()}
 
     online = False
     try:
@@ -287,7 +310,7 @@ async def busybar_status():
 
     _status_cache["online"] = online
     _status_cache["checked_at"] = now
-    return {"online": online}
+    return {"online": online, "messages_today": messages_sent_today()}
 
 
 @app.get("/healthz", tags=["System"])

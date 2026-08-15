@@ -51,6 +51,7 @@ jobs:
               "## Manual tools",
               "- [ ] New Uptime Kuma release (on VPS)",
               "- [ ] Check ghcr.io/khaddict/remark42 and envoyproxy/ratelimit for newer upstream commits (git-SHA pinned, not tracked by Renovate)",
+              "- [ ] Update community-scripts LXC containers (type `update` in each container's console)",
               "",
               "**⚠️ Reboot `voidnode` (the whole node) once everything above is done.**",
               "",
