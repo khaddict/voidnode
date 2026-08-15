@@ -2836,7 +2836,7 @@ repoServer:
     - name: avp-helm
       command: [/var/run/argocd/argocd-cmp-server]
       # renovate: depName=quay.io/argoproj/argocd
-      image: quay.io/argoproj/argocd:v2.13.3
+      image: quay.io/argoproj/argocd:v2.14.21
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
