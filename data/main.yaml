@@ -406,28 +406,6 @@ pve:
       backup: true
       <<: *vlan_edge
 
-    website:
-      vmid: 121
-      description: "Staging environment for testing website changes before production"
-      template: debian-trixie-template
-      tags: "edge,trixie"
-      exporters:
-        blackbox: true
-        node: true
-      ip: 10.40.0.12
-      main_iface: *default_iface
-      ssh: null
-      hardware:
-        ram_mb: 4096
-        cpu:
-          sockets: 1
-          cores: 3
-        disks:
-          - name: scsi0
-            size_gb: 20
-      backup: true
-      <<: *vlan_edge
-
     pihole:
       vmid: 122
       description: "Network-wide DNS ad-blocking and DNS server"

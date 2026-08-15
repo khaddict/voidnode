@@ -54,8 +54,5 @@
   'voidnode':
     - role.pve
 
-  'website':
-    - role.website
-
   'khaddict-vps':
     - role.vps
