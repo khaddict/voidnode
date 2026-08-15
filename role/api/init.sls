@@ -54,6 +54,30 @@ api_dependencies_pkg:
     - require:
       - file: /opt/api
 
+/var/www/api/index.html:
+  file.managed:
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/index.html
+    - use_etag: True
+    - skip_verify: True
+    - mode: 644
+    - user: root
+    - group: root
+    - makedirs: True
+    - require:
+      - pkg: api_dependencies_pkg
+
+/var/www/api/fr/index.html:
+  file.managed:
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/fr/index.html
+    - use_etag: True
+    - skip_verify: True
+    - mode: 644
+    - user: root
+    - group: root
+    - makedirs: True
+    - require:
+      - pkg: api_dependencies_pkg
+
 /opt/api/requirements.txt:
   file.managed:
     - source: salt://role/api/files/requirements.txt
@@ -101,3 +125,5 @@ nginx:
     - reload: True
     - watch:
       - file: /etc/nginx/sites-available/api
+      - file: /var/www/api/index.html
+      - file: /var/www/api/fr/index.html
