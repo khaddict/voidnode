@@ -81,6 +81,16 @@ api_dependencies_pkg:
     - source: salt://role/api/files/requirements.txt
     - mode: 644
 
+/opt/api/venv:
+  virtualenv.managed:
+    - name: /opt/api/venv
+    - requirements: salt://role/api/files/requirements.lock.txt
+    - venv_bin: python3 -m venv
+    - user: api
+    - require:
+      - file: /opt/api
+      - pkg: api_dependencies_pkg
+
 /opt/api/gunicorn.py:
   file.managed:
     - source: salt://role/api/files/gunicorn.py
@@ -97,10 +107,13 @@ api:
     - require:
       - file: /etc/systemd/system/api.service
       - file: /opt/api/app/config.py
+      - virtualenv: /opt/api/venv
     - watch:
       - file: /opt/api/app/main.py
       - file: /opt/api/app/config.py
+      - file: /opt/api/gunicorn.py
       - file: /etc/systemd/system/api.service
+      - virtualenv: /opt/api/venv
 
 /etc/nginx/sites-available/api:
   file.managed:

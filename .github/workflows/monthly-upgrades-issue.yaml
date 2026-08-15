@@ -50,7 +50,7 @@ jobs:
               "",
               "## Manual tools",
               "- [ ] New Uptime Kuma release (on VPS)",
-              "- [ ] New NetBox release",
+              "- [ ] Check ghcr.io/khaddict/remark42 and envoyproxy/ratelimit for newer upstream commits (git-SHA pinned, not tracked by Renovate)",
               "",
               "**⚠️ Reboot `voidnode` (the whole node) once everything above is done.**",
               "",

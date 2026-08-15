@@ -68,7 +68,7 @@ Management plane. Hosts all the tooling that operates, secures, and maintains th
 | Host | Type | Description |
 |------|------|-------------|
 | `registry.khaddict.lab` | VM | [Harbor](https://goharbor.io/) container image registry. Stores custom-built Docker images used in Kubernetes. Also caches upstream images to avoid rate limits. |
-| `saltmaster.khaddict.lab` | VM | [SaltStack](https://saltproject.io/) master. Manages configuration of all Debian/Ubuntu VMs via states. Orchestrates provisioning, service configuration, certificate deployment, and package management. |
+| `saltmaster.khaddict.lab` | VM | [SaltStack](https://saltproject.io/) master. Manages configuration of all Debian/Ubuntu VMs via states. Orchestrates provisioning, service configuration, certificate deployment, and package management. Also hosts a [`khaddict-com`](https://github.com/khaddict/khaddict-com) build/preview environment under an unprivileged `website-dev` user (rootless podman-compose, `role/saltmaster/website_dev.sls`), replacing the previous dedicated preview VM. `website.khaddict.lab` is a CNAME to this host. |
 | `stackstorm.khaddict.lab` | VM | [StackStorm](https://stackstorm.com/) event-driven automation engine. Runs a custom `st2_voidnode` pack that handles VM and LXC lifecycle (create, bootstrap, decommission, snapshot, template), PKI certificate provisioning, and sends Discord notifications. Triggered manually via CLI/API, or on a schedule (cron) for automated snapshots. |
 | `vault.khaddict.lab` | VM | [HashiCorp Vault](https://www.vaultproject.io/). Central secrets store for the entire lab. SaltStack minions authenticate via AppRole with strict per-minion path isolation. Kubernetes workloads pull secrets at sync time via the ArgoCD Vault Plugin. |
 | `easypki.khaddict.lab` | VM | Internal PKI authority ([EasyPKI](https://github.com/khaddict/easypki)). Issues and renews TLS certificates for all internal `*.khaddict.lab` services. Certificates are provisioned by StackStorm and distributed by SaltStack. |
@@ -96,8 +96,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
-| `website.khaddict.lab` | VM | Staging environment for previewing [`khaddict-com`](https://github.com/khaddict/khaddict-com) branches before merging to `main`. `khaddict-com` is cloned to `/srv/khaddict-com` (one-time `git.cloned`, not kept in sync by Salt); check out a branch and rerun `build.py` by hand. A podman-compose stack (`website-local-dev` systemd unit) mirrors the production layout: one nginx container per site (`www`, `blog`, `media`, `projects`) plus an edge nginx reverse-proxying each at `<site>.website.khaddict.lab`. |
-| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. First endpoint pushes short visitor messages to the BUSY Bar's local `display/draw` API; more IoT devices may be added behind the same gateway later. Holds the sole firewall exception from EDGE into the IOT VLAN. |
+| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. Routes: `/wall/message` and `/wall/image` push visitor content to the BUSY Bar, `/busybar/status` and `/healthz` report state, `/docs` serves the stock Swagger UI. The domain root (`/` and `/fr/`) serves a separate, site-styled API documentation page built in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo and fetched directly from GitHub raw via Salt (same mechanism as the VPS fallback page below, different target): a third deployment path for that repo, alongside the Helm chart and the fallback page. Holds the sole firewall exception from EDGE into the IOT VLAN. |
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `media.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
@@ -145,7 +144,7 @@ Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<
 All Debian/Ubuntu VMs are managed by SaltStack. States are organized in three layers:
 
 - `global/`: applied to every host in `data/main.yaml`'s Proxmox inventory: networking, SSH hardening, user management, DNS resolution, CA certificate trust, Promtail, node-exporter, blackbox-exporter, Vault client configuration. The external VPS (see "External exposure" below) is excluded by minion ID in `top.sls`, since it isn't Proxmox-managed and several of these states assume that inventory.
-- `role/`: per-service states applied to specific minions: `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `vault`, `vps`, `website`
+- `role/`: per-service states applied to specific minions: `api`, `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `pihole`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `unifi`, `vault`, `vps`
 - `independent/`: minimal one-time bootstrap states (`vm.sls`, `lxc.sls`, `vps.sls`) applied once via `salt-ssh` to turn a fresh host into a minion, before `global`/`role` states take over on an ongoing basis
 - `data/`: YAML source of truth consumed by states: `main.yaml` (full inventory), `versions.yaml` (pinned versions), `packages.yaml`
 
@@ -168,7 +167,7 @@ Browser
 
 If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
-**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `matomo` · `status`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `api` · `matomo` · `status`
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 

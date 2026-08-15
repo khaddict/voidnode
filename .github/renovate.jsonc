@@ -21,11 +21,13 @@
       "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
     },
     {
+      "enabled": false,
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/khaddict/media-khaddict"],
       "groupName": "media-khaddict"
     },
     {
+      "enabled": false,
       "matchDatasources": ["helm"],
       "matchPackageNames": ["khaddict-com"],
       "groupName": "khaddict-com content chart"
@@ -50,6 +52,14 @@
       "managerFilePatterns": ["/argocd/apps/.+/templates/.+\\.yaml$/"],
       "matchStrings": [
         "# renovate: depName=(?<depName>[^\\s]+)\\n\\s+url: [^:]+:(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/role/kcli/files/bootstrap/argocd-values\\.yaml$/"],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+)\\n\\s+image: [^:]+:(?<currentValue>[^\\s]+)"
       ],
       "datasourceTemplate": "docker"
     },

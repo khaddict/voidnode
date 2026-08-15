@@ -1,4 +1,6 @@
 {% import_yaml 'data/main.yaml' as data %}
+# renovate: depName=netbox-community/netbox datasource=git-refs
+{% set netbox_rev = 'feeff9c376f1a47443e9af7eb263e12561366a36' %}
 {% set psql_password = salt['vault'].read_secret('kv/minions/netbox/default').psql_password %}
 {% set secret_key = salt['vault'].read_secret('kv/minions/netbox/default').secret_key %}
 {% set api_token_peppers = salt['vault'].read_secret('kv/minions/netbox/default').api_token_peppers %}
@@ -46,10 +48,11 @@ netbox_dependencies_pkg:
     - mode: 755
 
 netbox_repo_git:
-  git.cloned:
+  git.latest:
     - name: https://github.com/netbox-community/netbox.git
     - target: /opt/netbox
-    - branch: main
+    - rev: {{ netbox_rev }}
+    - force_reset: True
     - require:
       - file: /opt/netbox
 
