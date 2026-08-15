@@ -404,12 +404,12 @@ certbot certonly \
 
 `/var/www/fallback/index.html` is **not** a one-time manual copy. `role.vps` manages it as a
 `file.managed` state sourced directly from
-`https://raw.githubusercontent.com/khaddict/khaddict-com/main/vps-fallback/index.html`, with
-`use_etag: True`. On every highstate, Salt sends the cached ETag back to GitHub; a `304` means
-no change and nothing is re-downloaded, a `200` means the page changed and Salt rewrites the
-file. This requires `vps-fallback/index.html` to actually be committed in `khaddict-com` (it
-isn't gitignored there). See section 14 for how the highstate that keeps this in sync gets
-triggered.
+`https://raw.githubusercontent.com/khaddict/khaddict-com/main/vps-fallback/index.html`. On
+every highstate, Salt re-fetches this URL and rewrites the file if the content differs
+(`use_etag` was removed after it caused stale content to persist across highstates, the same
+issue hit on `role.api`'s equivalent fetch for the `api` page). This requires
+`vps-fallback/index.html` to actually be committed in `khaddict-com` (it isn't gitignored
+there). See section 14 for how the highstate that keeps this in sync gets triggered.
 
 #### Create local HTTPS vhost for the fallback page
 
@@ -470,7 +470,7 @@ salt-key -a khaddict-vps -y
 From here on, `role.vps` (`role/vps/init.sls`) is what actually keeps the VPS configured:
 nginx itself, `/etc/nginx/nginx.conf`, the stream module config (section 10), the three vhosts
 in `sites-available`/`sites-enabled` (section 10, 13), and the fallback page content (section
-13's `use_etag` mechanism). All sourced from `role/vps/files/` in `voidnode`, applied with:
+13's GitHub-raw fetch mechanism). All sourced from `role/vps/files/` in `voidnode`, applied with:
 
 ```bash
 salt khaddict-vps state.apply
