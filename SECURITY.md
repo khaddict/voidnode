@@ -15,11 +15,7 @@ All secrets live in HashiCorp Vault (`vault.khaddict.lab`). Nothing is committed
 - **Vault root token on disk** (`role/vault/init.sls`, `/root/.vault-token`, mode 600): persisted for operational convenience on the Vault host itself. Accepted risk, since the Vault VM is treated as the highest-trust host in the lab and hardened accordingly; a compromise there is already a total-loss scenario regardless of this file.
 - **StackStorm workflow parameters aren't strictly validated** (`role/stackstorm/files/packs/st2_voidnode/actions/`): the `name` parameter reaches `qm`/`yq`/shell contexts without an allowlist pattern. Accepted risk, since the StackStorm API is bound to `127.0.0.1` with htpasswd auth and has no externally-triggerable webhook (only a `CronTimer` schedule), so exploitation requires an existing foothold on that host.
 - **Vault `max_lease_ttl` is ~2 years** (`role/vault/files/vault.hcl`): long by production standards, accepted as reasonable for a single-operator homelab.
-
-### Open items (not yet remediated)
-
-- **TLS verification disabled in three places**: StackStorm to OPNsense API calls (`opnsense_verify_ssl_cert: false`), HAProxy to all internal backends (`ssl verify none` in `role/revproxy/files/haproxy.cfg`), and the UniFi automation script (`curl -sk`). All three send credentials over connections that would accept a spoofed internal certificate. Fix: issue certs via the existing EasyPKI authority and re-enable verification.
-- **Loki has no authentication** (`auth_enabled: false`), reachable from anywhere already on the internal VLANs. Not internet-exposed.
+- **Loki has no authentication** (`role/loki/files/config.yml`, `auth_enabled: false`; note this setting is Loki's multi-tenancy header requirement, not real authentication either way). Reachable from anywhere already on the internal VLANs, not internet-exposed. A real fix would need a reverse proxy with basic auth in front of it, a coordinated secret rollout to every minion (Promtail on every host pushes to it via the `global` state), and a matching update to Grafana's Loki datasource (configured manually in the Grafana UI, not tracked in this repo). Accepted as-is for now given the limited blast radius.
 
 ## Network trust boundaries
 

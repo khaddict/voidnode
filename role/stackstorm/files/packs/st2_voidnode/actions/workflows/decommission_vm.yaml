@@ -14,7 +14,7 @@ vars:
   - opnsense_url: "https://opnsense.<% ctx().domain %>"
   - opnsense_api_key: "{{ dns_api_key }}"
   - opnsense_api_secret: "{{ dns_api_secret }}"
-  - opnsense_verify_ssl_cert: false
+  - opnsense_verify_ssl_cert: true
 
 tasks:
   check_vm_exists:

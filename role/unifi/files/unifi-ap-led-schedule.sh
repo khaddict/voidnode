@@ -21,7 +21,7 @@ COOKIE=$(mktemp)
 HEADERS=$(mktemp)
 trap 'rm -f "$COOKIE" "$HEADERS"' EXIT
 
-LOGIN_HTTP=$(curl -sk -o /dev/null -w "%{http_code}" -D "$HEADERS" -c "$COOKIE" \
+LOGIN_HTTP=$(curl -s --cacert /etc/ssl/certs/ca-certificates.crt -o /dev/null -w "%{http_code}" -D "$HEADERS" -c "$COOKIE" \
   -H "Content-Type: application/json" -X POST \
   "$UNIFI/api/auth/login" \
   -d "{\"username\":\"$USER\",\"password\":\"$PASS\",\"rememberMe\":true}") \
@@ -34,7 +34,7 @@ fi
 
 CSRF=$(awk 'BEGIN{IGNORECASE=1} /^x-csrf-token:/{gsub("\r","",$2); print $2}' "$HEADERS" | tail -1)
 
-DEVICE_ID=$(curl -sk -b "$COOKIE" -H "X-CSRF-Token: $CSRF" \
+DEVICE_ID=$(curl -s --cacert /etc/ssl/certs/ca-certificates.crt -b "$COOKIE" -H "X-CSRF-Token: $CSRF" \
   "$UNIFI/proxy/network/api/s/$SITE/stat/device" \
   | jq -r --arg NAME "$AP_NAME" '.data[] | select(.name == $NAME) | ._id' \
   | head -1) \
@@ -45,7 +45,7 @@ if [ -z "$DEVICE_ID" ] || [ "$DEVICE_ID" = "null" ]; then
     exit 1
 fi
 
-PUT_HTTP=$(curl -sk -o /dev/null -w "%{http_code}" -b "$COOKIE" -H "X-CSRF-Token: $CSRF" \
+PUT_HTTP=$(curl -s --cacert /etc/ssl/certs/ca-certificates.crt -o /dev/null -w "%{http_code}" -b "$COOKIE" -H "X-CSRF-Token: $CSRF" \
   -H "Content-Type: application/json" -X PUT \
   "$UNIFI/proxy/network/api/s/$SITE/rest/device/$DEVICE_ID" \
   -d "$LED_BODY") \
