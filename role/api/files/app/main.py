@@ -7,8 +7,6 @@ from io import BytesIO
 import httpx
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import HTMLResponse
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, field_validator
 
@@ -20,65 +18,7 @@ logger = logging.getLogger("api")
 app = FastAPI(
     title="khaddict api",
     description="Public gateway that drives IoT devices around the homelab, starting with the BUSY Bar.",
-    docs_url=None,
 )
-
-DOCS_THEME_CSS = """
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="https://media.khaddict.com/icons/khazix-pc-flat.png" type="image/png">
-  <style>
-    body, .swagger-ui { background: #1a1a22; color: #f1f5f9; }
-    .swagger-ui, .swagger-ui table, .swagger-ui select, .swagger-ui input, .swagger-ui textarea,
-    .swagger-ui .btn, .swagger-ui code, .swagger-ui pre, .swagger-ui .model, .swagger-ui .tab {
-      font-family: 'JetBrains Mono', monospace !important;
-    }
-    .swagger-ui .topbar { display: none; }
-    .swagger-ui .info .title, .swagger-ui .info .title small,
-    .swagger-ui .opblock-tag, .swagger-ui .opblock .opblock-summary-path,
-    .swagger-ui .opblock .opblock-summary-operation-id, .swagger-ui .model-title,
-    .swagger-ui .parameter__name, .swagger-ui table thead tr td, .swagger-ui table thead tr th,
-    .swagger-ui .response-col_status, .swagger-ui .responses-inner h4, .swagger-ui .responses-inner h5,
-    .swagger-ui .tab li, .swagger-ui label, .swagger-ui .opblock-title_normal {
-      color: #f1f5f9 !important;
-    }
-    .swagger-ui .info .description, .swagger-ui .opblock-description-wrapper p,
-    .swagger-ui .parameter__type, .swagger-ui .response-col_description,
-    .swagger-ui .opblock-tag small, .swagger-ui .opblock-tag-section > div small {
-      color: #94949f !important;
-    }
-    .swagger-ui .opblock-tag { border-bottom-color: rgba(255, 255, 255, .1); }
-    .swagger-ui section.models, .swagger-ui .opblock .opblock-section-header {
-      background: #22222c; border-color: rgba(255, 255, 255, .1);
-    }
-    .swagger-ui .model-box, .swagger-ui .responses-inner, .swagger-ui table tbody tr td {
-      background: transparent; border-color: rgba(255, 255, 255, .1) !important;
-    }
-    .swagger-ui .opblock { background: #22222c; border-color: rgba(255, 255, 255, .1); }
-    .swagger-ui .opblock.opblock-post { border-color: #a78bfa; background: rgba(167, 139, 250, .07); }
-    .swagger-ui .opblock.opblock-get { border-color: #e879f9; background: rgba(232, 121, 249, .07); }
-    .swagger-ui .opblock .opblock-summary-method { background: #a78bfa; }
-    .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #e879f9; }
-    .swagger-ui .opblock-tag { color: #a78bfa !important; }
-    .swagger-ui .btn.authorize, .swagger-ui .btn.execute {
-      background-color: #a78bfa; border-color: #a78bfa; color: #1a1a22;
-    }
-    .swagger-ui .highlight-code, .swagger-ui .microlight { background: #050507 !important; }
-    .swagger-ui .scheme-container { background: transparent; box-shadow: none; }
-  </style>
-"""
-
-
-@app.get("/docs", include_in_schema=False)
-async def custom_docs() -> HTMLResponse:
-    html = get_swagger_ui_html(
-        openapi_url=app.openapi_url,
-        title=f"{app.title} - docs",
-        swagger_favicon_url="https://media.khaddict.com/icons/khazix-pc-flat.png",
-    )
-    body = html.body.decode()
-    body = body.replace("</head>", f"{DOCS_THEME_CSS}</head>")
-    return HTMLResponse(body)
 
 app.add_middleware(
     CORSMiddleware,

@@ -57,7 +57,6 @@ api_dependencies_pkg:
 /var/www/api/index.html:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/index.html
-    - use_etag: True
     - skip_verify: True
     - mode: 644
     - user: root
@@ -69,7 +68,6 @@ api_dependencies_pkg:
 /var/www/api/fr/index.html:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/fr/index.html
-    - use_etag: True
     - skip_verify: True
     - mode: 644
     - user: root
