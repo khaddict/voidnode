@@ -5,6 +5,7 @@
 {% set busybar_secret = salt['vault'].read_secret('kv/minions/api/default') %}
 {% set busybar_url = busybar_secret.busybar_url %}
 {% set busybar_pin = busybar_secret.get('busybar_pin', '') %}
+{% set discord_webhook_url = busybar_secret.get('discord_webhook_url', '') %}
 
 api_user:
   user.present:
@@ -49,6 +50,7 @@ api_dependencies_pkg:
     - context:
         busybar_url: "{{ busybar_url }}"
         busybar_pin: "{{ busybar_pin }}"
+        discord_webhook_url: "{{ discord_webhook_url }}"
     - require:
       - file: /opt/api
 

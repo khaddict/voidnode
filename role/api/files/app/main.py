@@ -1,15 +1,16 @@
+import json
 import logging
 import time
 import unicodedata
 from io import BytesIO
 
 import httpx
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, field_validator
 
-from config import BUSYBAR_PIN, BUSYBAR_URL
+from config import BUSYBAR_PIN, BUSYBAR_URL, DISCORD_WEBHOOK_URL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
@@ -54,8 +55,12 @@ ALLOWED_TEXT_COLORS = {
 }
 
 
+def client_ip(request: Request) -> str:
+    return request.headers.get("x-real-ip") or (request.client.host if request.client else "unknown")
+
+
 def enforce_rate_limit(request: Request) -> None:
-    ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "unknown")
+    ip = client_ip(request)
     now = time.monotonic()
 
     # lazy prune so this dict doesn't grow forever across distinct visitor IPs
@@ -133,6 +138,40 @@ def busybar_headers() -> dict:
     return {"X-API-Token": BUSYBAR_PIN} if BUSYBAR_PIN else {}
 
 
+async def notify_discord_text(message: str, color: str, ip: str) -> None:
+    if not DISCORD_WEBHOOK_URL:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            await client.post(
+                DISCORD_WEBHOOK_URL,
+                json={
+                    "embeds": [{
+                        "title": "New wall message",
+                        "description": message,
+                        "color": int(color.lstrip("#"), 16),
+                        "footer": {"text": ip},
+                    }],
+                },
+            )
+    except httpx.HTTPError as exc:
+        logger.error("Discord notify failed: %s", exc)
+
+
+async def notify_discord_image(png_bytes: bytes, ip: str) -> None:
+    if not DISCORD_WEBHOOK_URL:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            await client.post(
+                DISCORD_WEBHOOK_URL,
+                data={"payload_json": json.dumps({"content": f"New wall image from {ip}"})},
+                files={"file": ("wall.png", png_bytes, "image/png")},
+            )
+    except httpx.HTTPError as exc:
+        logger.error("Discord notify failed: %s", exc)
+
+
 def image_draw_payload(filename: str) -> dict:
     return {
         "application_name": "web_wall",
@@ -166,7 +205,7 @@ def resize_to_screen(data: bytes) -> bytes:
 
 
 @app.post("/wall/message", status_code=204)
-async def post_message(body: WallMessage, request: Request):
+async def post_message(body: WallMessage, request: Request, background_tasks: BackgroundTasks):
     enforce_rate_limit(request)
     async with httpx.AsyncClient(timeout=5) as client:
         try:
@@ -179,10 +218,11 @@ async def post_message(body: WallMessage, request: Request):
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar draw failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    background_tasks.add_task(notify_discord_text, body.message, body.color, client_ip(request))
 
 
 @app.post("/wall/image", status_code=204)
-async def post_image(request: Request, file: UploadFile = File(...)):
+async def post_image(request: Request, background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     enforce_rate_limit(request)
     if file.content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported image type")
@@ -225,6 +265,7 @@ async def post_image(request: Request, file: UploadFile = File(...)):
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar image draw failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    background_tasks.add_task(notify_discord_image, png_bytes, client_ip(request))
 
 
 @app.get("/busybar/status")
