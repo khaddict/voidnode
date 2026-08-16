@@ -124,6 +124,14 @@ def enforce_rate_limit(request: Request) -> None:
     _last_request_at[ip] = now
 
 
+def rate_limit_remaining(request: Request) -> int:
+    last_seen = _last_request_at.get(client_ip(request))
+    if last_seen is None:
+        return 0
+    remaining = RATE_LIMIT_SECONDS - (time.monotonic() - last_seen)
+    return int(remaining) + 1 if remaining > 0 else 0
+
+
 class WallMessage(BaseModel):
     message: str = Field(min_length=1, max_length=MAX_MESSAGE_LENGTH)
     color: str = "#FFFFFF"
@@ -314,10 +322,14 @@ async def post_image(request: Request, background_tasks: BackgroundTasks, file: 
 
 
 @app.get("/busybar/status", tags=["BUSY Bar"])
-async def busybar_status():
+async def busybar_status(request: Request):
     now = time.monotonic()
     if now - _status_cache["checked_at"] < STATUS_CACHE_SECONDS:
-        return {"online": _status_cache["online"], "messages_today": messages_sent_today()}
+        return {
+            "online": _status_cache["online"],
+            "messages_today": messages_sent_today(),
+            "rate_limit_remaining": rate_limit_remaining(request),
+        }
 
     online = False
     try:
@@ -329,7 +341,11 @@ async def busybar_status():
 
     _status_cache["online"] = online
     _status_cache["checked_at"] = now
-    return {"online": online, "messages_today": messages_sent_today()}
+    return {
+        "online": online,
+        "messages_today": messages_sent_today(),
+        "rate_limit_remaining": rate_limit_remaining(request),
+    }
 
 
 @app.post(
