@@ -4,6 +4,7 @@ import time
 import unicodedata
 from datetime import datetime, timezone
 from io import BytesIO
+from pathlib import Path
 
 import httpx
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
@@ -57,8 +58,35 @@ STATUS_CACHE_SECONDS = 10
 STATUS_TIMEOUT_SEC = 3
 _status_cache = {"online": False, "checked_at": 0.0}
 
-# in-memory only, like the rate limiter: resets on restart, good enough for a fun counter
+# survives restarts/redeploys: not a Salt-managed path, so file.managed never
+# touches or wipes it. Written on every change (low-traffic counters, not a
+# hot path) and reloaded once at startup.
+STATS_FILE = Path("/opt/api/data/stats.json")
+
 _message_stats = {"date": None, "count": 0}
+MAX_TRACKED_SLUGS = 500  # caps _post_views so a client hammering arbitrary slugs can't grow it unbounded
+_post_views: dict[str, int] = {}
+
+
+def _load_stats() -> None:
+    try:
+        data = json.loads(STATS_FILE.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return
+    if isinstance(data.get("message_stats"), dict):
+        _message_stats.update(data["message_stats"])
+    if isinstance(data.get("post_views"), dict):
+        _post_views.update(data["post_views"])
+
+
+def _save_stats() -> None:
+    STATS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATS_FILE.with_suffix(".tmp")
+    tmp.write_text(json.dumps({"message_stats": _message_stats, "post_views": _post_views}))
+    tmp.replace(STATS_FILE)
+
+
+_load_stats()
 
 
 def _roll_message_stats_if_new_day() -> None:
@@ -66,11 +94,13 @@ def _roll_message_stats_if_new_day() -> None:
     if _message_stats["date"] != today:
         _message_stats["date"] = today
         _message_stats["count"] = 0
+        _save_stats()
 
 
 def record_message_sent() -> None:
     _roll_message_stats_if_new_day()
     _message_stats["count"] += 1
+    _save_stats()
 
 
 def messages_sent_today() -> int:
@@ -78,17 +108,11 @@ def messages_sent_today() -> int:
     return _message_stats["count"]
 
 
-# in-memory only, like the message counter: resets on restart, good enough for
-# a fun view counter. Capped so a client hammering arbitrary slugs can't grow
-# this unbounded, same idea as the rate limiter's dict pruning below.
-MAX_TRACKED_SLUGS = 500
-_post_views: dict[str, int] = {}
-
-
 def record_post_view(slug: str) -> int:
     if slug not in _post_views and len(_post_views) >= MAX_TRACKED_SLUGS:
         return 0
     _post_views[slug] = _post_views.get(slug, 0) + 1
+    _save_stats()
     return _post_views[slug]
 
 # must match the swatches offered in www.html.j2

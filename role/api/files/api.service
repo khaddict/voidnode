@@ -12,10 +12,12 @@ ExecStart=/opt/api/venv/bin/gunicorn --config /opt/api/gunicorn.py main:app
 Restart=on-failure
 RestartSec=5
 
-# stateless, never writes to disk, safe to sandbox tightly
+# sandboxed tightly; only /opt/api/data is writable, for the stats.json
+# counters, everything else on disk stays read-only to this service
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
+ReadWritePaths=/opt/api/data
 ProtectHome=true
 PrivateDevices=true
 ProtectKernelTunables=true

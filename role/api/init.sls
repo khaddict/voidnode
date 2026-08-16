@@ -40,6 +40,16 @@ api_dependencies_pkg:
     - group: api
     - mode: 755
 
+# just ensures the directory exists; stats.json itself is written by the app
+# and never touched by Salt, so it survives every redeploy/restart
+/opt/api/data:
+  file.directory:
+    - user: api
+    - group: api
+    - mode: 750
+    - require:
+      - file: /opt/api
+
 /opt/api/app/main.py:
   file.managed:
     - source: salt://role/api/files/app/main.py
