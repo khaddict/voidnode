@@ -7,6 +7,16 @@
 {% set busybar_pin = busybar_secret.get('busybar_pin', '') %}
 {% set discord_webhook_url = busybar_secret.get('discord_webhook_url', '') %}
 
+# raw.githubusercontent.com caches content by URL, so fetching from the
+# moving "main" branch name can serve stale content for a few minutes right
+# after a push - the actual cause of the repeated staleness reports, not
+# Salt's own caching. A commit SHA's content never changes, so resolving the
+# current HEAD SHA and fetching from that instead is safe to cache forever.
+# Falls back to "main" if the GitHub API call fails, to fail soft rather than
+# break this whole state render.
+{% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
+{% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha', 'main') %}
+
 api_user:
   user.present:
     - name: api
@@ -56,7 +66,7 @@ api_dependencies_pkg:
 
 /var/www/api/index.html:
   file.managed:
-    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/index.html
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/api/index.html
     - skip_verify: True
     - mode: 644
     - user: root
@@ -67,7 +77,7 @@ api_dependencies_pkg:
 
 /var/www/api/fr/index.html:
   file.managed:
-    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/main/files/api/fr/index.html
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/api/fr/index.html
     - skip_verify: True
     - mode: 644
     - user: root

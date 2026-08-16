@@ -332,7 +332,12 @@ async def busybar_status():
     return {"online": online, "messages_today": messages_sent_today()}
 
 
-@app.post("/blog/views/{slug}", tags=["Blog"])
+@app.post(
+    "/blog/views/{slug}",
+    tags=["Blog"],
+    summary="Required by the blog to power its view counter",
+    description="Called automatically when a blog post page loads. Not meant to be triggered manually.",
+)
 async def increment_post_view(slug: str):
     return {"views": record_post_view(slug)}
 
