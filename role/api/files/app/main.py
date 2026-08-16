@@ -24,10 +24,15 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://website.khaddict.lab",
-        "http://www.website.khaddict.lab",
+        # the local dev preview stack (role/saltmaster/website_dev.sls) serves
+        # everything through the edge container on :8080, and the browser's
+        # Origin header includes that port since it's non-default
+        "http://website.khaddict.lab:8080",
+        "http://www.website.khaddict.lab:8080",
+        "http://blog.website.khaddict.lab:8080",
         "https://www.khaddict.com",
         "https://khaddict.com",
+        "https://blog.khaddict.com",
     ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
@@ -71,6 +76,20 @@ def record_message_sent() -> None:
 def messages_sent_today() -> int:
     _roll_message_stats_if_new_day()
     return _message_stats["count"]
+
+
+# in-memory only, like the message counter: resets on restart, good enough for
+# a fun view counter. Capped so a client hammering arbitrary slugs can't grow
+# this unbounded, same idea as the rate limiter's dict pruning below.
+MAX_TRACKED_SLUGS = 500
+_post_views: dict[str, int] = {}
+
+
+def record_post_view(slug: str) -> int:
+    if slug not in _post_views and len(_post_views) >= MAX_TRACKED_SLUGS:
+        return 0
+    _post_views[slug] = _post_views.get(slug, 0) + 1
+    return _post_views[slug]
 
 # must match the swatches offered in www.html.j2
 ALLOWED_TEXT_COLORS = {
@@ -311,6 +330,11 @@ async def busybar_status():
     _status_cache["online"] = online
     _status_cache["checked_at"] = now
     return {"online": online, "messages_today": messages_sent_today()}
+
+
+@app.post("/blog/views/{slug}", tags=["Blog"])
+async def increment_post_view(slug: str):
+    return {"views": record_post_view(slug)}
 
 
 @app.get("/healthz", tags=["System"])
