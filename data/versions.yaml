@@ -8,7 +8,7 @@ k9s: "0.51.0"
 # renovate: depName=prometheus/prometheus datasource=github-releases
 prometheus: "3.13.2"
 # renovate: depName=prometheus/alertmanager datasource=github-releases
-alertmanager: "0.33.1"
+alertmanager: "0.34.0"
 # renovate: depName=mikefarah/yq datasource=github-releases
 yq: "4.53.3"
 # renovate: depName=siderolabs/talos datasource=github-releases
