@@ -12,4 +12,4 @@ alertmanager: "0.34.0"
 # renovate: depName=mikefarah/yq datasource=github-releases
 yq: "4.53.6"
 # renovate: depName=siderolabs/talos datasource=github-releases
-talosctl: "1.13.8"
+talosctl: "1.13.9"
