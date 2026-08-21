@@ -6,14 +6,10 @@
 {% set busybar_url = busybar_secret.busybar_url %}
 {% set busybar_pin = busybar_secret.get('busybar_pin', '') %}
 {% set discord_webhook_url = busybar_secret.get('discord_webhook_url', '') %}
+{% set alertmanager_token = busybar_secret.get('alertmanager_token', '') %}
 
-# raw.githubusercontent.com caches content by URL, so fetching from the
-# moving "main" branch name can serve stale content for a few minutes right
-# after a push - the actual cause of the repeated staleness reports, not
-# Salt's own caching. A commit SHA's content never changes, so resolving the
-# current HEAD SHA and fetching from that instead is safe to cache forever.
-# Falls back to "main" if the GitHub API call fails, to fail soft rather than
-# break this whole state render.
+# raw.githubusercontent.com caches by URL, so "main" can serve stale content after a push;
+# pin to the resolved commit SHA instead, falling back to "main" if the API call fails
 {% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
 {% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha', 'main') %}
 
@@ -31,6 +27,7 @@ api_dependencies_pkg:
       - python3-venv
       - python3-pip
       - nginx
+      - ffmpeg
     - require:
       - user: api_user
 
@@ -40,8 +37,7 @@ api_dependencies_pkg:
     - group: api
     - mode: 755
 
-# just ensures the directory exists; stats.json itself is written by the app
-# and never touched by Salt, so it survives every redeploy/restart
+# stats.json is written by the app, never touched by Salt, so it survives redeploys
 /opt/api/data:
   file.directory:
     - user: api
@@ -71,6 +67,7 @@ api_dependencies_pkg:
         busybar_url: "{{ busybar_url }}"
         busybar_pin: "{{ busybar_pin }}"
         discord_webhook_url: "{{ discord_webhook_url }}"
+        alertmanager_token: "{{ alertmanager_token }}"
     - require:
       - file: /opt/api
 

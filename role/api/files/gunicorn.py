@@ -8,8 +8,7 @@ control_socket_disable = True
 
 
 def on_starting(server):
-    # app/main.py's rate limiter is a plain per-process dict; more than one
-    # worker would silently divide its effectiveness by the worker count
+    # more than one worker would silently divide the in-memory rate limiter's effectiveness
     if server.cfg.workers != 1:
         raise RuntimeError(
             "workers must stay at 1: the in-memory per-IP rate limiter in "

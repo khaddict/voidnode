@@ -11,6 +11,14 @@ route:
     - receiver: prometheus_muted_alerts_discord
       matchers:
         - alertname="InfoInhibitor"
+    # continue: true keeps the default Discord receiver active before also duplicating to busybar
+    - receiver: prometheus_alerts_discord
+      matchers:
+        - severity=~"critical|warning"
+      continue: true
+    - receiver: busybar_alerts
+      matchers:
+        - severity=~"critical|warning"
 
 inhibit_rules:
   - source_matchers:
@@ -27,3 +35,10 @@ receivers:
 - name: prometheus_muted_alerts_discord
   discord_configs:
   - webhook_url: '{{ webhook_url_muted }}'
+- name: busybar_alerts
+  webhook_configs:
+  - url: '{{ busybar_alert_url }}'
+    send_resolved: true
+    http_config:
+      authorization:
+        credentials: '{{ busybar_alert_token }}'

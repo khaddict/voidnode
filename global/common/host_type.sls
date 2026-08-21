@@ -1,11 +1,7 @@
 {% import_yaml 'data/main.yaml' as data %}
 {% set host = grains.get('host') or '' %}
 
-{#
-  Determine the type of this host based on data/main.yaml.
-  This allows other states to branch consistently (vm vs node vs lxc) without
-  re-implementing the same logic repeatedly.
-#}
+{# lets other states branch on vm/node/lxc without re-implementing this lookup #}
 {% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
 {% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
 {% set lxc = data.get('pve', {}).get('lxc', {}).get(host) %}

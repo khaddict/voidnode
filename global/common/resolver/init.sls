@@ -11,10 +11,8 @@ include:
 include:
   - global.common.resolver.resolvconf
 {% elif lxc %}
-# Proxmox re-injects /etc/resolv.conf directly from the host on every
-# container start (verified: a systemd-resolved symlink gets overwritten
-# back to a plain file on reboot), so there's nothing reliable to manage
-# from inside the container.
+# Proxmox re-injects /etc/resolv.conf from the host on every container start (verified: even
+# a symlink gets overwritten back to a plain file), so nothing here is reliably manageable.
 {% else %}
 resolver_unknown_host_test:
   test.fail_without_changes:

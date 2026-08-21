@@ -1,9 +1,4 @@
-# raw.githubusercontent.com caches content by URL, so fetching from the
-# moving "main" branch name can serve stale content for a few minutes right
-# after a push. A commit SHA's content never changes, so resolving the
-# current HEAD SHA and fetching from that instead is safe to cache forever.
-# Falls back to "main" if the GitHub API call fails, to fail soft rather than
-# break this whole state render.
+# see role/api/init.sls: pins to a commit SHA to dodge raw.githubusercontent.com's URL caching
 {% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
 {% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha', 'main') %}
 

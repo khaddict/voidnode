@@ -81,7 +81,7 @@ Observability stack. Read-only access to the rest of the infrastructure: Prometh
 | Host | Type | Description |
 |------|------|-------------|
 | `netbox.khaddict.lab` | VM | [NetBox](https://github.com/netbox-community/netbox) IPAM/DCIM. Source of truth for IP allocation and VM inventory alongside `data/main.yaml`. |
-| `prometheus.khaddict.lab` | VM | [Prometheus](https://prometheus.io/) metrics collection. Scrapes `node_exporter` from all VMs across all VLANs, runs `blackbox_exporter` ICMP probes, and triggers AlertManager notifications (Discord webhook). |
+| `prometheus.khaddict.lab` | VM | [Prometheus](https://prometheus.io/) metrics collection. Scrapes `node_exporter` from all VMs across all VLANs, runs `blackbox_exporter` ICMP probes, and triggers Alertmanager notifications: always to Discord, plus the BUSY Bar wall for critical/warning severity (bearer-token authenticated webhook to `api`'s `/wall/alert`). |
 | `grafana.khaddict.lab` | VM | [Grafana](https://grafana.com/) dashboards. Visualizes metrics from Prometheus and logs from Loki in a unified interface. |
 | `loki.khaddict.lab` | VM | [Loki](https://grafana.com/oss/loki/) log aggregation backend. All VMs ship logs via Promtail (deployed globally by SaltStack). Queried from Grafana. |
 
@@ -96,7 +96,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
-| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. Routes: `/wall/message` and `/wall/image` push visitor content to the BUSY Bar, `/busybar/status` and `/healthz` report state, `/docs` serves the stock Swagger UI. The domain root (`/` and `/fr/`) serves a separate, site-styled API documentation page built in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo and fetched directly from GitHub raw via Salt (same mechanism as the VPS fallback page below, different target): a third deployment path for that repo, alongside the Helm chart and the fallback page. Holds the sole firewall exception from EDGE into the IOT VLAN. |
+| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. Routes: `/wall/message`, `/wall/image` and `/wall/audio` push visitor content to the BUSY Bar (serialized through an internal queue, so one send can't cut another off mid-display), `/wall/screen` mirrors its live display back to the site, `/wall/alert` receives Alertmanager webhooks to show critical/warning alerts, `/busybar/status` and `/healthz` report state, `/docs` serves the stock Swagger UI. The domain root (`/` and `/fr/`) serves a separate, site-styled API documentation page built in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo and fetched directly from GitHub raw via Salt (same mechanism as the VPS fallback page below, different target): a third deployment path for that repo, alongside the Helm chart and the fallback page. Holds the sole firewall exception from EDGE into the IOT VLAN. |
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `media.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
@@ -109,7 +109,7 @@ Public-facing IoT devices. Joins a dedicated Wi-Fi SSID broadcast by the Unifi U
 
 | Host | Type | Description |
 |------|------|-------------|
-| BUSY Bar | Device | [BUSY Bar](https://busy.app/) concentration timer, 72×16 LED display. Driven by the `api` VM over its local HTTP API (`POST /api/display/draw`), which lets visitors of `khaddict.com` push short messages to the physical display. First device on this VLAN; more IoT gadgets may join the same segment later. |
+| BUSY Bar | Device | [BUSY Bar](https://busy.app/) concentration timer, 72×16 LED display. Driven by the `api` VM over its local HTTP API, which lets visitors of `khaddict.com` push text, image, and audio messages to the physical display (its live screen mirrors back to the site), plus critical/warning infra alerts from Alertmanager. First device on this VLAN; more IoT gadgets may join the same segment later. |
 
 ## Kubernetes cluster
 

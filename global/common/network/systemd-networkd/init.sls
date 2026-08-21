@@ -34,11 +34,8 @@ systemd-networkd:
       - file: {{ host }}_network_conf
 
 {% if lxc %}
-# LXC containers from community-scripts/Proxmox default to classic ifupdown
-# (networking.service applying /etc/network/interfaces). Disable it so
-# systemd-networkd is the sole network authority, matching VMs. The
-# interfaces file must be emptied BEFORE stopping networking.service,
-# otherwise its ifdown -a still sees the eth0 stanza and drops the link.
+# community-scripts LXC containers default to ifupdown; disable it so networkd is sole authority.
+# Must empty interfaces before stopping networking.service, or its ifdown -a drops the link.
 /etc/network/interfaces:
   file.managed:
     - contents: |

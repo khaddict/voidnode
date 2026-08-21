@@ -1,5 +1,4 @@
-# update-ca-certificates only handles single-cert files.
-# voidnode.chain.crt is kept for apps needing the full chain.
+# update-ca-certificates only handles single-cert files; voidnode.chain.crt is for apps needing the full chain
 
 /usr/local/share/ca-certificates/voidnode.root.crt:
   file.managed:

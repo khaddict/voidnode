@@ -1,7 +1,13 @@
 {% import_yaml 'data/versions.yaml' as versions %}
 {% set alertmanager_version = versions.alertmanager %}
-{% set webhook_url = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url %}
-{% set webhook_url_muted = salt['vault'].read_secret('kv/minions/prometheus/default').webhook_url_muted %}
+{% set prometheus_secret = salt['vault'].read_secret('kv/minions/prometheus/default') %}
+{% set webhook_url = prometheus_secret.webhook_url %}
+{% set webhook_url_muted = prometheus_secret.webhook_url_muted %}
+{% set busybar_alert_token = prometheus_secret.get('busybar_alert_token', '') %}
+{% import_yaml 'data/main.yaml' as data %}
+{# the api host only serves plain HTTP internally (TLS is terminated at the
+   public edge), so reaching it directly over the LAN must use http, not https #}
+{% set busybar_alert_url = 'http://api.' ~ data.network.domain ~ '/wall/alert' %}
 
 alertmanager_user:
   user.present:
@@ -43,6 +49,8 @@ alertmanager_archive:
     - context:
         webhook_url: "{{ webhook_url }}"
         webhook_url_muted: "{{ webhook_url_muted }}"
+        busybar_alert_url: "{{ busybar_alert_url }}"
+        busybar_alert_token: "{{ busybar_alert_token }}"
     - require:
       - archive: alertmanager_archive
 
