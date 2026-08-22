@@ -164,6 +164,8 @@ _clock_is_foreground = False  # skip clear+re-upload on back-to-back refreshes
 
 def clock_draw_payload() -> dict:
     now = datetime.now()
+    date_color = "#FF00FFFF"
+    time_color = "#00FFFFFF"
     return {
         "application_name": CLOCK_APP_NAME,
         "priority": CLOCK_PRIORITY,
@@ -171,11 +173,11 @@ def clock_draw_payload() -> dict:
             {"id": "0", "type": "image", "path": CLOCK_LOGO_FILENAME, "x": 0, "y": 1, "timeout": 0},
             {
                 "id": "1", "type": "text", "text": now.strftime("%d.%m.%Y"), "x": 24, "y": -2,
-                "font": "small", "color": "#E879F9FF", "width": 54, "scroll_rate": 0, "timeout": 0,
+                "font": "small", "color": date_color, "width": 54, "scroll_rate": 0, "timeout": 0,
             },
             {
                 "id": "2", "type": "text", "text": now.strftime("%H:%M:%S"), "x": 18, "y": 4,
-                "font": "extra_large", "color": "#22D3EEFF", "width": 54, "scroll_rate": 0, "timeout": 0,
+                "font": "extra_large", "color": time_color, "width": 54, "scroll_rate": 0, "timeout": 0,
             },
         ],
     }
