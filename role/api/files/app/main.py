@@ -13,13 +13,13 @@ from io import BytesIO
 from pathlib import Path
 
 import httpx
-from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from config import ALERTMANAGER_TOKEN, BUSYBAR_PIN, BUSYBAR_URL, DISCORD_WEBHOOK_URL
+from config import ALERTMANAGER_TOKEN, BUSYBAR_ADMIN_TOKEN, BUSYBAR_PIN, BUSYBAR_URL, DISCORD_WEBHOOK_URL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
@@ -119,20 +119,118 @@ def enqueue_alert_job(job) -> None:
         raise HTTPException(status_code=429, detail="The alert queue is busy, try again shortly")
 
 
-async def _next_wall_job():
-    # alerts win when both are waiting; the timeout just avoids busy-looping idle
+NIGHT_HOUR_CUTOFF = 9  # local hour below this is night: brightness/volume 0, else 100
+BUSYBAR_SETTINGS_CHECK_SECONDS = 300  # hour-granularity schedule, no need to poll faster
+_busybar_is_night = None  # None forces a correction on startup regardless of the hour
+
+
+async def _apply_busybar_day_night_settings() -> None:
+    global _busybar_is_night
+    is_night = datetime.now().hour < NIGHT_HOUR_CUTOFF
+    if is_night == _busybar_is_night:
+        return
+    value = 0 if is_night else 100
+    headers = busybar_headers()
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            await client.post(f"{BUSYBAR_URL}/api/display/brightness", params={"value": str(value)}, headers=headers)
+            await client.post(f"{BUSYBAR_URL}/api/audio/volume", params={"volume": value, "silent": 1}, headers=headers)
+            _busybar_is_night = is_night
+        except httpx.HTTPError as exc:
+            logger.error("BUSY Bar day/night settings update failed: %s", exc)
+
+
+async def _busybar_day_night_loop() -> None:
+    while True:
+        await _apply_busybar_day_night_settings()
+        await asyncio.sleep(BUSYBAR_SETTINGS_CHECK_SECONDS)
+
+
+@app.on_event("startup")
+async def _launch_busybar_day_night_loop() -> None:
+    asyncio.create_task(_busybar_day_night_loop())
+
+
+# idle screen: persistent logo + clock shown when nothing else is queued
+CLOCK_APP_NAME = "web_clock"
+CLOCK_LOGO_FILENAME = "logo.png"
+# below built-in apps (10) so buttons win; above off's stub app (0) on purpose
+CLOCK_PRIORITY = 5
+CLOCK_IDLE_REFRESH_SECONDS = 1
+_clock_logo_bytes = (Path(__file__).parent / "assets" / "clock-logo.png").read_bytes()
+_clock_logo_uploaded = False
+_clock_is_foreground = False  # skip clear+re-upload on back-to-back refreshes
+
+
+def clock_draw_payload() -> dict:
+    now = datetime.now()
+    return {
+        "application_name": CLOCK_APP_NAME,
+        "priority": CLOCK_PRIORITY,
+        "elements": [
+            {"id": "0", "type": "image", "path": CLOCK_LOGO_FILENAME, "x": 0, "y": 1, "timeout": 0},
+            {
+                "id": "1", "type": "text", "text": now.strftime("%d.%m.%Y"), "x": 24, "y": -2,
+                "font": "small", "color": "#E879F9FF", "width": 54, "scroll_rate": 0, "timeout": 0,
+            },
+            {
+                "id": "2", "type": "text", "text": now.strftime("%H:%M:%S"), "x": 18, "y": 4,
+                "font": "extra_large", "color": "#22D3EEFF", "width": 54, "scroll_rate": 0, "timeout": 0,
+            },
+        ],
+    }
+
+
+async def run_clock_job() -> None:
+    global _clock_logo_uploaded, _clock_is_foreground
+    headers = busybar_headers()
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            if not _clock_is_foreground:
+                # see run_text_job: clear first, a different application_name won't take over
+                await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
+            if not _clock_logo_uploaded:
+                await client.post(
+                    f"{BUSYBAR_URL}/api/assets/upload",
+                    params={"application_name": CLOCK_APP_NAME, "file": CLOCK_LOGO_FILENAME},
+                    content=_clock_logo_bytes,
+                    headers={**headers, "Content-Type": "application/octet-stream"},
+                )
+                _clock_logo_uploaded = True
+            resp = await client.post(
+                f"{BUSYBAR_URL}/api/display/draw",
+                json=clock_draw_payload(),
+                headers=headers,
+            )
+            if resp.status_code == 409:
+                # a higher-priority app owns the display; retry next tick
+                _clock_is_foreground = False
+                return
+            resp.raise_for_status()
+            _clock_is_foreground = True
+        except httpx.HTTPError as exc:
+            logger.error("BUSY Bar clock draw failed: %s", exc)
+
+
+async def _next_wall_job(clock_deadline: float):
+    # alerts win when both are waiting; clock_deadline is fixed so draw latency doesn't stack
     while True:
         if not _alert_queue.empty():
             return _alert_queue.get_nowait()
+        timeout = max(0.0, clock_deadline - time.monotonic())
         try:
-            return await asyncio.wait_for(_wall_queue.get(), timeout=0.5)
+            return await asyncio.wait_for(_wall_queue.get(), timeout=timeout)
         except asyncio.TimeoutError:
-            continue
+            if _alert_queue.empty() and _wall_queue.empty():
+                return run_clock_job
 
 
 async def _wall_queue_worker() -> None:
+    clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
     while True:
-        job = await _next_wall_job()
+        job = await _next_wall_job(clock_deadline)
+        if job is run_clock_job:
+            clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
         try:
             await job()
         except Exception:
@@ -142,6 +240,7 @@ async def _wall_queue_worker() -> None:
 @app.on_event("startup")
 async def _launch_wall_queue_worker() -> None:
     asyncio.create_task(_wall_queue_worker())
+    enqueue_wall_job(run_clock_job)  # show the clock immediately instead of waiting out the first idle cycle
 
 # not a Salt-managed path, so file.managed never touches or wipes it across deploys
 STATS_FILE = Path("/opt/api/data/stats.json")
@@ -264,6 +363,24 @@ def verify_alert_auth(credentials: HTTPAuthorizationCredentials | None = Depends
         ALERTMANAGER_TOKEN
         and credentials is not None
         and secrets.compare_digest(credentials.credentials, ALERTMANAGER_TOKEN)
+    )
+    if not valid:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+# owner-only device controls, not exposed to visitors
+_admin_bearer_auth = HTTPBearer(auto_error=False)
+
+
+def verify_admin_auth(credentials: HTTPAuthorizationCredentials | None = Depends(_admin_bearer_auth)) -> None:
+    valid = bool(
+        BUSYBAR_ADMIN_TOKEN
+        and credentials is not None
+        and secrets.compare_digest(credentials.credentials, BUSYBAR_ADMIN_TOKEN)
     )
     if not valid:
         raise HTTPException(
@@ -507,12 +624,14 @@ def decode_front_screen(b64_data: bytes) -> bytes:
 
 
 async def run_text_job(text: str, color: str, ip: str) -> None:
+    global _clock_is_foreground
     headers = busybar_headers()
     async with httpx.AsyncClient(timeout=5) as client:
         try:
             # a draw under a different application_name won't take over the display on
             # its own (confirmed on real hardware), so clear whatever's showing first
             await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
+            _clock_is_foreground = False
             draw_started = time.monotonic()
             resp = await client.post(
                 f"{BUSYBAR_URL}/api/display/draw",
@@ -532,11 +651,13 @@ async def run_text_job(text: str, color: str, ip: str) -> None:
 
 
 async def run_image_job(png_bytes: bytes, ip: str) -> None:
+    global _clock_is_foreground
     headers = busybar_headers()
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             # see run_text_job: clear first, a different application_name won't take over
             await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
+            _clock_is_foreground = False
             # web_wall is our own namespace, safe to wipe before every upload
             await client.delete(
                 f"{BUSYBAR_URL}/api/assets/upload",
@@ -603,7 +724,17 @@ async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: st
     await asyncio.sleep(max(0, pcm_duration_seconds(pcm_bytes) + 0.5 - play_latency))
 
 
-@app.post("/wall/message", status_code=204, tags=["BUSY Bar"])
+@app.post(
+    "/wall/message",
+    status_code=204,
+    tags=["BUSY Bar"],
+    openapi_extra={
+        "requestBody": {
+            "content": {"application/json": {"schema": WallMessage.model_json_schema()}},
+            "required": True,
+        }
+    },
+)
 async def post_message(request: Request):
     enforce_rate_limit(request)  # before parsing the body, or a malformed one skips this
     try:
@@ -705,6 +836,42 @@ async def busybar_status(request: Request):
     }
 
 
+@app.post("/busybar/brightness", tags=["BUSY Bar"])
+async def set_busybar_brightness(
+    value: int = Query(..., ge=0, le=100),
+    _auth: None = Depends(verify_admin_auth),
+):
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            resp = await client.post(
+                f"{BUSYBAR_URL}/api/display/brightness",
+                params={"value": str(value)},
+                headers=busybar_headers(),
+            )
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.error("BUSY Bar brightness update failed: %s", exc)
+            raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+
+
+@app.post("/busybar/volume", tags=["BUSY Bar"])
+async def set_busybar_volume(
+    value: int = Query(..., ge=0, le=100),
+    _auth: None = Depends(verify_admin_auth),
+):
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            resp = await client.post(
+                f"{BUSYBAR_URL}/api/audio/volume",
+                params={"volume": value, "silent": 1},
+                headers=busybar_headers(),
+            )
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.error("BUSY Bar volume update failed: %s", exc)
+            raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+
+
 @app.get(
     "/wall/screen",
     tags=["BUSY Bar"],
@@ -745,11 +912,13 @@ async def get_wall_screen():
 
 
 async def run_alert_job(text: str, color: str) -> None:
+    global _clock_is_foreground
     headers = busybar_headers()
     async with httpx.AsyncClient(timeout=5) as client:
         try:
             # see run_text_job: clear first, a different application_name won't take over
             await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
+            _clock_is_foreground = False
             draw_started = time.monotonic()
             resp = await client.post(
                 f"{BUSYBAR_URL}/api/display/draw",

@@ -7,6 +7,7 @@
 {% set busybar_pin = busybar_secret.get('busybar_pin', '') %}
 {% set discord_webhook_url = busybar_secret.get('discord_webhook_url', '') %}
 {% set alertmanager_token = busybar_secret.get('alertmanager_token', '') %}
+{% set busybar_admin_token = busybar_secret.get('busybar_admin_token', '') %}
 
 # raw.githubusercontent.com caches by URL, so "main" can serve stale content after a push;
 # pin to the resolved commit SHA instead, falling back to "main" if the API call fails
@@ -63,11 +64,23 @@ api_dependencies_pkg:
     - group: api
     - mode: 640
     - template: jinja
+    - show_changes: False
     - context:
         busybar_url: "{{ busybar_url }}"
         busybar_pin: "{{ busybar_pin }}"
         discord_webhook_url: "{{ discord_webhook_url }}"
         alertmanager_token: "{{ alertmanager_token }}"
+        busybar_admin_token: "{{ busybar_admin_token }}"
+    - require:
+      - file: /opt/api
+
+/opt/api/app/assets/clock-logo.png:
+  file.managed:
+    - source: salt://role/api/files/app/assets/clock-logo.png
+    - user: api
+    - group: api
+    - mode: 644
+    - makedirs: True
     - require:
       - file: /opt/api
 
@@ -128,6 +141,7 @@ api:
     - watch:
       - file: /opt/api/app/main.py
       - file: /opt/api/app/config.py
+      - file: /opt/api/app/assets/clock-logo.png
       - file: /opt/api/gunicorn.py
       - file: /etc/systemd/system/api.service
       - virtualenv: /opt/api/venv

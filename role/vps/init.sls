@@ -88,6 +88,7 @@ git_pkg:
     - rev: master
     - branch: master
     - force_reset: remote-changes
+    - force_checkout: True
     - require:
       - pkg: git_pkg
 
