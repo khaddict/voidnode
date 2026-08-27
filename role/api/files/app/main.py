@@ -19,7 +19,15 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from config import ALERTMANAGER_TOKEN, BUSYBAR_ADMIN_TOKEN, BUSYBAR_PIN, BUSYBAR_URL, DISCORD_WEBHOOK_URL
+from config import (
+    ALERTMANAGER_TOKEN,
+    BUSYBAR_ADMIN_TOKEN,
+    BUSYBAR_PIN,
+    BUSYBAR_URL,
+    DISCORD_WEBHOOK_URL,
+    STACKSTORM_ALERT_TOKEN,
+    UPTIME_KUMA_ALERT_TOKEN,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
@@ -71,6 +79,11 @@ AUDIO_SUFFIXES = {
 }
 ALLOWED_AUDIO_TYPES = set(AUDIO_SUFFIXES)
 
+# per-IP rate limiting doesn't cap total CPU cost from distinct IPs hitting this single
+# gunicorn worker at once; bound concurrent Pillow decodes and ffmpeg conversions directly
+CONVERSION_CONCURRENCY = 2
+_conversion_semaphore = asyncio.Semaphore(CONVERSION_CONCURRENCY)
+
 RATE_LIMIT_SECONDS = 20
 _last_request_at: dict[str, float] = {}
 
@@ -79,15 +92,37 @@ _last_view_at: dict[str, float] = {}
 
 MAX_MESSAGES_PER_DAY = 300  # per-IP limiting alone doesn't stop IP-rotation abuse
 
+class TTLCache:
+    """Double-checked-locking cache: refresh() runs at most once per TTL window,
+    even under concurrent callers. A refresh() that raises leaves the cache as-is
+    (nothing is cached on failure), so the next caller retries immediately."""
+
+    def __init__(self, ttl: float):
+        self.ttl = ttl
+        self.value = None
+        self.checked_at = 0.0
+        self.lock = asyncio.Lock()
+
+    async def get(self, refresh):
+        now = time.monotonic()
+        if self.value is not None and now - self.checked_at < self.ttl:
+            return self.value
+        async with self.lock:
+            now = time.monotonic()  # re-check: another caller may have refreshed it already
+            if self.value is not None and now - self.checked_at < self.ttl:
+                return self.value
+            self.value = await refresh()
+            self.checked_at = now
+            return self.value
+
+
 STATUS_CACHE_SECONDS = 10
 STATUS_TIMEOUT_SEC = 3
-_status_cache = {"online": False, "checked_at": 0.0}
-_status_lock = asyncio.Lock()
+_status_cache = TTLCache(STATUS_CACHE_SECONDS)
 
 SCREEN_CACHE_SECONDS = 1.5  # every open tab polls this, so cache it instead of one fetch each
 SCREEN_TIMEOUT_SEC = 5
-_screen_cache = {"png": None, "checked_at": 0.0}
-_screen_lock = asyncio.Lock()
+_screen_cache = TTLCache(SCREEN_CACHE_SECONDS)
 
 # serializes device draws so one sender can't cut off another mid-display
 MAX_WALL_QUEUE_DEPTH = 20
@@ -117,6 +152,10 @@ def enqueue_alert_job(job) -> None:
         _alert_queue.put_nowait(job)
     except asyncio.QueueFull:
         raise HTTPException(status_code=429, detail="The alert queue is busy, try again shortly")
+
+
+# pass/fail summary, e.g. for a nightly job result: a label plus green/red OK/FAIL counts
+REPORT_APP_NAME = "web_report"
 
 
 NIGHT_HOUR_CUTOFF = 9  # local hour below this is night: brightness/volume 0, else 100
@@ -227,21 +266,27 @@ async def _next_wall_job(clock_deadline: float):
                 return run_clock_job
 
 
+JOB_TIMEOUT_SEC = 120  # a wedged device (accepts the connection, never replies) must not freeze the queue forever
+
+
 async def _wall_queue_worker() -> None:
     clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
     while True:
-        job = await _next_wall_job(clock_deadline)
-        if job is run_clock_job:
-            clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
         try:
-            await job()
+            job = await _next_wall_job(clock_deadline)
+            if job is run_clock_job:
+                clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
+            await asyncio.wait_for(job(), timeout=JOB_TIMEOUT_SEC)
         except Exception:
             logger.exception("Wall queue job crashed")
 
 
 @app.on_event("startup")
 async def _launch_wall_queue_worker() -> None:
-    asyncio.create_task(_wall_queue_worker())
+    # asyncio only holds a weak ref to tasks; keep a strong one or it can get GC'd mid-run
+    task = asyncio.create_task(_wall_queue_worker())
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
     enqueue_wall_job(run_clock_job)  # show the clock immediately instead of waiting out the first idle cycle
 
 # not a Salt-managed path, so file.managed never touches or wipes it across deploys
@@ -310,42 +355,43 @@ def client_ip(request: Request) -> str:
     return request.headers.get("x-real-ip") or (request.client.host if request.client else "unknown")
 
 
-def enforce_rate_limit(request: Request) -> None:
-    ip = client_ip(request)
+def _check_rate_limit(store: dict[str, float], ip: str, window: float) -> float | None:
+    """Records this hit and returns None if it's allowed, else the seconds left to wait."""
     now = time.monotonic()
 
     # lazy prune so this dict doesn't grow forever across distinct visitor IPs
-    if len(_last_request_at) > 10_000:
-        cutoff = now - RATE_LIMIT_SECONDS * 10
-        for stale_ip, seen_at in list(_last_request_at.items()):
+    if len(store) > 10_000:
+        cutoff = now - window * 10
+        for stale_ip, seen_at in list(store.items()):
             if seen_at < cutoff:
-                del _last_request_at[stale_ip]
+                del store[stale_ip]
 
-    last_seen = _last_request_at.get(ip)
-    if last_seen is not None and now - last_seen < RATE_LIMIT_SECONDS:
-        retry_after = int(RATE_LIMIT_SECONDS - (now - last_seen)) + 1
+    last_seen = store.get(ip)
+    if last_seen is not None and now - last_seen < window:
+        return window - (now - last_seen)
+    store[ip] = now
+    return None
+
+
+def enforce_rate_limit(request: Request) -> None:
+    wait = _check_rate_limit(_last_request_at, client_ip(request), RATE_LIMIT_SECONDS)
+    if wait is not None:
         raise HTTPException(
             status_code=429,
             detail="Too many requests, wait a bit before sending again",
-            headers={"Retry-After": str(retry_after)},
+            headers={"Retry-After": str(int(wait) + 1)},
         )
-    _last_request_at[ip] = now
 
 
 def enforce_view_rate_limit(request: Request) -> None:
-    ip = client_ip(request)
-    now = time.monotonic()
-
-    if len(_last_view_at) > 10_000:
-        cutoff = now - VIEW_RATE_LIMIT_SECONDS * 10
-        for stale_ip, seen_at in list(_last_view_at.items()):
-            if seen_at < cutoff:
-                del _last_view_at[stale_ip]
-
-    last_seen = _last_view_at.get(ip)
-    if last_seen is not None and now - last_seen < VIEW_RATE_LIMIT_SECONDS:
+    wait = _check_rate_limit(_last_view_at, client_ip(request), VIEW_RATE_LIMIT_SECONDS)
+    if wait is not None:
         raise HTTPException(status_code=429, detail="Too many requests")
-    _last_view_at[ip] = now
+
+
+def enforce_daily_message_limit() -> None:
+    if messages_sent_today() >= MAX_MESSAGES_PER_DAY:
+        raise HTTPException(status_code=429, detail="Daily message limit reached, try again tomorrow")
 
 
 def rate_limit_remaining(request: Request) -> int:
@@ -356,15 +402,16 @@ def rate_limit_remaining(request: Request) -> int:
     return int(remaining) + 1 if remaining > 0 else 0
 
 
-# a server-to-server call from Alertmanager, so authenticated rather than rate-limited
+# server-to-server calls, so authenticated rather than rate-limited; each caller carries
+# its own token so any one of them can be rotated without affecting the others
+ALERT_TOKENS = (ALERTMANAGER_TOKEN, STACKSTORM_ALERT_TOKEN, UPTIME_KUMA_ALERT_TOKEN)
 _alert_bearer_auth = HTTPBearer(auto_error=False)
 
 
 def verify_alert_auth(credentials: HTTPAuthorizationCredentials | None = Depends(_alert_bearer_auth)) -> None:
     valid = bool(
-        ALERTMANAGER_TOKEN
-        and credentials is not None
-        and secrets.compare_digest(credentials.credentials, ALERTMANAGER_TOKEN)
+        credentials is not None
+        and any(token and secrets.compare_digest(credentials.credentials, token) for token in ALERT_TOKENS)
     )
     if not valid:
         raise HTTPException(
@@ -495,54 +542,43 @@ def busybar_headers() -> dict:
     return {"X-API-Token": BUSYBAR_PIN} if BUSYBAR_PIN else {}
 
 
-async def notify_discord_text(message: str, color: str, ip: str) -> None:
+async def _notify_discord(**post_kwargs) -> None:
     if not DISCORD_WEBHOOK_URL:
         return
     try:
         async with httpx.AsyncClient(timeout=5) as client:
-            await client.post(
-                DISCORD_WEBHOOK_URL,
-                json={
-                    "embeds": [{
-                        "title": "New wall message",
-                        "description": message,
-                        "color": int(color.lstrip("#"), 16),
-                        "footer": {"text": ip},
-                    }],
-                },
-            )
+            await client.post(DISCORD_WEBHOOK_URL, **post_kwargs)
     except httpx.HTTPError as exc:
         logger.error("Discord notify failed: %s", exc)
+
+
+async def notify_discord_text(message: str, color: str, ip: str) -> None:
+    await _notify_discord(
+        json={
+            "embeds": [{
+                "title": "New wall message",
+                "description": message,
+                "color": int(color.lstrip("#"), 16),
+                "footer": {"text": ip},
+            }],
+        },
+    )
 
 
 async def notify_discord_image(png_bytes: bytes, ip: str) -> None:
-    if not DISCORD_WEBHOOK_URL:
-        return
-    try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            await client.post(
-                DISCORD_WEBHOOK_URL,
-                data={"payload_json": json.dumps({"content": f"New wall image from {ip}"})},
-                files={"file": ("wall.png", png_bytes, "image/png")},
-            )
-    except httpx.HTTPError as exc:
-        logger.error("Discord notify failed: %s", exc)
+    await _notify_discord(
+        data={"payload_json": json.dumps({"content": f"New wall image from {ip}"})},
+        files={"file": ("wall.png", png_bytes, "image/png")},
+    )
 
 
 async def notify_discord_audio(data: bytes, content_type: str, ip: str) -> None:
-    if not DISCORD_WEBHOOK_URL:
-        return
     # send the original clip, not the converted PCM below; Discord can play webm/ogg fine
     suffix = AUDIO_SUFFIXES.get(content_type, ".bin")
-    try:
-        async with httpx.AsyncClient(timeout=5) as client:
-            await client.post(
-                DISCORD_WEBHOOK_URL,
-                data={"payload_json": json.dumps({"content": f"New wall audio from {ip}"})},
-                files={"file": (f"wall{suffix}", data, content_type)},
-            )
-    except httpx.HTTPError as exc:
-        logger.error("Discord notify failed: %s", exc)
+    await _notify_discord(
+        data={"payload_json": json.dumps({"content": f"New wall audio from {ip}"})},
+        files={"file": (f"wall{suffix}", data, content_type)},
+    )
 
 
 def audio_play_payload(filename: str) -> dict:
@@ -560,7 +596,9 @@ def convert_audio_for_busybar(data: bytes, content_type: str) -> bytes:
         src.write(data)
         src.flush()
         cmd = [
-            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            # input is always our own local temp file; block ffmpeg from following
+            # a crafted container into fetching a network/other-local resource
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-protocol_whitelist", "file",
             "-i", src.name,
             "-ar", "44100", "-ac", "1", "-f", "s16le", "-acodec", "pcm_s16le",
             dst.name,
@@ -625,70 +663,82 @@ def decode_front_screen(b64_data: bytes) -> bytes:
     return out.getvalue()
 
 
-async def run_text_job(text: str, color: str, ip: str) -> None:
+async def _upload_wall_asset(client: httpx.AsyncClient, headers: dict, filename: str, content: bytes) -> None:
+    # web_wall is our own namespace, safe to wipe before every upload
+    await client.delete(
+        f"{BUSYBAR_URL}/api/assets/upload",
+        params={"application_name": "web_wall"},
+        headers=headers,
+    )
+    upload_resp = await client.post(
+        f"{BUSYBAR_URL}/api/assets/upload",
+        params={"application_name": "web_wall", "file": filename},
+        content=content,
+        headers={**headers, "Content-Type": "application/octet-stream"},
+    )
+    upload_resp.raise_for_status()
+
+
+async def _draw_and_hold(
+    payload: dict,
+    *,
+    client_timeout: float,
+    error_label: str,
+    hold_seconds: float,
+    extra_step=None,
+    on_success=None,
+) -> None:
+    """POST a draw payload, clearing whatever's showing first since a draw under a
+    different application_name won't take over the display on its own (confirmed on
+    real hardware). Then hold the wall queue for hold_seconds minus this call's own
+    latency, or the next queued job's draw lands late and leaves a gap."""
     global _clock_is_foreground
     headers = busybar_headers()
-    async with httpx.AsyncClient(timeout=5) as client:
+    async with httpx.AsyncClient(timeout=client_timeout) as client:
         try:
-            # a draw under a different application_name won't take over the display on
-            # its own (confirmed on real hardware), so clear whatever's showing first
             await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
             _clock_is_foreground = False
+            if extra_step is not None:
+                await extra_step(client, headers)
             draw_started = time.monotonic()
-            resp = await client.post(
-                f"{BUSYBAR_URL}/api/display/draw",
-                json=draw_payload(text, color),
-                headers=headers,
-            )
+            resp = await client.post(f"{BUSYBAR_URL}/api/display/draw", json=payload, headers=headers)
             resp.raise_for_status()
         except httpx.HTTPError as exc:
-            logger.error("BUSY Bar draw failed: %s", exc)
+            logger.error("BUSY Bar %s failed: %s", error_label, exc)
             return
-    record_message_sent()
-    fire_and_forget(notify_discord_text(text, color, ip))
-    # the device's timeout starts at the draw call, not our response, so subtract
-    # this call's latency or the next job's draw lands late and leaves a gap
+    if on_success is not None:
+        on_success()
     draw_latency = time.monotonic() - draw_started
-    await asyncio.sleep(max(0, display_wait_seconds(text) - draw_latency))
+    await asyncio.sleep(max(0, hold_seconds - draw_latency))
+
+
+async def run_text_job(text: str, color: str, ip: str) -> None:
+    def on_success() -> None:
+        record_message_sent()
+        fire_and_forget(notify_discord_text(text, color, ip))
+
+    await _draw_and_hold(
+        draw_payload(text, color),
+        client_timeout=5,
+        error_label="draw",
+        hold_seconds=display_wait_seconds(text),
+        on_success=on_success,
+    )
 
 
 async def run_image_job(png_bytes: bytes, ip: str) -> None:
-    global _clock_is_foreground
-    headers = busybar_headers()
-    async with httpx.AsyncClient(timeout=10) as client:
-        try:
-            # see run_text_job: clear first, a different application_name won't take over
-            await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
-            _clock_is_foreground = False
-            # web_wall is our own namespace, safe to wipe before every upload
-            await client.delete(
-                f"{BUSYBAR_URL}/api/assets/upload",
-                params={"application_name": "web_wall"},
-                headers=headers,
-            )
-            upload_resp = await client.post(
-                f"{BUSYBAR_URL}/api/assets/upload",
-                params={"application_name": "web_wall", "file": IMAGE_FILENAME},
-                content=png_bytes,
-                headers={**headers, "Content-Type": "application/octet-stream"},
-            )
-            upload_resp.raise_for_status()
+    def on_success() -> None:
+        record_message_sent()
+        fire_and_forget(notify_discord_image(png_bytes, ip))
 
-            draw_started = time.monotonic()
-            draw_resp = await client.post(
-                f"{BUSYBAR_URL}/api/display/draw",
-                json=image_draw_payload(IMAGE_FILENAME),
-                headers=headers,
-            )
-            draw_resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.error("BUSY Bar image draw failed: %s", exc)
-            return
-    record_message_sent()
-    fire_and_forget(notify_discord_image(png_bytes, ip))
-    # see run_text_job: subtract this call's own latency
-    draw_latency = time.monotonic() - draw_started
-    await asyncio.sleep(max(0, IMAGE_TIMEOUT_SEC - draw_latency))
+    await _draw_and_hold(
+        image_draw_payload(IMAGE_FILENAME),
+        client_timeout=10,
+        error_label="image draw",
+        hold_seconds=IMAGE_TIMEOUT_SEC,
+        extra_step=lambda client, headers: _upload_wall_asset(client, headers, IMAGE_FILENAME, png_bytes),
+        on_success=on_success,
+    )
 
 
 async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: str) -> None:
@@ -696,19 +746,7 @@ async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: st
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             # unlike text/image, audio doesn't touch the display, only its own assets
-            await client.delete(
-                f"{BUSYBAR_URL}/api/assets/upload",
-                params={"application_name": "web_wall"},
-                headers=headers,
-            )
-            upload_resp = await client.post(
-                f"{BUSYBAR_URL}/api/assets/upload",
-                params={"application_name": "web_wall", "file": AUDIO_FILENAME},
-                content=pcm_bytes,
-                headers={**headers, "Content-Type": "application/octet-stream"},
-            )
-            upload_resp.raise_for_status()
-
+            await _upload_wall_asset(client, headers, AUDIO_FILENAME, pcm_bytes)
             play_started = time.monotonic()
             play_resp = await client.post(
                 f"{BUSYBAR_URL}/api/audio/play",
@@ -743,8 +781,7 @@ async def post_message(request: Request):
         body = WallMessage.model_validate(await request.json())
     except (json.JSONDecodeError, ValidationError) as exc:
         raise HTTPException(status_code=422, detail=str(exc))
-    if messages_sent_today() >= MAX_MESSAGES_PER_DAY:
-        raise HTTPException(status_code=429, detail="Daily message limit reached, try again tomorrow")
+    enforce_daily_message_limit()
     ip = client_ip(request)
     enqueue_wall_job(lambda: run_text_job(body.message, body.color, ip))
 
@@ -759,8 +796,7 @@ async def post_message(request: Request):
 )
 async def post_image(request: Request, file: UploadFile = File(...)):
     enforce_rate_limit(request)
-    if messages_sent_today() >= MAX_MESSAGES_PER_DAY:
-        raise HTTPException(status_code=429, detail="Daily message limit reached, try again tomorrow")
+    enforce_daily_message_limit()
     if file.content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported image type")
 
@@ -769,7 +805,8 @@ async def post_image(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=413, detail="Image too large")
 
     try:
-        png_bytes = await asyncio.to_thread(resize_to_screen, data)
+        async with _conversion_semaphore:
+            png_bytes = await asyncio.to_thread(resize_to_screen, data)
     except Image.DecompressionBombError as exc:
         logger.error("Image rejected: %s", exc)
         raise HTTPException(status_code=400, detail="Image is too large to process")
@@ -791,8 +828,7 @@ async def post_image(request: Request, file: UploadFile = File(...)):
 )
 async def post_audio(request: Request, file: UploadFile = File(...)):
     enforce_rate_limit(request)
-    if messages_sent_today() >= MAX_MESSAGES_PER_DAY:
-        raise HTTPException(status_code=429, detail="Daily message limit reached, try again tomorrow")
+    enforce_daily_message_limit()
     content_type = (file.content_type or "").split(";")[0].strip()
     if content_type not in ALLOWED_AUDIO_TYPES:
         raise HTTPException(status_code=400, detail="Unsupported audio type")
@@ -802,7 +838,8 @@ async def post_audio(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=413, detail="Audio too large")
 
     try:
-        pcm_bytes = await asyncio.to_thread(convert_audio_for_busybar, data, content_type)
+        async with _conversion_semaphore:
+            pcm_bytes = await asyncio.to_thread(convert_audio_for_busybar, data, content_type)
     except (RuntimeError, subprocess.TimeoutExpired) as exc:
         logger.error("Audio conversion failed: %s", exc)
         raise HTTPException(status_code=400, detail="Could not process that audio")
@@ -814,28 +851,33 @@ async def post_audio(request: Request, file: UploadFile = File(...)):
     enqueue_wall_job(lambda: run_audio_job(pcm_bytes, data, content_type, ip))
 
 
+async def _fetch_busybar_online() -> bool:
+    try:
+        async with httpx.AsyncClient(timeout=STATUS_TIMEOUT_SEC) as client:
+            resp = await client.get(f"{BUSYBAR_URL}/api/status", headers=busybar_headers())
+            return resp.status_code == 200
+    except httpx.HTTPError:
+        return False
+
+
 @app.get("/busybar/status", tags=["BUSY Bar"])
 async def busybar_status(request: Request):
-    now = time.monotonic()
-    if now - _status_cache["checked_at"] >= STATUS_CACHE_SECONDS:
-        async with _status_lock:
-            now = time.monotonic()  # re-check: another request may have refreshed it already
-            if now - _status_cache["checked_at"] >= STATUS_CACHE_SECONDS:
-                online = False
-                try:
-                    async with httpx.AsyncClient(timeout=STATUS_TIMEOUT_SEC) as client:
-                        resp = await client.get(f"{BUSYBAR_URL}/api/status", headers=busybar_headers())
-                        online = resp.status_code == 200
-                except httpx.HTTPError:
-                    online = False
-                _status_cache["online"] = online
-                _status_cache["checked_at"] = now
-
+    online = await _status_cache.get(_fetch_busybar_online)
     return {
-        "online": _status_cache["online"],
+        "online": online,
         "messages_today": messages_sent_today(),
         "rate_limit_remaining": rate_limit_remaining(request),
     }
+
+
+async def _busybar_passthrough_post(path: str, params: dict, error_label: str) -> None:
+    async with httpx.AsyncClient(timeout=10) as client:
+        try:
+            resp = await client.post(f"{BUSYBAR_URL}{path}", params=params, headers=busybar_headers())
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.error("BUSY Bar %s update failed: %s", error_label, exc)
+            raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
 
 
 @app.post("/busybar/brightness", tags=["BUSY Bar"])
@@ -843,17 +885,7 @@ async def set_busybar_brightness(
     value: int = Query(..., ge=0, le=100),
     _auth: None = Depends(verify_admin_auth),
 ):
-    async with httpx.AsyncClient(timeout=10) as client:
-        try:
-            resp = await client.post(
-                f"{BUSYBAR_URL}/api/display/brightness",
-                params={"value": str(value)},
-                headers=busybar_headers(),
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.error("BUSY Bar brightness update failed: %s", exc)
-            raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    await _busybar_passthrough_post("/api/display/brightness", {"value": str(value)}, "brightness")
 
 
 @app.post("/busybar/volume", tags=["BUSY Bar"])
@@ -861,17 +893,27 @@ async def set_busybar_volume(
     value: int = Query(..., ge=0, le=100),
     _auth: None = Depends(verify_admin_auth),
 ):
-    async with httpx.AsyncClient(timeout=10) as client:
+    await _busybar_passthrough_post("/api/audio/volume", {"volume": value, "silent": 1}, "volume")
+
+
+async def _fetch_wall_screen_png() -> bytes:
+    async with httpx.AsyncClient(timeout=SCREEN_TIMEOUT_SEC) as client:
         try:
-            resp = await client.post(
-                f"{BUSYBAR_URL}/api/audio/volume",
-                params={"volume": value, "silent": 1},
+            resp = await client.get(
+                f"{BUSYBAR_URL}/api/screen",
+                params={"display": 0},
                 headers=busybar_headers(),
             )
             resp.raise_for_status()
         except httpx.HTTPError as exc:
-            logger.error("BUSY Bar volume update failed: %s", exc)
+            logger.error("BUSY Bar screen fetch failed: %s", exc)
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+
+    try:
+        return await asyncio.to_thread(decode_front_screen, resp.content)
+    except (binascii.Error, ValueError) as exc:
+        logger.error("Could not decode screen frame: %s", exc)
+        raise HTTPException(status_code=502, detail="Could not decode the screen frame")
 
 
 @app.get(
@@ -881,59 +923,17 @@ async def set_busybar_volume(
     description="Meant to be polled every second or two by the homepage widget when idle. Not rate-limited like the send endpoints, since it's read-only.",
 )
 async def get_wall_screen():
-    now = time.monotonic()
-    if _screen_cache["png"] is not None and now - _screen_cache["checked_at"] < SCREEN_CACHE_SECONDS:
-        return Response(content=_screen_cache["png"], media_type="image/png")
-
-    async with _screen_lock:
-        now = time.monotonic()  # re-check: another poller may have refreshed it already
-        if _screen_cache["png"] is not None and now - _screen_cache["checked_at"] < SCREEN_CACHE_SECONDS:
-            return Response(content=_screen_cache["png"], media_type="image/png")
-
-        async with httpx.AsyncClient(timeout=SCREEN_TIMEOUT_SEC) as client:
-            try:
-                resp = await client.get(
-                    f"{BUSYBAR_URL}/api/screen",
-                    params={"display": 0},
-                    headers=busybar_headers(),
-                )
-                resp.raise_for_status()
-            except httpx.HTTPError as exc:
-                logger.error("BUSY Bar screen fetch failed: %s", exc)
-                raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
-
-        try:
-            png_bytes = await asyncio.to_thread(decode_front_screen, resp.content)
-        except (binascii.Error, ValueError) as exc:
-            logger.error("Could not decode screen frame: %s", exc)
-            raise HTTPException(status_code=502, detail="Could not decode the screen frame")
-
-        _screen_cache["png"] = png_bytes
-        _screen_cache["checked_at"] = now
+    png_bytes = await _screen_cache.get(_fetch_wall_screen_png)
     return Response(content=png_bytes, media_type="image/png")
 
 
 async def run_alert_job(text: str, color: str) -> None:
-    global _clock_is_foreground
-    headers = busybar_headers()
-    async with httpx.AsyncClient(timeout=5) as client:
-        try:
-            # see run_text_job: clear first, a different application_name won't take over
-            await client.delete(f"{BUSYBAR_URL}/api/display/draw", headers=headers)
-            _clock_is_foreground = False
-            draw_started = time.monotonic()
-            resp = await client.post(
-                f"{BUSYBAR_URL}/api/display/draw",
-                json=draw_payload(text, color, application_name="web_alert"),
-                headers=headers,
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.error("BUSY Bar alert draw failed: %s", exc)
-            return
-    # see run_text_job: subtract this call's own latency
-    draw_latency = time.monotonic() - draw_started
-    await asyncio.sleep(max(0, display_wait_seconds(text) - draw_latency))
+    await _draw_and_hold(
+        draw_payload(text, color, application_name="web_alert"),
+        client_timeout=5,
+        error_label="alert draw",
+        hold_seconds=display_wait_seconds(text),
+    )
 
 
 @app.post(
@@ -945,7 +945,15 @@ async def run_alert_job(text: str, color: str) -> None:
     "by Alertmanager, not visitors, authenticated with a bearer token instead of the "
     "visitor rate limiter.",
 )
-async def post_alert(payload: AlertmanagerWebhook, _auth: None = Depends(verify_alert_auth)):
+async def post_alert(request: Request, _auth: None = Depends(verify_alert_auth)):
+    body = await request.json()
+    if isinstance(body, str):
+        # Uptime Kuma's custom webhook body renders to a string, then gets JSON-encoded again
+        body = json.loads(body)
+    try:
+        payload = AlertmanagerWebhook.model_validate(body)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     names = ", ".join(payload.alert_names())
     if payload.status == "resolved":
         text, color = f"RESOLVED: {names}", "#00FF00"
@@ -953,6 +961,50 @@ async def post_alert(payload: AlertmanagerWebhook, _auth: None = Depends(verify_
         text, color = f"ALERT: {names}", "#FF0000"
 
     enqueue_alert_job(lambda: run_alert_job(text, color))
+
+
+def report_draw_payload(ok: int, failed: int) -> dict:
+    color = "#00FF00FF" if failed == 0 else "#FF0000FF"
+    return {
+        "application_name": REPORT_APP_NAME,
+        "priority": 100,
+        "elements": [
+            {
+                "id": "0", "type": "text", "text": "SNAPSHOTS", "x": 4, "y": -2,
+                "font": "small", "color": "#FFFFFFFF", "width": 66, "scroll_rate": 0, "timeout": MIN_TIMEOUT_SEC,
+            },
+            {
+                "id": "1", "type": "text", "text": f"{ok}/{ok + failed}", "x": 4, "y": 4,
+                "font": "extra_large", "color": color, "width": 64, "scroll_rate": 0, "timeout": MIN_TIMEOUT_SEC,
+            },
+        ],
+    }
+
+
+async def run_report_job(ok: int, failed: int) -> None:
+    await _draw_and_hold(
+        report_draw_payload(ok, failed),
+        client_timeout=10,
+        error_label="report draw",
+        hold_seconds=MIN_TIMEOUT_SEC,
+    )
+
+
+class WallReport(BaseModel):
+    ok: int = Field(ge=0)
+    failed: int = Field(ge=0)
+
+
+@app.post(
+    "/wall/report",
+    status_code=204,
+    tags=["BUSY Bar"],
+    summary="Show a pass/fail summary icon on the BUSY Bar, e.g. a nightly job result",
+    description="Draws a checkmark or cross next to an OK/FAIL count. Same server-to-server "
+    "auth as /wall/alert, not the visitor rate limiter.",
+)
+async def post_report(payload: WallReport, _auth: None = Depends(verify_alert_auth)):
+    enqueue_alert_job(lambda: run_report_job(payload.ok, payload.failed))
 
 
 @app.post(
