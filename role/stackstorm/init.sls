@@ -2,7 +2,9 @@
 {% set rabbitmq_password = st2_secrets.get('rabbitmq_password') %}
 {% set mongodb_password  = st2_secrets.get('mongodb_password') %}
 
-{% set snapshot_vms_discord_webhook = salt['vault'].read_secret('kv/minions/stackstorm/st2_voidnode').snapshot_vms_discord_webhook %}
+{% set st2_voidnode_secrets = salt['vault'].read_secret('kv/minions/stackstorm/st2_voidnode') %}
+{% set snapshot_vms_discord_webhook = st2_voidnode_secrets.snapshot_vms_discord_webhook %}
+{% set busybar_alert_token = st2_voidnode_secrets.get('busybar_alert_token', '') %}
 
 {% set opnsense_secrets = salt['vault'].read_secret('kv/minions/stackstorm/opnsense') %}
 {% set dns_api_key  = opnsense_secrets.get('dns_api_key') %}
@@ -39,6 +41,7 @@
     - dir_mode: 775
     - context:
         snapshot_vms_discord_webhook: "{{ snapshot_vms_discord_webhook }}"
+        busybar_alert_token: "{{ busybar_alert_token }}"
         dns_api_key: "{{ dns_api_key }}"
         dns_api_secret: "{{ dns_api_secret }}"
 

@@ -1,5 +1,5 @@
 version: 1.0
-description: Create sequential Proxmox snapshots for VMs and LXC containers with vmid < 200, prune old automated snapshots, and send a final summary to Discord.
+description: Create sequential Proxmox snapshots for VMs and LXC containers with vmid < 200, prune old automated snapshots, and push a summary to both Discord and the BUSY Bar (green if all succeeded, red otherwise).
 
 vars:
   - pve_node: voidnode
@@ -50,6 +50,14 @@ vars:
       echo "✅ Success: $SUCCESS"
       echo "❌ Failure: $FAILED"
 
+      curl -s -X POST "https://api.khaddict.com/wall/report" \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer $BUSYBAR_ALERT_TOKEN" \
+          -d "{\"ok\":${SUCCESS},\"failed\":${FAILED}}" \
+          >/dev/null 2>&1
+
+      [ "$FAILED" -eq 0 ]
+
 tasks:
   create_node_snapshots:
     action: core.remote
@@ -60,6 +68,7 @@ tasks:
       cmd: |
         export NODE="<% ctx().pve_node %>"
         export SNAPNAME="<% ctx().snapshot_name %>"
+        export BUSYBAR_ALERT_TOKEN="{{ busybar_alert_token }}"
         <% ctx().snapshot_script %>
     next:
       - when: <% succeeded() or failed() %>
