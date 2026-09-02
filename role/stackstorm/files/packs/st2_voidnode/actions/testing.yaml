@@ -1,6 +1,6 @@
 name: testing
 pack: st2_voidnode
-description: Test workflow. Run a highstate on stackstorm.khaddict.lab if needed.
+description: No-op smoke-test workflow for validating the StackStorm/Orquesta pipeline.
 runner_type: orquesta
 entry_point: workflows/testing.yaml
 enabled: true

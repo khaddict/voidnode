@@ -14,6 +14,8 @@ netbox_user:
   user.present:
     - name: netbox
     - usergroup: True
+    - createhome: False
+    - system: True
 
 netbox_dependencies_pkg:
   pkg.installed:

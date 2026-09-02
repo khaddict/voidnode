@@ -1,5 +1,8 @@
 ---
 user: salt
+# saltgui's ACL below is unrestricted (.*, @runner, @wheel, @jobs): logging into
+# the saltgui PAM account is equivalent to root on every minion plus salt-key and
+# the Vault runners in peer_run.conf. Protect that PAM credential accordingly.
 external_auth:
   pam:
     saltgui:

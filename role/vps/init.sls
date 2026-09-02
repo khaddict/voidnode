@@ -1,6 +1,8 @@
-# see role/api/init.sls: pins to a commit SHA to dodge raw.githubusercontent.com's URL caching
+# see role/api/init.sls: pins to a commit SHA to dodge raw.githubusercontent.com's URL caching.
+# No fallback to "main" on API failure, same reasoning as role/api/init.sls: that would
+# silently widen the pin to a floating, unreviewed ref instead of failing loudly.
 {% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
-{% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha', 'main') %}
+{% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha') %}
 
 nginx_pkgs:
   pkg.installed:

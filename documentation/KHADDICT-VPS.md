@@ -403,13 +403,16 @@ certbot certonly \
 #### Create the fallback page content
 
 `/var/www/fallback/index.html` is **not** a one-time manual copy. `role.vps` manages it as a
-`file.managed` state sourced directly from
-`https://raw.githubusercontent.com/khaddict/khaddict-com/main/vps-fallback/index.html`. On
-every highstate, Salt re-fetches this URL and rewrites the file if the content differs
-(`use_etag` was removed after it caused stale content to persist across highstates, the same
-issue hit on `role.api`'s equivalent fetch for the `api` page). This requires
-`vps-fallback/index.html` to actually be committed in `khaddict-com` (it isn't gitignored
-there). See section 14 for how the highstate that keeps this in sync gets triggered.
+`file.managed` state. On every highstate, Salt first resolves the latest commit SHA for
+`khaddict/khaddict-com` via the GitHub API, then sources the file from
+`https://raw.githubusercontent.com/khaddict/khaddict-com/<sha>/vps-fallback/index.html`,
+never from `main`. Pinning to the resolved SHA (rather than the floating branch name) is what
+avoids raw.githubusercontent.com's URL-level caching serving stale content after a push, the
+same issue hit on `role.api`'s equivalent fetch for the `api` page. If the API call doesn't
+return a SHA, the state fails closed: the source URL resolves to nothing and the fetch 404s,
+rather than silently falling back to `main`. This requires `vps-fallback/index.html` to
+actually be committed in `khaddict-com` (it isn't gitignored there). See section 14 for how
+the highstate that keeps this in sync gets triggered.
 
 #### Create local HTTPS vhost for the fallback page
 

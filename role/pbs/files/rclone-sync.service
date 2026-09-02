@@ -1,5 +1,5 @@
 [Unit]
-Description=Sync /datastore to ShadowDrive
+Description=Sync /datastore to Infomaniak kDrive
 After=network-online.target
 Wants=network-online.target
 ConditionPathIsDirectory=/datastore

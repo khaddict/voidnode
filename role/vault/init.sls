@@ -30,6 +30,10 @@ vault:
     - require:
       - file: /etc/systemd/system/vault.service
 
+# This is the Vault root token (not a scoped per-minion token like other roles
+# deploy) refreshed on every highstate, so root on this host has standing,
+# unscoped Vault admin. That's acceptable only because this is the Vault host
+# itself; don't copy this pattern to other roles.
 /root/.vault-token:
   file.managed:
     - contents: "{{ root_token }}"

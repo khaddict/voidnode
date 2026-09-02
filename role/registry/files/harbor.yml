@@ -8,10 +8,10 @@ https:
   certificate: /etc/ssl/certs/registry.khaddict.lab.cert.pem
   private_key: /etc/ssl/private/registry.khaddict.lab.key.pem
 
-harbor_admin_password: {{ harbor_admin_password }}
+harbor_admin_password: "{{ harbor_admin_password }}"
 
 database:
-  password: {{ database_password }}
+  password: "{{ database_password }}"
   max_idle_conns: 100
   max_open_conns: 900
   conn_max_lifetime: 5m

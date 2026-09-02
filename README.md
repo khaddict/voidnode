@@ -12,6 +12,8 @@ The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` L
 
 ## Hardware
 
+<img src="https://media.khaddict.com/gallery/lab-rax-u7-mount-installed.jpg" alt="Homelab" style="width:100%; max-width:400px;">
+
 - [GEEKOM A9 Max Mini PC](https://www.geekom.fr/geekom-a9-max-mini-pc)
 - [128GB DDR5-5600](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)
 - [4TB Samsung 990 EVO Plus NVMe](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)
@@ -59,7 +61,7 @@ Core infrastructure. Full outbound access, all other VLANs isolated from it by d
 | Host | Type | Description |
 |------|------|-------------|
 | `opnsense.khaddict.lab` | VM | [OPNsense](https://opnsense.org/) firewall, VLAN routing, DNS (Unbound), NTP. Acts as the default gateway and DNS resolver for all segments. |
-| `voidnode.khaddict.lab` | VM | [Proxmox VE](https://www.proxmox.com/en/proxmox-virtual-environment/overview) hypervisor. Hosts all VMs and LXC containers. Single bare-metal node. |
+| `voidnode.khaddict.lab` | Node | [Proxmox VE](https://www.proxmox.com/en/proxmox-virtual-environment/overview) hypervisor. Hosts all VMs and LXC containers. Single bare-metal node. |
 
 ## VLAN 20 – ADMIN `10.20.0.0/24`
 
@@ -91,17 +93,18 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 
 | Host | Type | Description |
 |------|------|-------------|
-| `revproxy.khaddict.lab` | VM | [HAProxy](https://www.haproxy.org/) reverse proxy. Handles SSL termination for all public `*.khaddict.com` domains except `status.khaddict.com` (terminated directly on the VPS, see Network architecture). Routes by hostname to the appropriate backend: Kubernetes Envoy Gateway or Matomo LXC. Certificates renewed via Infomaniak DNS API. |
+| `revproxy.khaddict.lab` | VM | [HAProxy](https://www.haproxy.org/) reverse proxy. Handles SSL termination for all public `*.khaddict.com` domains except `status.khaddict.com` (terminated directly on the VPS, see Network architecture). Routes by hostname to the appropriate backend: Kubernetes Envoy Gateway, Matomo LXC, or the API VM. Certificates renewed via Infomaniak DNS API. |
 | `kcontrol.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes control plane. Manages the cluster API. No SSH, fully API-driven via `talosctl` and `kubectl` from `kcli`. |
 | `kworker01.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 1. Runs workloads. |
 | `kworker02.khaddict.lab` | VM | [Talos Linux](https://www.talos.dev/) Kubernetes worker node 2. Runs workloads. |
 | `kcli.khaddict.lab` | VM | Kubernetes admin workstation. Holds `kubeconfig`, `talosconfig`, runs `kubectl` and [ArgoCD](https://argo-cd.readthedocs.io/) bootstrap scripts. Entry point for all cluster operations. |
-| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. Routes: `/wall/message`, `/wall/image` and `/wall/audio` push visitor content to the BUSY Bar (serialized through an internal queue, so one send can't cut another off mid-display), `/wall/screen` mirrors its live display back to the site, `/wall/alert` receives Alertmanager webhooks to show critical/warning alerts, `/busybar/status` and `/healthz` report state, `/docs` serves the stock Swagger UI. The domain root (`/` and `/fr/`) serves a separate, site-styled API documentation page built in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo and fetched directly from GitHub raw via Salt (same mechanism as the VPS fallback page below, different target): a third deployment path for that repo, alongside the Helm chart and the fallback page. Holds the sole firewall exception from EDGE into the IOT VLAN. |
+| `api.khaddict.lab` | VM | Public gateway API (FastAPI, gunicorn/uvicorn behind nginx) for IoT devices. Exposed publicly at `api.khaddict.com` via `revproxy`. Routes: `/wall/message`, `/wall/image` and `/wall/audio` push visitor content to the BUSY Bar (serialized through an internal queue, so one send can't cut another off mid-display), `/wall/screen` mirrors its live display back to the site, `/wall/alert` receives alert webhooks from Alertmanager, StackStorm, and Uptime Kuma to show critical/warning alerts, `/wall/report` shows a pass/fail summary (used by StackStorm's snapshot job), `/blog/views/{slug}` increments a post's view counter, `/busybar/status` and `/healthz` report state, `/docs` serves the stock Swagger UI. The domain root (`/` and `/fr/`) serves a separate, site-styled API documentation page built in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo and fetched directly from GitHub raw via Salt (same mechanism as the VPS fallback page below, different target): a third deployment path for that repo, alongside the Helm chart and the fallback page. Holds the sole firewall exception from EDGE into the IOT VLAN. |
 | `matomo.khaddict.lab` | LXC | [Matomo](https://matomo.org/) web analytics (Caddy + PHP 8.3-FPM + MariaDB). Tracks `khaddict.com`, `blog.khaddict.com`, `media.khaddict.com`, `projects.khaddict.com`. Snippet baked into the static HTML at build time in the [`khaddict-com`](https://github.com/khaddict/khaddict-com) repo. Exposed publicly at `matomo.khaddict.com`. |
 | `ollama.khaddict.lab` | LXC | [Ollama](https://ollama.com/) local LLM inference server. 50GB RAM, 16 cores. Runs large models locally without cloud dependency. |
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
 | `homelable.khaddict.lab` | LXC | [Homelable](https://homelable.net/), a self-hosted visual mapper of the homelab. Interactive network diagram with live status monitoring. |
 | `unifi.khaddict.lab` | LXC | Unifi network controller. Manages the Unifi Switch Lite 8 PoE and the Unifi U7 Pro AP. |
+| `pihole.khaddict.lab` | VM | [Pi-hole](https://pi-hole.net/) network-wide DNS ad-blocking and DNS server. |
 
 ## VLAN 50 – IOT `10.50.0.0/24`
 
@@ -141,10 +144,11 @@ Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<
 
 ## Configuration management: SaltStack
 
-All Debian/Ubuntu VMs are managed by SaltStack. States are organized in three layers:
+All Debian/Ubuntu VMs are managed by SaltStack. States are organized in five layers:
 
 - `global/`: applied to every host in `data/main.yaml`'s Proxmox inventory: networking, SSH hardening, user management, DNS resolution, CA certificate trust, Promtail, node-exporter, blackbox-exporter, Vault client configuration. The external VPS (see "External exposure" below) is excluded by minion ID in `top.sls`, since it isn't Proxmox-managed and several of these states assume that inventory.
 - `role/`: per-service states applied to specific minions: `api`, `easypki`, `grafana`, `kcli`, `loki`, `netbox`, `pbs`, `pihole`, `prometheus`, `pve`, `registry`, `revproxy`, `saltmaster`, `stackstorm`, `unifi`, `vault`, `vps`
+- `base/`: shared vendor apt-repo and package-installation states (Grafana/Loki/Promtail, HashiCorp Vault, SaltStack, node/blackbox exporters) included by `global/` and `role/` states rather than applied to any host on its own
 - `independent/`: minimal one-time bootstrap states (`vm.sls`, `lxc.sls`, `vps.sls`) applied once via `salt-ssh` to turn a fresh host into a minion, before `global`/`role` states take over on an ongoing basis
 - `data/`: YAML source of truth consumed by states: `main.yaml` (full inventory), `versions.yaml` (pinned versions), `packages.yaml`
 

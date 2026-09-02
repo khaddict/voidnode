@@ -187,7 +187,9 @@ async def _busybar_day_night_loop() -> None:
 
 @app.on_event("startup")
 async def _launch_busybar_day_night_loop() -> None:
-    asyncio.create_task(_busybar_day_night_loop())
+    task = asyncio.create_task(_busybar_day_night_loop())
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
 
 
 # idle screen: persistent logo + clock shown when nothing else is queued

@@ -31,10 +31,13 @@ certbot_pkgs:
 /etc/letsencrypt/renewal-hooks/deploy/haproxy.sh:
   file.managed:
     - source: salt://role/revproxy/files/haproxy.sh
+    - template: jinja
     - mode: 755
     - user: root
     - group: root
     - makedirs: True
+    - context:
+        public_domain: {{ public_domain }}
 
 /root/.secrets/infomaniak:
   file.managed:

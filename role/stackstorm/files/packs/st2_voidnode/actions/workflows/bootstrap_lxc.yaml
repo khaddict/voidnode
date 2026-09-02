@@ -13,7 +13,6 @@ vars:
   - saltmaster_sshkey: ""
   - pve: "voidnode.<% ctx().domain %>"
   - saltmaster: "saltmaster.<% ctx().domain %>"
-  - node: "voidnode"
 
 tasks:
   extract_lxc_fields:

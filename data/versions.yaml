@@ -11,5 +11,7 @@ prometheus: "3.14.0"
 alertmanager: "0.34.0"
 # renovate: depName=mikefarah/yq datasource=github-releases
 yq: "4.53.6"
+# sha256 of yq_linux_amd64 for the version above; update manually when bumping yq (renovate does not track this)
+yq_sha256: "c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385"
 # renovate: depName=siderolabs/talos datasource=github-releases
 talosctl: "1.14.0"

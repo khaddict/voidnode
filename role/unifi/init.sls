@@ -3,7 +3,7 @@
 /usr/local/bin/unifi-ap-led-schedule.sh:
   file.managed:
     - source: salt://role/unifi/files/unifi-ap-led-schedule.sh
-    - mode: 755
+    - mode: 700
     - user: root
     - group: root
     - template: jinja

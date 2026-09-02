@@ -14,7 +14,7 @@ tasks:
     next:
       - when: <% succeeded() and result().stdout != "" %>
         publish:
-          - vms: <% result().stdout.split("\n") %>
+          - vms: <% result().stdout.split("\n").where($ != "") %>
         do:
           - create_vms
       - when: <% succeeded() and result().stdout = "" %>

@@ -38,7 +38,7 @@ docker_base_packages_pkg:
     - contents: |
         Types: deb
         URIs: https://download.docker.com/linux/debian
-        Suites: {{ grains.get('oscodename', '') }}
+        Suites: {{ oscodename }}
         Components: stable
         Signed-By: /etc/apt/keyrings/docker.asc
     - mode: 644
