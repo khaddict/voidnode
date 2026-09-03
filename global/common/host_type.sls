@@ -1,7 +1,6 @@
 {% import_yaml 'data/main.yaml' as data %}
 {% set host = grains.get('host') or '' %}
 
-{# lets other states branch on vm/node/lxc without re-implementing this lookup #}
 {% set vm = data.get('pve', {}).get('vms', {}).get(host) %}
 {% set node = data.get('pve', {}).get('nodes', {}).get(host) %}
 {% set lxc = data.get('pve', {}).get('lxc', {}).get(host) %}

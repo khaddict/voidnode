@@ -1,9 +1,3 @@
-#########################
-#                       #
-#   Required settings   #
-#                       #
-#########################
-
 # write access is denied for hostnames not in this list; the first entry is the preferred name
 ALLOWED_HOSTS = ['{{ fqdn }}', '{{ ip }}']
 
@@ -62,12 +56,6 @@ API_TOKEN_PEPPERS = {
     1: '{{ api_token_peppers }}',
 }
 
-
-#########################
-#                       #
-#   Optional settings   #
-#                       #
-#########################
 
 # admins get notified of application errors, if email settings are configured
 ADMINS = [
@@ -163,7 +151,6 @@ PLUGINS = []
 #     }
 # }
 
-# Remote authentication support
 REMOTE_AUTH_ENABLED = False
 REMOTE_AUTH_BACKEND = 'netbox.authentication.RemoteUserBackend'
 REMOTE_AUTH_HEADER = 'HTTP_REMOTE_USER'

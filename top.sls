@@ -5,7 +5,6 @@
     - match: compound
     - global
 
-# Per role configuration
   'api':
     - role.api
 

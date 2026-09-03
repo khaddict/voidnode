@@ -5,7 +5,6 @@ storage "file" {
   path = "/opt/vault/data"
 }
 
-# HTTPS listener
 listener "tcp" {
   address       = "0.0.0.0:8200"
   tls_cert_file = "/etc/ssl/certs/vault.{{ domain }}.cert.pem"

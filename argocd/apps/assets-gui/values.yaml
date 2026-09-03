@@ -62,9 +62,7 @@ httproute:
   gatewayName: envoy-gateway
 
 env:
-  # Strike API Configuration
   STRIKE_API_TOKEN: <path:kv/data/kubernetes/assets-gui#STRIKE_API_TOKEN>
-  # Streamlit Configuration for static asset serving
   STREAMLIT_SERVER_HEADLESS: "true"
   STREAMLIT_SERVER_PORT: "8501"
   STREAMLIT_SERVER_ADDRESS: "0.0.0.0"

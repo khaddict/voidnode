@@ -21,7 +21,6 @@ server {
 }
 
 server {
-    # Redirect HTTP traffic to HTTPS
     listen [::]:80 ipv6only=off;
     server_name _;
     return 301 https://$host$request_uri;

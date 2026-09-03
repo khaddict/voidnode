@@ -28,8 +28,6 @@
         rabbitmq_password: "{{ rabbitmq_password }}"
         mongodb_password: "{{ mongodb_password }}"
 
-# Packs
-
 /opt/stackstorm/packs/st2_voidnode:
   file.recurse:
     - source: salt://role/stackstorm/files/packs/st2_voidnode
@@ -45,8 +43,6 @@
         dns_api_key: "{{ dns_api_key }}"
         dns_api_secret: "{{ dns_api_secret }}"
 
-# Data
-
 /opt/stackstorm/data/main.yaml:
   file.managed:
     - source: salt://data/main.yaml
@@ -54,8 +50,6 @@
     - user: root
     - group: root
     - makedirs: True
-
-# Installations
 
 st2_voidnode_installation_cmd:
   cmd.run:
