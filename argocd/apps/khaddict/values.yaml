@@ -37,7 +37,7 @@ sites:
     replicas: 2
     image:
       repository: ghcr.io/khaddict/media-khaddict
-      tag: "0.1.66"
+      tag: "0.1.73"
     host: media.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 5
