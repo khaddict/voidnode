@@ -108,7 +108,7 @@ class TTLCache:
         if self.value is not None and now - self.checked_at < self.ttl:
             return self.value
         async with self.lock:
-            now = time.monotonic()  # re-check: another caller may have refreshed it already
+            now = time.monotonic()
             if self.value is not None and now - self.checked_at < self.ttl:
                 return self.value
             self.value = await refresh()
@@ -392,8 +392,11 @@ def enforce_view_rate_limit(request: Request) -> None:
 
 
 def enforce_daily_message_limit() -> None:
+    # counts at admission, not completion: jobs already queued (up to MAX_WALL_QUEUE_DEPTH) would
+    # otherwise all read the same stale count and let the cap overshoot before any of them finish
     if messages_sent_today() >= MAX_MESSAGES_PER_DAY:
         raise HTTPException(status_code=429, detail="Daily message limit reached, try again tomorrow")
+    record_message_sent()
 
 
 def rate_limit_remaining(request: Request) -> int:
@@ -511,8 +514,6 @@ def compute_display_timing(text: str) -> tuple[int, int]:
 
 
 def display_wait_seconds(text: str) -> int:
-    """How long the queue worker should hold this message on screen before
-    moving on to the next queued job."""
     _, timeout = compute_display_timing(transliterate_for_device(text))
     return timeout
 
@@ -638,7 +639,6 @@ def resize_to_screen(data: bytes) -> bytes:
     if image.width * image.height > MAX_IMAGE_PIXELS:
         raise Image.DecompressionBombError("image dimensions exceed the allowed pixel count")
     image = image.convert("RGB")
-    # contain-fit: scale to fit without cropping, pad with black
     scale = min(SCREEN_WIDTH_PX / image.width, SCREEN_HEIGHT_PX / image.height)
     new_w = max(1, round(image.width * scale))
     new_h = max(1, round(image.height * scale))
@@ -716,7 +716,6 @@ async def _draw_and_hold(
 
 async def run_text_job(text: str, color: str, ip: str) -> None:
     def on_success() -> None:
-        record_message_sent()
         fire_and_forget(notify_discord_text(text, color, ip))
 
     await _draw_and_hold(
@@ -730,7 +729,6 @@ async def run_text_job(text: str, color: str, ip: str) -> None:
 
 async def run_image_job(png_bytes: bytes, ip: str) -> None:
     def on_success() -> None:
-        record_message_sent()
         fire_and_forget(notify_discord_image(png_bytes, ip))
 
     await _draw_and_hold(
@@ -759,7 +757,6 @@ async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: st
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar audio play failed: %s", exc)
             return
-    record_message_sent()
     fire_and_forget(notify_discord_audio(data, content_type, ip))
     # see run_text_job: subtract this call's own latency
     play_latency = time.monotonic() - play_started

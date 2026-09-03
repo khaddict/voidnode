@@ -9,6 +9,9 @@
   "helmv3": {
     "managerFilePatterns": ["/argocd/apps/.+/Chart\\.yaml$/"]
   },
+  "pip-compile": {
+    "managerFilePatterns": ["/^role/api/files/requirements\\.lock\\.txt$/"]
+  },
   "packageRules": [
     {
       "enabled": false,
@@ -31,15 +34,6 @@
       "matchDatasources": ["helm"],
       "matchPackageNames": ["khaddict-com"],
       "groupName": "khaddict-com content chart"
-    },
-    // generated via `pip freeze` from requirements.txt, not hand-authored: a
-    // dependency bumped here alone can silently conflict with what another
-    // pinned package actually requires (pydantic_core vs pydantic, 3 times
-    // so far). Bump requirements.txt instead and regenerate the lockfile
-    // via the procedure documented in its own header comment.
-    {
-      "enabled": false,
-      "matchFileNames": ["role/api/files/requirements.lock.txt"]
     }
   ],
   "customManagers": [
