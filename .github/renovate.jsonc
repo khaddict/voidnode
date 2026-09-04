@@ -9,9 +9,6 @@
   "helmv3": {
     "managerFilePatterns": ["/argocd/apps/.+/Chart\\.yaml$/"]
   },
-  "pip-compile": {
-    "managerFilePatterns": ["/^role/api/files/requirements\\.lock\\.txt$/"]
-  },
   "packageRules": [
     {
       "enabled": false,
@@ -22,10 +19,6 @@
     {
       "matchDepNames": ["kubernetes/kubernetes"],
       "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
-    },
-    {
-      "matchPackageNames": ["pydantic", "pydantic-core"],
-      "groupName": "pydantic"
     },
     {
       "enabled": false,

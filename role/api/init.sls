@@ -118,7 +118,7 @@ api_dependencies_pkg:
 /opt/api/venv:
   virtualenv.managed:
     - name: /opt/api/venv
-    - requirements: salt://role/api/files/requirements.lock.txt
+    - requirements: salt://role/api/files/requirements.txt
     - venv_bin: python3 -m venv
     - user: api
     - require:
