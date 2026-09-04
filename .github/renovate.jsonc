@@ -24,6 +24,10 @@
       "extractVersion": "^v(?<version>\\d+\\.\\d+)\\."
     },
     {
+      "matchPackageNames": ["pydantic", "pydantic-core"],
+      "groupName": "pydantic"
+    },
+    {
       "enabled": false,
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/khaddict/media-khaddict"],
