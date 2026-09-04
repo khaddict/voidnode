@@ -3,7 +3,7 @@ namespace: changedetection
 
 deployment:
   replicas: 1
-  image: ghcr.io/dgtlmoon/changedetection.io:0.60.2
+  image: ghcr.io/dgtlmoon/changedetection.io:0.60.3
   imagePullPolicy: IfNotPresent
   resources:
     requests:
