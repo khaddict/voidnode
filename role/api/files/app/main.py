@@ -15,6 +15,7 @@ from pathlib import Path
 import httpx
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, Field, ValidationError, field_validator
@@ -47,11 +48,28 @@ app.add_middleware(
         "https://www.khaddict.com",
         "https://khaddict.com",
         "https://blog.khaddict.com",
+        "https://projects.khaddict.com",
+        "https://media.khaddict.com",
     ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
     expose_headers=["Retry-After"],
 )
+
+# these two only need to fetch /openapi.json for the site's search palette, not send
+# anything to the physical BUSY Bar; block them at the actual/preflight method level
+# since CORSMiddleware has no per-origin method scoping
+READ_ONLY_ORIGINS = {"https://projects.khaddict.com", "https://media.khaddict.com"}
+
+
+@app.middleware("http")
+async def restrict_read_only_origins(request: Request, call_next):
+    origin = request.headers.get("origin")
+    if origin in READ_ONLY_ORIGINS:
+        requested_method = request.headers.get("access-control-request-method", request.method)
+        if requested_method.upper() != "GET":
+            return JSONResponse({"detail": "This origin has read-only access"}, status_code=403)
+    return await call_next(request)
 
 MAX_MESSAGE_LENGTH = 60
 SCREEN_WIDTH_PX = 72
