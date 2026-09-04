@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: khaddict-com
-    version: "0.1.71"
+    version: "0.1.75"
     repository: "oci://ghcr.io/khaddict/charts"
