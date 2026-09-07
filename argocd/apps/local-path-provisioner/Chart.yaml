@@ -3,7 +3,8 @@ name: local-path-provisioner
 description: A Helm chart for local-path-provisioner
 type: application
 version: 0.1.0
-appVersion: "v0.0.36"
+# renovate: depName=rancher/local-path-provisioner datasource=docker
+appVersion: "v0.0.37"
 keywords:
   - storage
   - hostpath

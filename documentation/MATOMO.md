@@ -21,7 +21,7 @@ Matomo runs on a Proxmox LXC container and is exposed publicly via the standard 
 The container was created using the community-scripts ProxmoxVE helper:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/homelable.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/matomo.sh)"
 ```
 
 During advanced setup: enable root password login and SSH.

@@ -35,8 +35,8 @@
     - template: jinja
     - user: root
     - group: st2packs
-    - file_mode: 640
-    - dir_mode: 750
+    - file_mode: 775
+    - dir_mode: 775
     - context:
         snapshot_vms_discord_webhook: "{{ snapshot_vms_discord_webhook }}"
         busybar_alert_token: "{{ busybar_alert_token }}"

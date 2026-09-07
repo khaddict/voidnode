@@ -40,7 +40,8 @@
         "/\\.github/workflows/.+\\.yaml$/",
         "/data/versions\\.yaml$/",
         "/role/kcli/files/bootstrap/argocd\\.sh$/",
-        "/role/kcli/files/bootstrap/argocd-values\\.yaml$/"
+        "/role/kcli/files/bootstrap/argocd-values\\.yaml$/",
+        "/argocd/apps/.+/Chart\\.yaml$/"
       ],
       "matchStrings": [
         "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)( registryUrl=(?<registryUrl>[^\\s]+))?\\n\\s*\\w+[=:] ?\"(?<currentValue>[^\"]+)\""
