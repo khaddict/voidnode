@@ -785,6 +785,8 @@ async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: st
     "/wall/message",
     status_code=204,
     tags=["BUSY Bar"],
+    summary="Send a text message to the BUSY Bar",
+    description=f"Up to {MAX_MESSAGE_LENGTH} characters, with an optional display color.",
     openapi_extra={
         "requestBody": {
             "content": {"application/json": {"schema": WallMessage.model_json_schema()}},
@@ -877,7 +879,11 @@ async def _fetch_busybar_online() -> bool:
         return False
 
 
-@app.get("/busybar/status", tags=["BUSY Bar"])
+@app.get(
+    "/busybar/status",
+    tags=["BUSY Bar"],
+    summary="Current BUSY Bar online status and rate-limit counters",
+)
 async def busybar_status(request: Request):
     online = await _status_cache.get(_fetch_busybar_online)
     return {
@@ -897,7 +903,11 @@ async def _busybar_passthrough_post(path: str, params: dict, error_label: str) -
             raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
 
 
-@app.post("/busybar/brightness", tags=["BUSY Bar"])
+@app.post(
+    "/busybar/brightness",
+    tags=["BUSY Bar"],
+    summary="Set the BUSY Bar's display brightness",
+)
 async def set_busybar_brightness(
     value: int = Query(..., ge=0, le=100),
     _auth: None = Depends(verify_admin_auth),
@@ -905,7 +915,11 @@ async def set_busybar_brightness(
     await _busybar_passthrough_post("/api/display/brightness", {"value": str(value)}, "brightness")
 
 
-@app.post("/busybar/volume", tags=["BUSY Bar"])
+@app.post(
+    "/busybar/volume",
+    tags=["BUSY Bar"],
+    summary="Set the BUSY Bar's audio volume",
+)
 async def set_busybar_volume(
     value: int = Query(..., ge=0, le=100),
     _auth: None = Depends(verify_admin_auth),
@@ -1036,6 +1050,6 @@ async def increment_post_view(slug: str, request: Request):
     return {"views": views}
 
 
-@app.get("/healthz", tags=["System"])
+@app.get("/healthz", tags=["System"], summary="Health check for the API service")
 async def healthz():
     return {"status": "ok"}
