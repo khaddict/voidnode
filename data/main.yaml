@@ -454,25 +454,6 @@ pve:
     # [end:vms]
 
   lxc:
-    homelable:
-      vmid: 113
-      description: "Self-hosted visual network diagram and homelab mapper"
-      tags: "edge,lxc"
-      exporters:
-        blackbox: true
-        node: true
-      ip: 10.40.0.10
-      main_iface: eth0
-      hardware:
-        ram_mb: 2048
-        cpu:
-          cores: 2
-        rootfs:
-          storage: local-lvm
-          size_gb: 8
-      backup: true
-      <<: *vlan_edge
-
     matomo:
       vmid: 108
       description: "Web analytics for khaddict.com"
