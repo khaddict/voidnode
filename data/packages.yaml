@@ -15,6 +15,7 @@ common_packages:
     - "lolcat"
     - "ca-certificates"
     - "fping"
+    - "nmap"
     - "tcpdump"
     - "tig"
     - "iproute2"
