@@ -12,6 +12,7 @@
 | projects            | CNAME | khaddict.com.       | Auto |
 | status              | CNAME | khaddict.com.       | Auto |
 | matomo              | CNAME | khaddict.com.       | Auto |
+| diagram             | CNAME | khaddict.com.       | Auto |
 
 ## 2. Firewall configuration
 
@@ -397,8 +398,11 @@ certbot certonly \
   -d 'dashboard.khaddict.com' \
   -d 'media.khaddict.com' \
   -d 'projects.khaddict.com' \
-  -d 'matomo.khaddict.com'
+  -d 'matomo.khaddict.com' \
+  -d 'diagram.khaddict.com'
 ```
+
+Note: this doc edit only records the intended `-d` list — the certificate itself still needs to be reissued by actually running this command on the VPS before `diagram.khaddict.com` is covered by the fallback page's cert.
 
 #### Create the fallback page content
 

@@ -12,6 +12,7 @@ services:
       - blog
       - media
       - projects
+      - diagram
 
   www:
     image: docker.io/library/nginx:1.31.5
@@ -60,4 +61,15 @@ services:
       - ${CONTENT}/media/security.txt:/usr/share/nginx/html/security.txt:ro
       - ${CONTENT}/shared/404.html:/usr/share/nginx/html/404.html:ro
       - ${CONTENT}/media/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
+
+  diagram:
+    image: docker.io/library/nginx:1.31.5
+    volumes:
+      - ${CONTENT}/diagram/index.html:/usr/share/nginx/html/index.html:ro
+      - ${CONTENT}/diagram/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
+      - ${CONTENT}/shared/robots.txt:/usr/share/nginx/html/robots.txt:ro
+      - ${CONTENT}/diagram/security.txt:/usr/share/nginx/html/security.txt:ro
+      - ${CONTENT}/shared/404.html:/usr/share/nginx/html/404.html:ro
+      - ${CONTENT}/shared/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./security-headers.conf:/etc/nginx/security-headers.conf:ro

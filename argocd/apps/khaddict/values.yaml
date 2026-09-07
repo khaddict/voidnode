@@ -49,3 +49,11 @@ sites:
     host: projects.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
+  - name: diagram
+    replicas: 2
+    image:
+      repository: nginx
+      tag: "1.31.5"
+    host: diagram.khaddict.lab
+    hasSitemap: false
+    livenessInitialDelaySeconds: 15
