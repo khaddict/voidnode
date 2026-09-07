@@ -402,8 +402,6 @@ certbot certonly \
   -d 'diagram.khaddict.com'
 ```
 
-Note: this doc edit only records the intended `-d` list — the certificate itself still needs to be reissued by actually running this command on the VPS before `diagram.khaddict.com` is covered by the fallback page's cert.
-
 #### Create the fallback page content
 
 `/var/www/fallback/index.html` is **not** a one-time manual copy. `role.vps` manages it as a

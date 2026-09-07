@@ -110,6 +110,17 @@ api_dependencies_pkg:
       - pkg: api_dependencies_pkg
 {% endfor %}
 
+/var/www/api/security.txt:
+  file.managed:
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/api/security.txt
+    - skip_verify: True
+    - mode: 644
+    - user: root
+    - group: root
+    - makedirs: True
+    - require:
+      - pkg: api_dependencies_pkg
+
 /opt/api/requirements.txt:
   file.managed:
     - source: salt://role/api/files/requirements.txt
@@ -173,3 +184,4 @@ nginx:
       - file: /etc/nginx/sites-available/api
       - file: /var/www/api/index.html
       - file: /var/www/api/fr/index.html
+      - file: /var/www/api/security.txt
