@@ -72,3 +72,21 @@ jobs:
               helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
             fi
           done
+
+      - name: Validate ArgoCD Application manifests
+        run: |
+          for f in argocd/applications/root/*.yaml argocd/applications/services/*.yaml argocd/applications/system/*.yaml; do
+            echo "→ validate $f"
+            kubeconform -strict -ignore-missing-schemas -summary "$f"
+          done
+
+      - name: Check ArgoCD Application paths exist
+        run: |
+          for f in argocd/applications/services/*.yaml argocd/applications/system/*.yaml; do
+            path=$(grep -oP '(?<=path: argocd/apps/)\S+' "$f")
+            if [ -z "$path" ] || [ ! -d "argocd/apps/$path" ]; then
+              echo "✗ $f references missing path 'argocd/apps/$path'"
+              exit 1
+            fi
+            echo "✓ $f -> argocd/apps/$path"
+          done
