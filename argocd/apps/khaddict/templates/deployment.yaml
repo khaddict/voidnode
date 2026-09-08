@@ -19,6 +19,13 @@ spec:
       labels:
         {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 8 }}
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 12 }}
       containers:
       - name: {{ $site.name }}-khaddict
         image: {{ $site.image.repository }}:{{ $site.image.tag }}
