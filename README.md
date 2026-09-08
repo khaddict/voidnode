@@ -42,7 +42,7 @@ ISP ◄── x.x.x.x ◄── Freebox (.254) ◄── (.253 - WAN) OPNsense (
 
 All public traffic transits through an Infomaniak VPS before reaching the homelab. The VPS acts as a TCP passthrough proxy and never sees the TLS content. The connection between the VPS and the lab is maintained over a WireGuard tunnel, which means the residential IP is never exposed publicly. Every `*.khaddict.com` request hits the VPS first, gets forwarded through the tunnel, and lands on HAProxy at `revproxy` for SSL termination and routing.
 
-An interactive, always up to date version of this network diagram is available at [diagram.khaddict.com](https://diagram.khaddict.com).
+An interactive version of this network diagram is available at [diagram.khaddict.com](https://diagram.khaddict.com). Its node/VLAN data is manually kept in sync with this repo, not generated from it.
 
 Firewall policy follows a least-privilege model:
 
