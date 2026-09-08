@@ -56,18 +56,6 @@ echo "Waiting for ArgoCD components to initialize..."
 kubectl rollout status deployment/argocd-server -n "$ARGOCD_NAMESPACE" --timeout=180s
 kubectl rollout status deployment/argocd-repo-server -n "$ARGOCD_NAMESPACE" --timeout=180s || true
 
-ARGOCD_CERT_SECRET=$(vault kv get -field="argocd.khaddict.lab.cert.pem" "kv/minions/easypki/server/argocd.khaddict.lab")
-ARGOCD_KEY_SECRET=$(vault kv get -field="argocd.khaddict.lab.key.pem" "kv/minions/easypki/server/argocd.khaddict.lab")
-
-printf '%s\n' "$ARGOCD_CERT_SECRET" > /tmp/argocd.cert.pem
-printf '%s\n' "$ARGOCD_KEY_SECRET" > /tmp/argocd.key.pem
-
-kubectl create secret tls argocd-cert-secret \
-    --namespace "$ARGOCD_NAMESPACE" \
-    --cert=/tmp/argocd.cert.pem \
-    --key=/tmp/argocd.key.pem \
-    --dry-run=client -o yaml | kubectl apply -f -
-
 kubectl apply -f /root/bootstrap/argocd-rbac.yaml -n "$ARGOCD_NAMESPACE"
 
 ARGOCD_SERVER_POD=$(kubectl get pod -n "$ARGOCD_NAMESPACE" \
