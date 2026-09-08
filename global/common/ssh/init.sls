@@ -55,7 +55,6 @@ ssh:
       - pkg: openssh_server_pkg
     - watch:
       - file: /etc/ssh/sshd_config
-      - file: /root/.ssh/config
       {% if host_type == 'node' %}
       - file: /etc/pve/priv/authorized_keys
       {% else %}
