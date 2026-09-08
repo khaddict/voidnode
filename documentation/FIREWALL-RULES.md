@@ -91,16 +91,9 @@
 | Order | Action | Protocol | Source | Destination | Port | Description |
 |---|---|---|---|---|---|---|
 | 1 | PASS | UDP | any | WAN address | 51820 | Allow WireGuard VPN access |
-| 2 | PASS | TCP | any | REVPROXY | HTTPS | Allow HTTPS access to REVPROXY |
 
 # VPN
 
 | Order | Action | Protocol | Source | Destination | Port | Description |
 |---|---|---|---|---|---|---|
 | 1 | PASS | * | VPN net | any | any | Allow full access from VPN |
-
-# NAT
-
-| Order | Protocol | Source | Port | Destination | Port | Redirect target IP | Port | Description |
-|---|---|---|---|---|---|---|---|---|
-| 1 | TCP | any | any | WAN address | HTTPS | REVPROXY | 443 | Redirect WAN HTTPS traffic to REVPROXY |
