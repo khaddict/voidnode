@@ -106,7 +106,7 @@ ufw default allow outgoing
 ufw allow 22222/tcp
 ufw allow 443/tcp
 ufw allow 80/tcp
-ufw allow from 10.40.0.0/24 to any port 3001 proto tcp
+ufw allow from 10.40.0.2 to any port 3001 proto tcp
 ```
 
 #### Enable firewall
