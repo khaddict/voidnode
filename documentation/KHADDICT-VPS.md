@@ -13,6 +13,7 @@
 | status              | CNAME | khaddict.com.       | Auto |
 | matomo              | CNAME | khaddict.com.       | Auto |
 | diagram             | CNAME | khaddict.com.       | Auto |
+| api                 | CNAME | khaddict.com.       | Auto |
 
 ## 2. Firewall configuration
 
@@ -399,7 +400,8 @@ certbot certonly \
   -d 'media.khaddict.com' \
   -d 'projects.khaddict.com' \
   -d 'matomo.khaddict.com' \
-  -d 'diagram.khaddict.com'
+  -d 'diagram.khaddict.com' \
+  -d 'api.khaddict.com'
 ```
 
 #### Create the fallback page content
