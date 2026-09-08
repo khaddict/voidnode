@@ -2,7 +2,7 @@
 
 /etc/hostname:
   file.managed:
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - contents: {{ host }}

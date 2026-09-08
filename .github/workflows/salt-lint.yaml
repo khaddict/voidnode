@@ -1,0 +1,33 @@
+name: Salt Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "base/**"
+      - "global/**"
+      - "role/**"
+      - "independent/**"
+  pull_request:
+    paths:
+      - "base/**"
+      - "global/**"
+      - "role/**"
+      - "independent/**"
+  workflow_dispatch:
+
+env:
+  # renovate: depName=salt-lint datasource=pypi
+  SALT_LINT_VERSION: "0.9.2"
+
+jobs:
+  salt-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Install salt-lint
+        run: pip install "salt-lint==${SALT_LINT_VERSION}"
+
+      - name: Lint SLS files
+        run: find base global role independent -name "*.sls" -print0 | xargs -0 salt-lint

@@ -4,7 +4,7 @@
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 /etc/apt/sources.list.d/salt.sources:
   file.managed:
@@ -12,7 +12,7 @@
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 saltext_vault_pip:
   cmd.run:

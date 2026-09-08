@@ -20,7 +20,7 @@ kubectl_dependencies_pkg:
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 /etc/apt/sources.list.d/kubernetes.sources:
   file.managed:
@@ -28,7 +28,7 @@ kubectl_dependencies_pkg:
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 /usr/share/keyrings/helm.gpg:
   file.managed:
@@ -36,7 +36,7 @@ kubectl_dependencies_pkg:
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 /etc/apt/sources.list.d/helm.sources:
   file.managed:
@@ -44,7 +44,7 @@ kubectl_dependencies_pkg:
     - makedirs: True
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 kubectl_pkg:
   pkg.installed:
@@ -81,20 +81,20 @@ k9s_pkg:
   file.managed:
     - source: https://github.com/siderolabs/talos/releases/download/v{{ talosctl_version }}/talosctl-linux-amd64
     - source_hash: https://github.com/siderolabs/talos/releases/download/v{{ talosctl_version }}/sha256sum.txt
-    - mode: 755
+    - mode: '0755'
     - unless: talosctl version --client 2>&1 | grep -q "{{ talosctl_version }}"
 
 /root/.vault-token:
   file.managed:
     - contents: "{{ vault_token }}"
-    - mode: 600
+    - mode: '0600'
     - user: root
     - group: root
 
 /root/.bashrc.d/kcli.bashrc:
   file.managed:
     - source: salt://role/kcli/files/kcli.bashrc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

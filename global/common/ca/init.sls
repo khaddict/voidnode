@@ -3,14 +3,14 @@
 /usr/local/share/ca-certificates/voidnode.root.crt:
   file.managed:
     - source: salt://global/common/ca/files/voidnode.root.crt
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
 /usr/local/share/ca-certificates/voidnode.intermediate.crt:
   file.managed:
     - source: salt://global/common/ca/files/voidnode.intermediate.crt
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

@@ -41,13 +41,13 @@ netbox_dependencies_pkg:
 /opt/netbox_db.sh:
   file.managed:
     - source: salt://role/netbox/files/netbox_db.sh
-    - mode: 755
+    - mode: '0755'
     - user: root
     - group: root
 
 /opt/netbox:
   file.directory:
-    - mode: 755
+    - mode: '0755'
 
 netbox_repo_git:
   git.latest:
@@ -76,7 +76,7 @@ netbox_repo_git:
 /opt/netbox/netbox/netbox/configuration.py:
   file.managed:
     - source: salt://role/netbox/files/configuration.py
-    - mode: 640
+    - mode: '0640'
     - user: root
     - group: netbox
     - template: jinja
@@ -90,21 +90,21 @@ netbox_repo_git:
 /opt/netbox/gunicorn.py:
   file.managed:
     - source: salt://role/netbox/files/gunicorn.py
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
 /etc/systemd/system/netbox.service:
   file.managed:
     - source: salt://role/netbox/files/netbox.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
 /etc/systemd/system/netbox-rq.service:
   file.managed:
     - source: salt://role/netbox/files/netbox-rq.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
@@ -123,7 +123,7 @@ netbox-rq:
 /etc/nginx/sites-available/netbox:
   file.managed:
     - source: salt://role/netbox/files/netbox
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja
@@ -147,14 +147,14 @@ nginx:
 /opt/netbox/netbox/scripts/populate_netbox.py:
   file.managed:
     - source: salt://role/netbox/files/populate_netbox.py
-    - mode: 755
+    - mode: '0755'
     - user: netbox
     - group: netbox
 
 /opt/netbox/data/inventory.yaml:
   file.managed:
     - source: salt://data/main.yaml
-    - mode: 640
+    - mode: '0640'
     - user: netbox
     - group: netbox
     - makedirs: True

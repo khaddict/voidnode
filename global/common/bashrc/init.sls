@@ -1,7 +1,7 @@
 /root/.bashrc:
   file.managed:
     - source: salt://global/common/bashrc/files/.bashrc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

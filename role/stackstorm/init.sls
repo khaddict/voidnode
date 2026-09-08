@@ -13,14 +13,14 @@
 /etc/default/st2actionrunner:
   file.managed:
     - source: salt://role/stackstorm/files/st2actionrunner
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
 /etc/st2/st2.conf:
   file.managed:
     - source: salt://role/stackstorm/files/st2.conf
-    - mode: 640
+    - mode: '0640'
     - user: root
     - group: st2
     - template: jinja
@@ -35,8 +35,8 @@
     - template: jinja
     - user: root
     - group: st2packs
-    - file_mode: 775
-    - dir_mode: 775
+    - file_mode: '0775'
+    - dir_mode: '0775'
     - context:
         snapshot_vms_discord_webhook: "{{ snapshot_vms_discord_webhook }}"
         busybar_alert_token: "{{ busybar_alert_token }}"
@@ -46,7 +46,7 @@
 /opt/stackstorm/data/main.yaml:
   file.managed:
     - source: salt://data/main.yaml
-    - mode: 640
+    - mode: '0640'
     - user: root
     - group: root
     - makedirs: True
@@ -54,7 +54,7 @@
 st2_voidnode_installation_cmd:
   cmd.run:
     - name: "st2 pack install file:///opt/stackstorm/packs/st2_voidnode/"
-    - require: 
+    - require:
       - file: /opt/stackstorm/packs/st2_voidnode
     - onchanges:
       - file: /opt/stackstorm/packs/st2_voidnode

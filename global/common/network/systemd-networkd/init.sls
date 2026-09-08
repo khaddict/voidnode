@@ -13,7 +13,7 @@ systemd_pkg:
   file.managed:
     - name: /etc/systemd/network/10-{{ host_entry.main_iface }}.network
     - source: salt://global/common/network/systemd-networkd/files/default-networkd-conf
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja
@@ -41,7 +41,7 @@ systemd-networkd:
     - contents: |
         auto lo
         iface lo inet loopback
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:

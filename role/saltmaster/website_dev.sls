@@ -32,8 +32,8 @@ website_dev_pkgs:
 /srv/khaddict-com:
   file.directory:
     - group: website-dev
-    - dir_mode: 775
-    - file_mode: 664
+    - dir_mode: '0775'
+    - file_mode: '0664'
     - recurse:
       - group
       - mode
@@ -54,7 +54,7 @@ website_dev_venv:
   file.directory:
     - user: website-dev
     - group: website-dev
-    - mode: 755
+    - mode: '0755'
     - makedirs: True
     - require:
       - user: website_dev_user
@@ -63,7 +63,7 @@ website_dev_venv:
   file.directory:
     - user: website-dev
     - group: website-dev
-    - mode: 755
+    - mode: '0755'
     - require:
       - file: /srv/website-local-dev
 
@@ -72,7 +72,7 @@ website_dev_venv:
     - source: salt://role/saltmaster/files/website-dev/docker-compose.yml
     - user: website-dev
     - group: website-dev
-    - mode: 644
+    - mode: '0644'
     - require:
       - file: /srv/website-local-dev
 
@@ -81,7 +81,7 @@ website_dev_venv:
     - source: salt://role/saltmaster/files/website-dev/.env
     - user: website-dev
     - group: website-dev
-    - mode: 644
+    - mode: '0644'
     - require:
       - file: /srv/website-local-dev
 
@@ -91,7 +91,7 @@ website_dev_venv:
     - template: jinja
     - user: website-dev
     - group: website-dev
-    - mode: 644
+    - mode: '0644'
     - context:
         domain: {{ domain }}
     - require:
@@ -103,7 +103,7 @@ website_dev_venv:
     - template: jinja
     - user: website-dev
     - group: website-dev
-    - mode: 644
+    - mode: '0644'
     - context:
         domain: {{ domain }}
     - require:

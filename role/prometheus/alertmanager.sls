@@ -19,7 +19,8 @@ alertmanager_user:
 alertmanager_archive:
   archive.extracted:
     - name: /etc/alertmanager
-    - source: https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz
+    - source: >-
+        https://github.com/prometheus/alertmanager/releases/download/v{{ alertmanager_version }}/alertmanager-{{ alertmanager_version }}.linux-amd64.tar.gz
     - user: alertmanager
     - group: alertmanager
     - overwrite: True
@@ -35,14 +36,14 @@ alertmanager_archive:
   file.directory:
     - user: alertmanager
     - group: alertmanager
-    - mode: 755
+    - mode: '0755'
     - require:
       - user: alertmanager_user
 
 /etc/alertmanager/alertmanager.yml:
   file.managed:
     - source: salt://role/prometheus/files/alertmanager.yml
-    - mode: 600
+    - mode: '0600'
     - user: alertmanager
     - group: alertmanager
     - template: jinja
@@ -58,7 +59,7 @@ alertmanager_archive:
   file.directory:
     - user: alertmanager
     - group: alertmanager
-    - mode: 755
+    - mode: '0755'
     - makedirs: True
     - require:
       - user: alertmanager_user
@@ -66,7 +67,7 @@ alertmanager_archive:
 /etc/systemd/system/alertmanager.service:
   file.managed:
     - source: salt://role/prometheus/files/alertmanager.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:

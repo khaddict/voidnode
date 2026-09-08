@@ -17,7 +17,7 @@
 /etc/apt/sources.list.d/proxmox.sources:
   file.managed:
     - source: salt://global/common/sources/files/proxmox.sources
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja

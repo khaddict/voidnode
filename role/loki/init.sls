@@ -13,7 +13,7 @@ loki_user:
   file.directory:
     - user: loki
     - group: loki
-    - mode: 750
+    - mode: '0750'
     - makedirs: True
     - require:
       - pkg: loki_pkg
@@ -22,7 +22,7 @@ loki_user:
 /etc/loki/config.yml:
   file.managed:
     - source: salt://role/loki/files/config.yml
-    - mode: 640
+    - mode: '0640'
     - user: root
     - group: loki
     - require:

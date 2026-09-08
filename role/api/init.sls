@@ -40,14 +40,14 @@ api_dependencies_pkg:
   file.directory:
     - user: api
     - group: api
-    - mode: 755
+    - mode: '0755'
 
 # stats.json is written by the app, never touched by Salt, so it survives redeploys
 /opt/api/data:
   file.directory:
     - user: api
     - group: api
-    - mode: 750
+    - mode: '0750'
     - require:
       - file: /opt/api
 
@@ -56,7 +56,7 @@ api_dependencies_pkg:
     - source: salt://role/api/files/app/main.py
     - user: api
     - group: api
-    - mode: 644
+    - mode: '0644'
     - makedirs: True
     - require:
       - file: /opt/api
@@ -66,7 +66,7 @@ api_dependencies_pkg:
     - source: salt://role/api/files/app/config.py
     - user: api
     - group: api
-    - mode: 640
+    - mode: '0640'
     - template: jinja
     - show_changes: False
     - context:
@@ -85,7 +85,7 @@ api_dependencies_pkg:
     - source: salt://role/api/files/app/assets/clock-logo.png
     - user: api
     - group: api
-    - mode: 644
+    - mode: '0644'
     - makedirs: True
     - require:
       - file: /opt/api
@@ -102,7 +102,7 @@ api_dependencies_pkg:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/api/{{ locale_path }}index.html
     - skip_verify: True
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - makedirs: True
@@ -114,7 +114,7 @@ api_dependencies_pkg:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/api/security.txt
     - skip_verify: True
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - makedirs: True
@@ -124,7 +124,7 @@ api_dependencies_pkg:
 /opt/api/requirements.txt:
   file.managed:
     - source: salt://role/api/files/requirements.txt
-    - mode: 644
+    - mode: '0644'
 
 /opt/api/venv:
   virtualenv.managed:
@@ -139,12 +139,12 @@ api_dependencies_pkg:
 /opt/api/gunicorn.py:
   file.managed:
     - source: salt://role/api/files/gunicorn.py
-    - mode: 644
+    - mode: '0644'
 
 /etc/systemd/system/api.service:
   file.managed:
     - source: salt://role/api/files/api.service
-    - mode: 644
+    - mode: '0644'
 
 api:
   service.running:
@@ -164,7 +164,7 @@ api:
 /etc/nginx/sites-available/api:
   file.managed:
     - source: salt://role/api/files/nginx_api
-    - mode: 644
+    - mode: '0644'
     - template: jinja
     - context:
         fqdn: {{ fqdn }}

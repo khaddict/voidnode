@@ -9,7 +9,7 @@
   file.managed:
     - source: salt://global/common/hosts/files/hosts
     - template: jinja
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - context:

@@ -14,7 +14,7 @@ openssh_server_pkg:
 /etc/ssh/sshd_config:
   file.managed:
     - source: salt://global/common/ssh/files/sshd_config
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja
@@ -29,7 +29,7 @@ openssh_server_pkg:
     - group: root
 {% endif %}
     - source: salt://global/common/ssh/files/authorized_keys
-    - mode: 600
+    - mode: '0600'
     - user: root
     - template: jinja
     - context:
@@ -41,7 +41,7 @@ openssh_server_pkg:
 /root/.ssh/config:
   file.managed:
     - source: salt://global/common/ssh/files/config
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja

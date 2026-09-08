@@ -22,7 +22,7 @@ promtail_pkg:
   file.directory:
     - user: promtail
     - group: promtail
-    - mode: 755
+    - mode: '0755'
     - makedirs: True
     - require:
       - pkg: promtail_pkg
@@ -31,7 +31,7 @@ promtail_pkg:
 /etc/promtail/config.yml:
   file.managed:
     - source: salt://base/observability/promtail/files/config.yml
-    - mode: 640
+    - mode: '0640'
     - user: root
     - group: promtail
     - require:

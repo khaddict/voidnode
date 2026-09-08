@@ -34,7 +34,7 @@ prometheus_user:
   file.directory:
     - user: prometheus
     - group: prometheus
-    - mode: 755
+    - mode: '0755'
     - require:
       - user: prometheus_user
 
@@ -56,7 +56,7 @@ prometheus_archive:
 /etc/prometheus/prometheus.yml:
   file.managed:
     - source: salt://role/prometheus/files/prometheus.yml
-    - mode: 644
+    - mode: '0644'
     - user: prometheus
     - group: prometheus
     - template: jinja
@@ -74,8 +74,8 @@ prometheus_archive:
     - include_empty: True
     - user: prometheus
     - group: prometheus
-    - dir_mode: 755
-    - file_mode: 644
+    - dir_mode: '0755'
+    - file_mode: '0644'
     - require:
       - archive: prometheus_archive
       - user: prometheus_user
@@ -83,7 +83,7 @@ prometheus_archive:
 /etc/systemd/system/prometheus.service:
   file.managed:
     - source: salt://role/prometheus/files/prometheus.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

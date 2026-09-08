@@ -13,7 +13,7 @@ nginx_pkgs:
 /etc/nginx/nginx.conf:
   file.managed:
     - source: salt://role/vps/files/nginx.conf
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -25,7 +25,7 @@ nginx_pkgs:
   file.directory:
     - user: root
     - group: root
-    - mode: 755
+    - mode: '0755'
     - makedirs: True
     - require:
       - pkg: nginx_pkgs
@@ -33,7 +33,7 @@ nginx_pkgs:
 /etc/nginx/stream-enabled/khaddict.conf:
   file.managed:
     - source: salt://role/vps/files/khaddict-stream.conf
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -45,7 +45,7 @@ nginx_pkgs:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/vps-fallback/index.html
     - skip_verify: True
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - makedirs: True
@@ -56,7 +56,7 @@ nginx_pkgs:
 /etc/nginx/sites-available/{{ vhost }}:
   file.managed:
     - source: salt://role/vps/files/{{ vhost }}
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -97,7 +97,7 @@ git_pkg:
 /root/uptime-kuma/ecosystem.config.js:
   file.managed:
     - source: salt://role/vps/files/ecosystem.config.js
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:

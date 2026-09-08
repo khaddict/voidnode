@@ -8,7 +8,7 @@ include:
 /etc/vault.d/vault.hcl:
   file.managed:
     - source: salt://role/vault/files/vault.hcl
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja
@@ -18,7 +18,7 @@ include:
 /etc/systemd/system/vault.service:
   file.managed:
     - source: salt://role/vault/files/vault.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -37,13 +37,13 @@ vault:
 /root/.vault-token:
   file.managed:
     - contents: "{{ root_token }}"
-    - mode: 600
+    - mode: '0600'
     - user: root
     - group: root
 
 /root/.bashrc.d/vault.bashrc:
   file.managed:
     - source: salt://role/vault/files/vault.bashrc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root

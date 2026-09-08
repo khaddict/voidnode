@@ -10,7 +10,7 @@ vault_dependencies_pkg:
 /usr/share/keyrings/hashicorp-archive-keyring.gpg:
   file.managed:
     - source: salt://base/vault/files/hashicorp-archive-keyring.gpg
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

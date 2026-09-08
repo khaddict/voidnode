@@ -17,7 +17,7 @@ docker_base_packages_pkg:
 
 /etc/apt/keyrings:
   file.directory:
-    - mode: 755
+    - mode: '0755'
     - user: root
     - group: root
     - makedirs: True
@@ -27,7 +27,7 @@ docker_base_packages_pkg:
 /etc/apt/keyrings/docker.asc:
   file.managed:
     - source: salt://role/registry/files/docker.asc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -41,7 +41,7 @@ docker_base_packages_pkg:
         Suites: {{ oscodename }}
         Components: stable
         Signed-By: /etc/apt/keyrings/docker.asc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -77,7 +77,7 @@ harbor_archive:
   file.directory:
     - user: root
     - group: root
-    - mode: 755
+    - mode: '0755'
     - makedirs: True
     - require:
       - pkg: podman_pkg
@@ -85,7 +85,7 @@ harbor_archive:
 /etc/containers/certs.d/registry.khaddict.lab/ca.crt:
   file.managed:
     - source: salt://global/common/ca/files/voidnode.chain.crt
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:
@@ -94,7 +94,7 @@ harbor_archive:
 /etc/harbor/harbor.yml:
   file.managed:
     - source: salt://role/registry/files/harbor.yml
-    - mode: 600
+    - mode: '0600'
     - user: root
     - group: root
     - template: jinja
@@ -139,7 +139,7 @@ trivy_archive:
 /etc/systemd/system/harbor.service:
   file.managed:
     - source: salt://role/registry/files/harbor.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - require:

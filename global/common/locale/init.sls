@@ -15,14 +15,14 @@ en_US.UTF-8 UTF-8:
     - source: salt://global/common/locale/files/default-locale
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
 
 /etc/default/keyboard:
   file.managed:
     - source: salt://global/common/locale/files/default-keyboard
     - user: root
     - group: root
-    - mode: 644
+    - mode: '0644'
     - require:
       - pkg: keyboard_configuration_pkg
       - pkg: console_setup_pkg

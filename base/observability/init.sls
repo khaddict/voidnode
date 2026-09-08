@@ -1,7 +1,7 @@
 /etc/apt/keyrings/grafana.asc:
   file.managed:
     - source: salt://base/observability/files/grafana.asc
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

@@ -24,7 +24,7 @@
     - source: salt://role/pve/files/jobs.cfg
     - user: root
     - group: www-data
-    - mode: 640
+    - mode: '0640'
     - template: jinja
     - context:
         vmids: "{{ backup_vmids | sort | join(',') }}"

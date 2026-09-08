@@ -12,7 +12,7 @@ salt_minion_pkg:
   file.managed:
     - source: salt://global/common/salt-minion/files/minion
     - template: jinja
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - context:

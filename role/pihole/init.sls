@@ -1,7 +1,7 @@
 /etc/systemd/network/10-ens19.network:
   file.managed:
     - source: salt://role/pihole/files/secondary-networkd-conf
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - template: jinja

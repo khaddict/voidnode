@@ -4,7 +4,7 @@ include:
 /etc/salt/master:
   file.managed:
     - source: salt://role/saltmaster/files/master
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

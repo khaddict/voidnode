@@ -8,7 +8,7 @@ rclone_pkg:
 /usr/local/bin/pbs-datastore-sync.sh:
   file.managed:
     - source: salt://role/pbs/files/pbs-datastore-sync.sh
-    - mode: 755
+    - mode: '0755'
     - user: root
     - group: root
     - makedirs: True
@@ -16,7 +16,7 @@ rclone_pkg:
 /root/.config/rclone/rclone.conf:
   file.managed:
     - source: salt://role/pbs/files/rclone.conf
-    - mode: 600
+    - mode: '0600'
     - user: root
     - group: root
     - makedirs: True
@@ -28,14 +28,14 @@ rclone_pkg:
 /etc/systemd/system/rclone-sync.service:
   file.managed:
     - source: salt://role/pbs/files/rclone-sync.service
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 
 /etc/systemd/system/rclone-sync.timer:
   file.managed:
     - source: salt://role/pbs/files/rclone-sync.timer
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
 

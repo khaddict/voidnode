@@ -7,7 +7,7 @@ openssl_pkg:
 
 /root/easypki:
   file.directory:
-    - mode: 755
+    - mode: '0755'
 
 easypki_repo_git:
   git.latest:

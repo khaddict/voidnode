@@ -17,7 +17,7 @@ certbot_pkgs:
   file.managed:
     - source: salt://role/revproxy/files/haproxy.cfg
     - template: jinja
-    - mode: 644
+    - mode: '0644'
     - user: root
     - group: root
     - context:
@@ -32,7 +32,7 @@ certbot_pkgs:
   file.managed:
     - source: salt://role/revproxy/files/haproxy.sh
     - template: jinja
-    - mode: 755
+    - mode: '0755'
     - user: root
     - group: root
     - makedirs: True
@@ -41,7 +41,7 @@ certbot_pkgs:
 
 /root/.secrets/infomaniak:
   file.managed:
-    - mode: 600
+    - mode: '0600'
     - user: root
     - group: root
     - makedirs: True

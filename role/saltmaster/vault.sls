@@ -3,7 +3,7 @@
 /etc/salt/master.d/vault.conf:
   file.managed:
     - source: salt://role/saltmaster/files/vault.conf
-    - mode: 600
+    - mode: '0600'
     - user: salt
     - group: salt
     - template: jinja
@@ -17,7 +17,7 @@
 /etc/salt/master.d/peer_run.conf:
   file.managed:
     - source: salt://role/saltmaster/files/peer_run.conf
-    - mode: 644
+    - mode: '0644'
     - user: salt
     - group: salt
     - require:
