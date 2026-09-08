@@ -73,7 +73,7 @@ harbor_archive:
     - source_hash: https://github.com/goharbor/harbor/releases/download/v{{ harbor_version }}/md5sum
     - unless: test -f /etc/harbor/harbor.v{{ harbor_version }}.tar.gz
 
-/etc/containers/certs.d/registry.khaddict.lab:
+/etc/containers/certs.d/registry.{{ domain }}:
   file.directory:
     - user: root
     - group: root
@@ -82,14 +82,14 @@ harbor_archive:
     - require:
       - pkg: podman_pkg
 
-/etc/containers/certs.d/registry.khaddict.lab/ca.crt:
+/etc/containers/certs.d/registry.{{ domain }}/ca.crt:
   file.managed:
     - source: salt://global/common/ca/files/voidnode.chain.crt
     - mode: '0644'
     - user: root
     - group: root
     - require:
-      - file: /etc/containers/certs.d/registry.khaddict.lab
+      - file: /etc/containers/certs.d/registry.{{ domain }}
 
 /etc/harbor/harbor.yml:
   file.managed:

@@ -1,4 +1,5 @@
 {% set oscodename = grains["oscodename"] %}
+{% set host_type = grains.get('host_type') or '' %}
 
 {% if grains["os"] == "Debian" %}
 /etc/apt/sources.list.d/debian.sources:
@@ -13,7 +14,7 @@
     - context:
         oscodename: {{ oscodename }}
 
-{% if grains["fqdn"] == "voidnode.khaddict.lab" %}
+{% if host_type == 'node' %}
 /etc/apt/sources.list.d/proxmox.sources:
   file.managed:
     - source: salt://global/common/sources/files/proxmox.sources
