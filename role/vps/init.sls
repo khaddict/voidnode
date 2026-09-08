@@ -4,6 +4,9 @@
 {% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
 {% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha') %}
 
+# renovate: depName=louislam/uptime-kuma datasource=git-refs
+{% set uptime_kuma_rev = 'e4821321e559c887b14e37d9979e604b221a8945' %}
+
 nginx_pkgs:
   pkg.installed:
     - pkgs:
@@ -87,8 +90,7 @@ git_pkg:
   git.latest:
     - name: https://github.com/louislam/uptime-kuma.git
     - target: /root/uptime-kuma
-    - rev: master
-    - branch: master
+    - rev: {{ uptime_kuma_rev }}
     - force_reset: remote-changes
     - force_checkout: True
     - require:
