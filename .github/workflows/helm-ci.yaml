@@ -32,6 +32,11 @@ jobs:
           curl -fsSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" \
             | tar xz -C /usr/local/bin kubeconform
 
+      - name: Read cluster Kubernetes version
+        run: |
+          K8S_VERSION=$(grep -oP '(?<=stable:/v)\d+\.\d+' role/kcli/files/kubernetes.sources)
+          echo "K8S_VERSION=${K8S_VERSION}.0" >> "$GITHUB_ENV"
+
       - name: Lint local charts
         run: |
           for dir in argocd/apps/*/; do
@@ -59,7 +64,7 @@ jobs:
             chart="${dir%/}"
             if ! grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
               echo "→ kubeconform $chart"
-              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
+              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -kubernetes-version "$K8S_VERSION" -summary
             fi
           done
 
@@ -69,7 +74,7 @@ jobs:
             chart="${dir%/}"
             if grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
               echo "→ kubeconform $chart"
-              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
+              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -kubernetes-version "$K8S_VERSION" -summary
             fi
           done
 
@@ -77,7 +82,7 @@ jobs:
         run: |
           for f in argocd/applications/root/*.yaml argocd/applications/services/*.yaml argocd/applications/system/*.yaml; do
             echo "→ validate $f"
-            kubeconform -strict -ignore-missing-schemas -summary "$f"
+            kubeconform -strict -ignore-missing-schemas -kubernetes-version "$K8S_VERSION" -summary "$f"
           done
 
       - name: Check ArgoCD Application paths exist
