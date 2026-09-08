@@ -228,6 +228,8 @@ The snippet is baked in before `</head>` at build time, by `build.py` in the `kh
 | blog posts | `templates/pages/post.html.j2` |
 | media.khaddict.com | `templates/pages/media.html.j2` |
 | projects.khaddict.com | `templates/pages/projects.html.j2` |
+| api.khaddict.com | `templates/pages/api.html.j2` |
+| diagram.khaddict.com | `templates/pages/diagram.html.j2` |
 | shared 404 page | `templates/pages/404.html.j2` |
 
 All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
