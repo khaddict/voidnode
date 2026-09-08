@@ -60,3 +60,13 @@ jobs:
               helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
             fi
           done
+
+      - name: Validate K8s manifests (charts with dependencies)
+        run: |
+          for dir in argocd/apps/*/; do
+            chart="${dir%/}"
+            if grep -q "^dependencies:" "$chart/Chart.yaml" 2>/dev/null; then
+              echo "→ kubeconform $chart"
+              helm template "$chart" | kubeconform -strict -ignore-missing-schemas -summary
+            fi
+          done
