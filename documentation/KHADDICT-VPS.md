@@ -242,7 +242,7 @@ wg genkey | tee /etc/wireguard/privatekey | wg pubkey > /etc/wireguard/publickey
 ```ini
 [Interface]
 PrivateKey = <VPS private key>
-Address = 10.10.0.2/24
+Address = 10.1.0.2/32
 
 [Peer]
 PublicKey = <OPNsense public key>
