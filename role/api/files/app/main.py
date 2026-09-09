@@ -50,16 +50,17 @@ app.add_middleware(
         "https://blog.khaddict.com",
         "https://projects.khaddict.com",
         "https://media.khaddict.com",
+        "https://diagram.khaddict.com",
     ],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
     expose_headers=["Retry-After"],
 )
 
-# these two only need to fetch /openapi.json for the site's search palette, not send
+# these three only need to fetch /openapi.json for the site's search palette, not send
 # anything to the physical BUSY Bar; block them at the actual/preflight method level
 # since CORSMiddleware has no per-origin method scoping
-READ_ONLY_ORIGINS = {"https://projects.khaddict.com", "https://media.khaddict.com"}
+READ_ONLY_ORIGINS = {"https://projects.khaddict.com", "https://media.khaddict.com", "https://diagram.khaddict.com"}
 
 
 @app.middleware("http")
