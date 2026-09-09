@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
 spec:
-  maxUnavailable: 1
+  maxUnavailable: {{ min 1 (sub $site.replicas 1) }}
   selector:
     matchLabels:
       {{- include "khaddict.selectorLabels" (dict "site" $site "root" $) | nindent 6 }}
