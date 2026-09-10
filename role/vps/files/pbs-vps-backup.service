@@ -1,0 +1,20 @@
+[Unit]
+Description=Backup this VPS to Proxmox Backup Server (offsite, namespace vps)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/proxmox-backup/vps-backup.env
+ExecStart=/usr/bin/proxmox-backup-client backup root.pxar:/ \
+	--backup-id khaddict-vps \
+	--ns vps \
+	--crypt-mode none \
+	--exclude /proc \
+	--exclude /sys \
+	--exclude /dev \
+	--exclude /run \
+	--exclude /tmp \
+	--exclude /var/tmp \
+	--exclude /root/uptime-kuma/node_modules
+Restart=no

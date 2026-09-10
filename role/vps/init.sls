@@ -1,3 +1,7 @@
+include:
+  - global.common.ca
+  - role.vps.backup
+
 # see role/api/init.sls: pins to a commit SHA to dodge raw.githubusercontent.com's URL caching.
 # No fallback to "main" on API failure, same reasoning as role/api/init.sls: that would
 # silently widen the pin to a floating, unreviewed ref instead of failing loudly.
