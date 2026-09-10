@@ -4,7 +4,7 @@ description: A Helm chart for homepage
 type: application
 version: 0.1.0
 # renovate: depName=gethomepage/homepage datasource=docker registryUrl=https://ghcr.io
-appVersion: "v2.2.0"
+appVersion: "v2.3.0"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/homepage
