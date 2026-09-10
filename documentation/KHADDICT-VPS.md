@@ -275,6 +275,12 @@ resolvectl status wg0
 Expected: no `DNS Servers:` line and no `DNS Domain: ~.` under `Link (wg0)`. DNS should only
 appear against `ens3`, pointing at the Infomaniak resolvers.
 
+> **Amendment (section 15):** the offsite PBS backup needs `vault.khaddict.lab` and
+> `pbs.khaddict.lab` to resolve, so `wg0` carries a routing-only domain scoped to
+> `~khaddict.lab` (not the `~.` catch-all above), pointed at `10.20.0.1`. Public names like
+> `discord.com` still resolve via `ens3`, unaffected. `resolvectl status wg0` now expectedly
+> shows `DNS Servers: 10.20.0.1` and `DNS Domain: ~khaddict.lab`.
+
 #### Verify the alert path survives a full homelab outage
 
 ```bash
@@ -491,3 +497,51 @@ salt-call state.highstate
 
 Certificates (certbot) and the WireGuard tunnel (section 9) stay manual. Salt doesn't manage
 either.
+
+---
+
+## 15. Offsite backup to PBS
+
+The VPS backs up to the homelab's PBS (`role/vps/backup.sls`, included from `role/vps/init.sls`):
+`proxmox-backup-client` runs weekly (`pbs-vps-backup.timer`, Sunday 03:00) as a full-filesystem
+backup (`root.pxar:/`, standard virtual-fs excludes plus `uptime-kuma/node_modules`), into its
+own PBS namespace so a compromised VPS can't touch the other VMs' backups. This section covers
+the prerequisites and the PBS-side setup Salt doesn't manage; `role/vps/backup.sls` covers the
+VPS-side package/service/timer.
+
+#### Prerequisites
+
+- `~khaddict.lab` DNS routing on `wg0` (section 9's amendment), since the client needs to
+  resolve `pbs.khaddict.lab`.
+- `global.common.ca` included in `role/vps/init.sls`, since the client needs to trust PBS's
+  cert, issued by the internal EasyPKI CA.
+- A Vault secret at `kv/minions/khaddict-vps/default`, key `pbs_backup_token`, holding the API
+  token's secret value (see below). Written by hand on `vault.khaddict.lab`, not by Salt.
+
+#### PBS-side setup (imperative, not Salt-managed)
+
+Run on `pbs.khaddict.lab`:
+
+```bash
+# Dedicated user + token, least-privilege
+proxmox-backup-manager user create vps-backup@pbs --comment "khaddict-vps offsite backup"
+proxmox-backup-manager user generate-token vps-backup@pbs backup-token
+# -> save the returned token value into Vault as pbs_backup_token
+
+# Create the namespace first (Datastore > backup > Content > Add Namespace in the web UI),
+# or writes fail with a misleading "missing permissions" error.
+
+# Grant on BOTH the token and its parent user: token alone is enough to read, but backup
+# writes need the user's grant too.
+proxmox-backup-manager acl update /datastore/backup/vps DatastoreBackup --auth-id vps-backup@pbs
+proxmox-backup-manager acl update /datastore/backup/vps DatastoreBackup --auth-id 'vps-backup@pbs!backup-token'
+
+# Retention: independent of the VM backups' prune job, scoped to the vps namespace only
+proxmox-backup-manager prune-job create vps-backup-prune --schedule daily --store backup --ns vps --keep-last 2
+```
+
+The repository string used by the VPS client is `vps-backup@pbs!backup-token@pbs.khaddict.lab:backup`,
+namespace `vps`. Longer-term retention beyond `keep-last=2` isn't handled here: the existing
+`pbs-datastore-sync.sh` offsite mirror to kDrive (`role/pbs`) already snapshots the whole
+datastore on its own recent/monthly/yearly schedule, so the VPS's backups inherit that history
+for free without needing their own separate long-retention policy.
