@@ -1,5 +1,4 @@
 {% set fqdn = grains["fqdn"] %}
-{% set host_type = grains.get('host_type') or '' %}
 {% import_yaml 'data/main.yaml' as data %}
 {% set stackstorm_ssh = data.pve.vms.stackstorm.ssh %}
 {% set easypki_ssh = data.pve.vms.easypki.ssh %}
@@ -19,7 +18,7 @@ openssh_server_pkg:
     - group: root
     - template: jinja
 
-{% if host_type == 'node' %}
+{% if fqdn == "voidnode.khaddict.lab" %}
 /etc/pve/priv/authorized_keys:
   file.managed:
     - group: www-data
@@ -55,7 +54,7 @@ ssh:
       - pkg: openssh_server_pkg
     - watch:
       - file: /etc/ssh/sshd_config
-      {% if host_type == 'node' %}
+      {% if fqdn == "voidnode.khaddict.lab" %}
       - file: /etc/pve/priv/authorized_keys
       {% else %}
       - file: /root/.ssh/authorized_keys
