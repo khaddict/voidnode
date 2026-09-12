@@ -3,6 +3,7 @@ import base64
 import binascii
 import json
 import logging
+import os
 import secrets
 import subprocess
 import tempfile
@@ -288,9 +289,13 @@ async def _next_wall_job(clock_deadline: float):
 
 
 JOB_TIMEOUT_SEC = 120  # a wedged device (accepts the connection, never replies) must not freeze the queue forever
+WATCHDOG_STALL_SEC = 60  # every job attempt resolves within 10s even when the device is down, so this is generous
+
+_last_job_done_at = time.monotonic()
 
 
 async def _wall_queue_worker() -> None:
+    global _last_job_done_at
     clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
     while True:
         try:
@@ -298,8 +303,19 @@ async def _wall_queue_worker() -> None:
             if job is run_clock_job:
                 clock_deadline = time.monotonic() + CLOCK_IDLE_REFRESH_SECONDS
             await asyncio.wait_for(job(), timeout=JOB_TIMEOUT_SEC)
-        except Exception:
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except BaseException:
             logger.exception("Wall queue job crashed")
+        _last_job_done_at = time.monotonic()
+
+
+async def _wall_queue_watchdog() -> None:
+    while True:
+        await asyncio.sleep(WATCHDOG_STALL_SEC)
+        if time.monotonic() - _last_job_done_at > WATCHDOG_STALL_SEC:
+            logger.critical("Wall queue worker stalled for over %ds, exiting for systemd to restart", WATCHDOG_STALL_SEC)
+            os._exit(1)
 
 
 @app.on_event("startup")
@@ -309,6 +325,9 @@ async def _launch_wall_queue_worker() -> None:
     _background_tasks.add(task)
     task.add_done_callback(_background_tasks.discard)
     enqueue_wall_job(run_clock_job)  # show the clock immediately instead of waiting out the first idle cycle
+    watchdog_task = asyncio.create_task(_wall_queue_watchdog())
+    _background_tasks.add(watchdog_task)
+    watchdog_task.add_done_callback(_background_tasks.discard)
 
 # not a Salt-managed path, so file.managed never touches or wipes it across deploys
 STATS_FILE = Path("/opt/api/data/stats.json")
@@ -587,19 +606,22 @@ async def notify_discord_text(message: str, color: str, ip: str) -> None:
     )
 
 
-async def notify_discord_image(png_bytes: bytes, ip: str) -> None:
+IMAGE_SUFFIXES = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp"}
+
+
+async def notify_discord_image(data: bytes, content_type: str, ip: str) -> None:
+    # the original upload, not the 72x16 resize sent to the device
+    suffix = IMAGE_SUFFIXES.get(content_type, ".bin")
     await _notify_discord(
         data={"payload_json": json.dumps({"content": f"New wall image from {ip}"})},
-        files={"file": ("wall.png", png_bytes, "image/png")},
+        files={"file": (f"wall{suffix}", data, content_type)},
     )
 
 
-async def notify_discord_audio(data: bytes, content_type: str, ip: str) -> None:
-    # send the original clip, not the converted PCM below; Discord can play webm/ogg fine
-    suffix = AUDIO_SUFFIXES.get(content_type, ".bin")
+async def notify_discord_audio(mp3_bytes: bytes, ip: str) -> None:
     await _notify_discord(
         data={"payload_json": json.dumps({"content": f"New wall audio from {ip}"})},
-        files={"file": (f"wall{suffix}", data, content_type)},
+        files={"file": ("wall.mp3", mp3_bytes, "audio/mpeg")},
     )
 
 
@@ -607,13 +629,10 @@ def audio_play_payload(filename: str) -> dict:
     return {"application_name": "web_wall", "path": filename}
 
 
-def convert_audio_for_busybar(data: bytes, content_type: str) -> bytes:
-    """BusyBar firmware expects raw PCM: 16-bit little-endian, mono, 44.1kHz,
-    no container header, uploaded under a .wav name regardless."""
-    suffix = AUDIO_SUFFIXES.get(content_type, "")
+def _run_ffmpeg(data: bytes, src_suffix: str, dst_suffix: str, *output_args: str) -> bytes:
     with (
-        tempfile.NamedTemporaryFile(suffix=suffix) as src,
-        tempfile.NamedTemporaryFile(suffix=".raw") as dst,
+        tempfile.NamedTemporaryFile(suffix=src_suffix) as src,
+        tempfile.NamedTemporaryFile(suffix=dst_suffix) as dst,
     ):
         src.write(data)
         src.flush()
@@ -622,13 +641,27 @@ def convert_audio_for_busybar(data: bytes, content_type: str) -> bytes:
             # a crafted container into fetching a network/other-local resource
             "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-protocol_whitelist", "file",
             "-i", src.name,
-            "-ar", "44100", "-ac", "1", "-f", "s16le", "-acodec", "pcm_s16le",
+            *output_args,
             dst.name,
         ]
         proc = subprocess.run(cmd, check=False, capture_output=True, timeout=15)
         if proc.returncode != 0:
             raise RuntimeError(proc.stderr.decode("utf-8", errors="ignore"))
         return Path(dst.name).read_bytes()
+
+
+def convert_audio_for_busybar(data: bytes, content_type: str) -> bytes:
+    """BusyBar firmware expects raw PCM: 16-bit little-endian, mono, 44.1kHz,
+    no container header, uploaded under a .wav name regardless."""
+    suffix = AUDIO_SUFFIXES.get(content_type, "")
+    return _run_ffmpeg(data, suffix, ".raw", "-ar", "44100", "-ac", "1", "-f", "s16le", "-acodec", "pcm_s16le")
+
+
+def convert_audio_for_discord(data: bytes, content_type: str) -> bytes:
+    # browser recordings (webm/opus, Safari's mp4/aac) don't reliably get an inline
+    # player in Discord; mp3 does
+    suffix = AUDIO_SUFFIXES.get(content_type, "")
+    return _run_ffmpeg(data, suffix, ".mp3", "-acodec", "libmp3lame", "-b:a", "128k")
 
 
 def pcm_duration_seconds(pcm_bytes: bytes) -> float:
@@ -746,9 +779,9 @@ async def run_text_job(text: str, color: str, ip: str) -> None:
     )
 
 
-async def run_image_job(png_bytes: bytes, ip: str) -> None:
+async def run_image_job(png_bytes: bytes, original_bytes: bytes, content_type: str, ip: str) -> None:
     def on_success() -> None:
-        fire_and_forget(notify_discord_image(png_bytes, ip))
+        fire_and_forget(notify_discord_image(original_bytes, content_type, ip))
 
     await _draw_and_hold(
         image_draw_payload(IMAGE_FILENAME),
@@ -760,7 +793,7 @@ async def run_image_job(png_bytes: bytes, ip: str) -> None:
     )
 
 
-async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: str) -> None:
+async def run_audio_job(pcm_bytes: bytes, mp3_bytes: bytes, ip: str) -> None:
     headers = busybar_headers()
     async with httpx.AsyncClient(timeout=10) as client:
         try:
@@ -776,7 +809,7 @@ async def run_audio_job(pcm_bytes: bytes, data: bytes, content_type: str, ip: st
         except httpx.HTTPError as exc:
             logger.error("BUSY Bar audio play failed: %s", exc)
             return
-    fire_and_forget(notify_discord_audio(data, content_type, ip))
+    fire_and_forget(notify_discord_audio(mp3_bytes, ip))
     # see run_text_job: subtract this call's own latency
     play_latency = time.monotonic() - play_started
     await asyncio.sleep(max(0, pcm_duration_seconds(pcm_bytes) + 0.5 - play_latency))
@@ -835,7 +868,7 @@ async def post_image(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Could not read that image")
 
     ip = client_ip(request)
-    enqueue_wall_job(lambda: run_image_job(png_bytes, ip))
+    enqueue_wall_job(lambda: run_image_job(png_bytes, data, file.content_type, ip))
 
 
 @app.post(
@@ -860,6 +893,7 @@ async def post_audio(request: Request, file: UploadFile = File(...)):
     try:
         async with _conversion_semaphore:
             pcm_bytes = await asyncio.to_thread(convert_audio_for_busybar, data, content_type)
+            mp3_bytes = await asyncio.to_thread(convert_audio_for_discord, data, content_type)
     except (RuntimeError, subprocess.TimeoutExpired) as exc:
         logger.error("Audio conversion failed: %s", exc)
         raise HTTPException(status_code=400, detail="Could not process that audio")
@@ -868,7 +902,7 @@ async def post_audio(request: Request, file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Audio too long")
 
     ip = client_ip(request)
-    enqueue_wall_job(lambda: run_audio_job(pcm_bytes, data, content_type, ip))
+    enqueue_wall_job(lambda: run_audio_job(pcm_bytes, mp3_bytes, ip))
 
 
 async def _fetch_busybar_online() -> bool:
