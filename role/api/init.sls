@@ -90,6 +90,17 @@ api_dependencies_pkg:
     - require:
       - file: /opt/api
 
+# vendored from github.com/busy-app/busybar-protobuf, see main.py's import comment
+/opt/api/app/proto:
+  file.recurse:
+    - source: salt://role/api/files/app/proto
+    - user: api
+    - group: api
+    - file_mode: '0644'
+    - dir_mode: '0755'
+    - require:
+      - file: /opt/api
+
 # the pass/fail report is text-only now; clean up the earlier icon-based design's assets
 /opt/api/app/assets/report-ok.png:
   file.absent
@@ -157,6 +168,7 @@ api:
       - file: /opt/api/app/main.py
       - file: /opt/api/app/config.py
       - file: /opt/api/app/assets/clock-logo.png
+      - file: /opt/api/app/proto
       - file: /opt/api/gunicorn.py
       - file: /etc/systemd/system/api.service
       - virtualenv: /opt/api/venv
@@ -168,6 +180,11 @@ api:
     - template: jinja
     - context:
         fqdn: {{ fqdn }}
+
+/etc/nginx/conf.d/api_limits.conf:
+  file.managed:
+    - source: salt://role/api/files/nginx_api_limits.conf
+    - mode: '0644'
 
 /etc/nginx/sites-enabled/default:
   file.absent
@@ -182,6 +199,7 @@ nginx:
     - reload: True
     - watch:
       - file: /etc/nginx/sites-available/api
+      - file: /etc/nginx/conf.d/api_limits.conf
       - file: /var/www/api/index.html
       - file: /var/www/api/fr/index.html
       - file: /var/www/api/security.txt

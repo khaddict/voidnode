@@ -1,19 +1,20 @@
 import asyncio
-import base64
-import binascii
 import json
 import logging
 import os
 import secrets
 import subprocess
+import sys
 import tempfile
 import time
 import unicodedata
+import urllib.parse
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 
 import httpx
+import websockets
 from fastapi import Depends, FastAPI, File, HTTPException, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -30,6 +31,11 @@ from config import (
     STACKSTORM_ALERT_TOKEN,
     UPTIME_KUMA_ALERT_TOKEN,
 )
+
+# vendored from github.com/busy-app/busybar-protobuf, imports resolve via sys.path not as a package
+sys.path.insert(0, str(Path(__file__).parent / "proto"))
+import frame_pb2  # noqa: E402
+import state_pb2  # noqa: E402
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
@@ -104,10 +110,11 @@ ALLOWED_AUDIO_TYPES = set(AUDIO_SUFFIXES)
 CONVERSION_CONCURRENCY = 2
 _conversion_semaphore = asyncio.Semaphore(CONVERSION_CONCURRENCY)
 
-RATE_LIMIT_SECONDS = 20
-_last_request_at: dict[str, float] = {}
+RATE_LIMIT_BASE_SECONDS = 30  # required gap doubles per send: 30s, 1m, 2m, 4m...
+RATE_LIMIT_DECAY_SECONDS = 3600  # an hour of silence resets an IP back to the fast tier
+_wall_rate_state: dict[str, tuple[float, int]] = {}
 
-VIEW_RATE_LIMIT_SECONDS = 2  # shorter than RATE_LIMIT_SECONDS: view-counting isn't a wall message
+VIEW_RATE_LIMIT_SECONDS = 2  # view-counting isn't a wall message, stays a flat window
 _last_view_at: dict[str, float] = {}
 
 MAX_MESSAGES_PER_DAY = 300  # per-IP limiting alone doesn't stop IP-rotation abuse
@@ -140,9 +147,9 @@ STATUS_CACHE_SECONDS = 10
 STATUS_TIMEOUT_SEC = 3
 _status_cache = TTLCache(STATUS_CACHE_SECONDS)
 
-SCREEN_CACHE_SECONDS = 1.5  # every open tab polls this, so cache it instead of one fetch each
-SCREEN_TIMEOUT_SEC = 5
-_screen_cache = TTLCache(SCREEN_CACHE_SECONDS)
+FRAME_STALE_SEC = 3  # /wall/screen returns 502 if the WS stream hasn't pushed a frame lately
+_latest_screen_png: bytes | None = None
+_latest_screen_at = 0.0
 
 # serializes device draws so one sender can't cut off another mid-display
 MAX_WALL_QUEUE_DEPTH = 20
@@ -201,7 +208,12 @@ async def _apply_busybar_day_night_settings() -> None:
 
 async def _busybar_day_night_loop() -> None:
     while True:
-        await _apply_busybar_day_night_settings()
+        try:
+            await _apply_busybar_day_night_settings()
+        except (asyncio.CancelledError, KeyboardInterrupt, SystemExit):
+            raise
+        except BaseException as exc:
+            logger.error("BUSY Bar day/night loop crashed: %s", exc)
         await asyncio.sleep(BUSYBAR_SETTINGS_CHECK_SECONDS)
 
 
@@ -396,10 +408,9 @@ def client_ip(request: Request) -> str:
 
 
 def _check_rate_limit(store: dict[str, float], ip: str, window: float) -> float | None:
-    """Records this hit and returns None if it's allowed, else the seconds left to wait."""
+    """Flat-window limiter for view-counting."""
     now = time.monotonic()
 
-    # lazy prune so this dict doesn't grow forever across distinct visitor IPs
     if len(store) > 10_000:
         cutoff = now - window * 10
         for stale_ip, seen_at in list(store.items()):
@@ -413,8 +424,43 @@ def _check_rate_limit(store: dict[str, float], ip: str, window: float) -> float 
     return None
 
 
+# one IP per line, edited by hand on the box; no HTTP surface for this on purpose
+BLOCKLIST_FILE = Path("/opt/api/data/blocklist.txt")
+
+
+def _is_blocked(ip: str) -> bool:
+    try:
+        return ip in BLOCKLIST_FILE.read_text().split()
+    except FileNotFoundError:
+        return False
+
+
+def _check_wall_rate_limit(ip: str) -> float | None:
+    """Escalating limiter for wall sends, see RATE_LIMIT_BASE_SECONDS above."""
+    now = time.monotonic()
+
+    if len(_wall_rate_state) > 10_000:
+        cutoff = now - RATE_LIMIT_DECAY_SECONDS
+        for stale_ip, (seen_at, _) in list(_wall_rate_state.items()):
+            if seen_at < cutoff:
+                del _wall_rate_state[stale_ip]
+
+    last_sent_at, strike = _wall_rate_state.get(ip, (0.0, 0))
+    elapsed = now - last_sent_at
+    if elapsed > RATE_LIMIT_DECAY_SECONDS:
+        strike = 0
+    required_wait = RATE_LIMIT_BASE_SECONDS * (2 ** (strike - 1)) if strike else 0
+    if strike and elapsed < required_wait:
+        return required_wait - elapsed
+    _wall_rate_state[ip] = (now, strike + 1)
+    return None
+
+
 def enforce_rate_limit(request: Request) -> None:
-    wait = _check_rate_limit(_last_request_at, client_ip(request), RATE_LIMIT_SECONDS)
+    ip = client_ip(request)
+    if _is_blocked(ip):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    wait = _check_wall_rate_limit(ip)
     if wait is not None:
         raise HTTPException(
             status_code=429,
@@ -438,10 +484,11 @@ def enforce_daily_message_limit() -> None:
 
 
 def rate_limit_remaining(request: Request) -> int:
-    last_seen = _last_request_at.get(client_ip(request))
-    if last_seen is None:
+    last_sent_at, strike = _wall_rate_state.get(client_ip(request), (0.0, 0))
+    now = time.monotonic()
+    if not strike or now - last_sent_at > RATE_LIMIT_DECAY_SECONDS:
         return 0
-    remaining = RATE_LIMIT_SECONDS - (time.monotonic() - last_seen)
+    remaining = RATE_LIMIT_BASE_SECONDS * (2 ** (strike - 1)) - (now - last_sent_at)
     return int(remaining) + 1 if remaining > 0 else 0
 
 
@@ -702,11 +749,8 @@ def resize_to_screen(data: bytes) -> bytes:
     return out.getvalue()
 
 
-def decode_front_screen(b64_data: bytes) -> bytes:
-    """The front display's /api/screen response is base64-encoded, uncompressed
-    BGR888 (3 bytes/pixel), despite its misleading image/bmp content-type and
-    lack of any real BMP header. Swap to RGB and re-encode as a real PNG."""
-    raw = base64.b64decode(b64_data, validate=True)
+def _bgr888_to_png(raw: bytes) -> bytes:
+    # actually BGR888 despite the RGB888 label
     pixels = bytearray(len(raw))
     pixels[0::3] = raw[2::3]
     pixels[1::3] = raw[1::3]
@@ -962,35 +1006,94 @@ async def set_busybar_volume(
     await _busybar_passthrough_post("/api/audio/volume", {"volume": value, "silent": 1}, "volume")
 
 
-async def _fetch_wall_screen_png() -> bytes:
-    async with httpx.AsyncClient(timeout=SCREEN_TIMEOUT_SEC) as client:
-        try:
-            resp = await client.get(
-                f"{BUSYBAR_URL}/api/screen",
-                params={"display": 0},
-                headers=busybar_headers(),
-            )
-            resp.raise_for_status()
-        except httpx.HTTPError as exc:
-            logger.error("BUSY Bar screen fetch failed: %s", exc)
-            raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+def _rle_decompress(data: bytes, block_size: int, max_len: int) -> bytes:
+    # mirrors lib/toolbox/rle_encode.c in busybar-firmware
+    out = bytearray()
+    i = 0
+    while i < len(data):
+        opcode = data[i]
+        count = opcode & 0x7F
+        i += 1
+        if opcode & 0x80:
+            out += data[i : i + count * block_size]
+            i += count * block_size
+        else:
+            out += data[i : i + block_size] * count
+            i += block_size
+        if len(out) > max_len:
+            raise ValueError("decompressed frame exceeds expected size")
+    return bytes(out)
 
-    try:
-        return await asyncio.to_thread(decode_front_screen, resp.content)
-    except (binascii.Error, ValueError) as exc:
-        logger.error("Could not decode screen frame: %s", exc)
-        raise HTTPException(status_code=502, detail="Could not decode the screen frame")
+
+def _busybar_ws_url() -> str:
+    scheme = "wss" if BUSYBAR_URL.startswith("https") else "ws"
+    host = BUSYBAR_URL.split("://", 1)[1]
+    token = urllib.parse.quote(BUSYBAR_PIN, safe="")
+    return f"{scheme}://{host}/api/status/ws?x-api-token={token}"
+
+
+async def _screen_stream_loop() -> None:
+    global _latest_screen_png, _latest_screen_at
+    while True:
+        try:
+            async with websockets.connect(_busybar_ws_url(), open_timeout=5) as ws:
+                await ws.send(json.dumps({"enable": True}))
+                while True:
+                    msg = await asyncio.wait_for(ws.recv(), timeout=30)
+                    if not isinstance(msg, bytes):
+                        continue
+                    state = state_pb2.State()
+                    state.ParseFromString(msg)
+                    for update in state.updates:
+                        if update.WhichOneof("state") != "frame":
+                            continue
+                        frame = update.frame
+                        if (
+                            frame.screen != frame_pb2.FRONT
+                            or frame.pixel_format != frame_pb2.RGB888
+                            or frame.width != SCREEN_WIDTH_PX
+                            or frame.height != SCREEN_HEIGHT_PX
+                        ):
+                            continue
+                        expected_len = SCREEN_WIDTH_PX * SCREEN_HEIGHT_PX * 3
+                        try:
+                            raw = (
+                                _rle_decompress(frame.data, 3, expected_len)
+                                if frame.encoding == frame_pb2.RUN_LENGTH
+                                else frame.data
+                            )
+                        except ValueError as exc:
+                            logger.error("BUSY Bar screen frame rejected: %s", exc)
+                            continue
+                        if len(raw) != expected_len:
+                            continue
+                        _latest_screen_png = await asyncio.to_thread(_bgr888_to_png, raw)
+                        _latest_screen_at = time.monotonic()
+        except (asyncio.CancelledError, KeyboardInterrupt, SystemExit):
+            raise
+        except BaseException as exc:
+            logger.error("BUSY Bar screen stream disconnected: %s", exc)
+            await asyncio.sleep(5)
+
+
+@app.on_event("startup")
+async def _launch_screen_stream_loop() -> None:
+    task = asyncio.create_task(_screen_stream_loop())
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
 
 
 @app.get(
     "/wall/screen",
     tags=["BUSY Bar"],
     summary="Live mirror of the BUSY Bar's front display",
-    description="Meant to be polled every second or two by the homepage widget when idle. Not rate-limited like the send endpoints, since it's read-only.",
+    description="Pushed in real time from the WS status stream. Not rate-limited like the "
+    "send endpoints, since it's read-only.",
 )
 async def get_wall_screen():
-    png_bytes = await _screen_cache.get(_fetch_wall_screen_png)
-    return Response(content=png_bytes, media_type="image/png")
+    if _latest_screen_png is None or time.monotonic() - _latest_screen_at >= FRAME_STALE_SEC:
+        raise HTTPException(status_code=502, detail="Could not reach the BUSY Bar")
+    return Response(content=_latest_screen_png, media_type="image/png")
 
 
 async def run_alert_job(text: str, color: str) -> None:
@@ -1081,8 +1184,7 @@ async def post_report(payload: WallReport, _auth: None = Depends(verify_alert_au
 )
 async def increment_post_view(slug: str, request: Request):
     enforce_view_rate_limit(request)
-    views = await asyncio.to_thread(record_post_view, slug)
-    return {"views": views}
+    return {"views": record_post_view(slug)}
 
 
 @app.get("/healthz", tags=["System"], summary="Health check for the API service")
