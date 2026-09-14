@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import re
 import secrets
 import subprocess
 import sys
@@ -396,11 +397,7 @@ def record_post_view(slug: str) -> int:
     _save_stats()
     return _post_views[slug]
 
-# must match the swatches offered in www.html.j2
-ALLOWED_TEXT_COLORS = {
-    "#FFFFFF", "#FF0000", "#FF8800", "#FFFF00",
-    "#00FF00", "#00FFFF", "#0066FF", "#FF00FF",
-}
+HEX_COLOR_RE = re.compile(r"^#[0-9A-F]{6}$")
 
 
 def client_ip(request: Request) -> str:
@@ -544,10 +541,10 @@ class WallMessage(BaseModel):
 
     @field_validator("color")
     @classmethod
-    def color_must_be_allowed(cls, value: str) -> str:
+    def color_must_be_hex(cls, value: str) -> str:
         normalized = value.upper()
-        if normalized not in ALLOWED_TEXT_COLORS:
-            raise ValueError("unsupported color")
+        if not HEX_COLOR_RE.match(normalized):
+            raise ValueError("color must be a #RRGGBB hex value")
         return normalized
 
 
