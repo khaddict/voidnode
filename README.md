@@ -138,7 +138,6 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `assets-gui` | Internal asset manager (Streamlit UI + FastAPI backend, 5Gi PVC) |
 | `changedetection` | Monitors websites for content changes, 5Gi PVC |
 | `dnsutils` | Minimal debug pod in the `dnsutils` namespace for DNS troubleshooting |
-| `remark42` | Comment widget for `blog.khaddict.com`, embedded as an iframe. GitHub-only auth, 5Gi PVC (BoltDB storage + backups), secrets from Vault at `kv/data/kubernetes/remark42`. |
 
 Secrets are injected at ArgoCD sync time by the **ArgoCD Vault Plugin** using `<path:kv/data/kubernetes/<app>#FIELD>` annotations, authenticated with a long-lived Vault token.
 
