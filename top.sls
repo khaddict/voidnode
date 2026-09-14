@@ -8,6 +8,9 @@
   'api':
     - role.api
 
+  'bookstack':
+    - role.bookstack
+
   'easypki':
     - role.easypki
 

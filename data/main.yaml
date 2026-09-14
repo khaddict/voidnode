@@ -451,6 +451,28 @@ pve:
       backup: true
       <<: *vlan_edge
 
+    bookstack:
+      vmid: 113
+      description: "BookStack wiki for personal SRE/DevOps revision notes, exposed as sre.khaddict.com via revproxy"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.40.0.10
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 4096
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 50
+      backup: true
+      <<: *vlan_edge
+
     # [end:vms]
 
   lxc:

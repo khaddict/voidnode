@@ -407,7 +407,8 @@ certbot certonly \
   -d 'projects.khaddict.com' \
   -d 'matomo.khaddict.com' \
   -d 'diagram.khaddict.com' \
-  -d 'api.khaddict.com'
+  -d 'api.khaddict.com' \
+  -d 'sre.khaddict.com'
 ```
 
 #### Create the fallback page content

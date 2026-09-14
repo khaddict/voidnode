@@ -231,8 +231,9 @@ The snippet is baked in before `</head>` at build time, by `build.py` in the `kh
 | api.khaddict.com | `templates/pages/api.html.j2` |
 | diagram.khaddict.com | `templates/pages/diagram.html.j2` |
 | shared 404 page | `templates/pages/404.html.j2` |
+| sre.khaddict.com | BookStack's own "Custom HTML Head Content" setting (Settings → Customization). Not build.py-rendered, so the snippet is pasted there directly instead of coming from a template. |
 
-All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
+All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**); `sre.khaddict.com` needs to be added there too.
 
 Snippet:
 
