@@ -45,3 +45,10 @@ bookstack_apache_reload:
     - name: systemctl reload apache2
     - onchanges:
       - file: /etc/apache2/sites-available/bookstack.conf
+
+/var/www/bookstack-custom-head.html:
+  file.managed:
+    - source: salt://role/bookstack/files/custom-head.html
+    - mode: '0644'
+    - user: www-data
+    - group: www-data
