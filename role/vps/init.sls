@@ -2,6 +2,8 @@ include:
   - global.common.ca
   - role.vps.backup
 
+{% import_yaml 'data/main.yaml' as data %}
+
 # see role/api/init.sls: pins to a commit SHA to dodge raw.githubusercontent.com's URL caching.
 # No fallback to "main" on API failure, same reasoning as role/api/init.sls: that would
 # silently widen the pin to a floating, unreviewed ref instead of failing loudly.
@@ -43,6 +45,9 @@ nginx_pkgs:
     - mode: '0644'
     - user: root
     - group: root
+    - template: jinja
+    - context:
+        revproxy_ip: "{{ data.pve.vms.revproxy.ip }}"
     - require:
       - file: /etc/nginx/stream-enabled
     - listen_in:
