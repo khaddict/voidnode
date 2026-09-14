@@ -39,30 +39,32 @@ data:
 {{ $content.Files.Get "files/blog/fr/feed.xml" | indent 4 }}
 {{- end }}
 {{- if eq $site.name "blog" }}
+{{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
+{{- $slug := $path | replace "files/blog/posts/" "" | replace "/index.html" "" }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: blog-khaddict-posts
+  name: blog-khaddict-post-{{ $slug }}
   namespace: {{ $.Values.namespace }}
   labels:
     {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
 data:
-{{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
-  {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}: |
+  index.html: |
 {{ $content.Files.Get $path | indent 4 }}
 {{- end }}
+{{- range $path, $bytes := $content.Files.Glob "files/blog/fr/posts/**" }}
+{{- $slug := $path | replace "files/blog/fr/posts/" "" | replace "/index.html" "" }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: blog-khaddict-posts-fr
+  name: blog-khaddict-post-{{ $slug }}-fr
   namespace: {{ $.Values.namespace }}
   labels:
     {{- include "khaddict.labels" (dict "site" $site "root" $) | nindent 4 }}
 data:
-{{- range $path, $bytes := $content.Files.Glob "files/blog/fr/posts/**" }}
-  {{ $path | replace "files/blog/fr/posts/" "" | replace "/" "-" | quote }}: |
+  index.html: |
 {{ $content.Files.Get $path | indent 4 }}
 {{- end }}
 {{- end }}

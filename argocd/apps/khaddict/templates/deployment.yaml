@@ -91,20 +91,26 @@ spec:
           name: {{ $site.name }}-khaddict-html
       {{- if eq $site.name "blog" }}
       - name: posts-volume
-        configMap:
-          name: blog-khaddict-posts
-          items:
+        projected:
+          sources:
           {{- range $path, $bytes := $content.Files.Glob "files/blog/posts/**" }}
-          - key: {{ $path | replace "files/blog/posts/" "" | replace "/" "-" | quote }}
-            path: {{ $path | replace "files/blog/posts/" "" }}
+          {{- $slug := $path | replace "files/blog/posts/" "" | replace "/index.html" "" }}
+          - configMap:
+              name: blog-khaddict-post-{{ $slug }}
+              items:
+              - key: index.html
+                path: {{ $slug }}/index.html
           {{- end }}
       - name: posts-volume-fr
-        configMap:
-          name: blog-khaddict-posts-fr
-          items:
+        projected:
+          sources:
           {{- range $path, $bytes := $content.Files.Glob "files/blog/fr/posts/**" }}
-          - key: {{ $path | replace "files/blog/fr/posts/" "" | replace "/" "-" | quote }}
-            path: {{ $path | replace "files/blog/fr/posts/" "" }}
+          {{- $slug := $path | replace "files/blog/fr/posts/" "" | replace "/index.html" "" }}
+          - configMap:
+              name: blog-khaddict-post-{{ $slug }}-fr
+              items:
+              - key: index.html
+                path: {{ $slug }}/index.html
           {{- end }}
       {{- end }}
 {{- end }}
