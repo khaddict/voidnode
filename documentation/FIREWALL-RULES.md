@@ -75,9 +75,8 @@
 | EDGE | 10 | PASS | TCP | K8S | ALERTMANAGER | 9093 | Allow VMAlert to send alerts to AlertManager |
 | EDGE | 11 | PASS | TCP | K8S | REGISTRY | 443 | Allow K8S access to the registry |
 | EDGE | 12 | PASS | TCP | K8S | This Firewall | 443 | Allow Homepage widget access to the firewall |
-| EDGE | 13 | PASS | TCP | REVPROXY | STATUS | 3001 | Allow HAProxy to reach Uptime Kuma on VPS via WireGuard |
-| EDGE | 14 | PASS | TCP | API | BUSY_BAR | 80 | Allow API to push messages to the BUSY Bar display |
-| EDGE | 15 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
+| EDGE | 13 | PASS | TCP | API | BUSY_BAR | 80 | Allow API to push messages to the BUSY Bar display |
+| EDGE | 14 | PASS | * | EDGE net | !RFC1918 | any | Allow internet access |
 
 # VLAN 50 IOT
 
@@ -96,4 +95,9 @@
 
 | Order | Action | Protocol | Source | Destination | Port | Description |
 |---|---|---|---|---|---|---|
-| 1 | PASS | * | VPN net | any | any | Allow full access from VPN |
+| 1 | PASS | TCP | VPS | REVPROXY | 443 | Allow the VPS HAProxy passthrough to reach revproxy |
+| 2 | PASS | TCP | VPS | SALTMASTER | 4505-4506 | Allow the VPS Salt minion to check in |
+| 3 | PASS | TCP | VPS | VAULT | 8200 | Allow the VPS to read Vault secrets during highstate |
+| 4 | PASS | TCP | VPS | PBS | 8007 | Allow the VPS to reach PBS |
+| 5 | PASS | UDP | VPS | This Firewall | 53 | Allow the VPS DNS access to the firewall |
+| 6 | PASS | * | VPN_PERSONAL | any | any | Allow full access from personal VPN peers |
