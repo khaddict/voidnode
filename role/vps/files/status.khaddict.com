@@ -8,6 +8,10 @@ server {
     real_ip_header proxy_protocol;
     set_real_ip_from 127.0.0.1;
 
+    location = /.well-known/security.txt {
+        alias /var/www/status-well-known/security.txt;
+    }
+
     location / {
         add_header Access-Control-Allow-Origin "*" always;
         add_header Access-Control-Allow-Methods "GET, OPTIONS" always;

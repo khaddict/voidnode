@@ -1,0 +1,13 @@
+:80 {
+    root * /opt/matomo
+    @blocked {
+        not path /.well-known/security.txt
+        path /config /config/* /tmp /tmp/* /lang /lang/* /.* /.*/*
+    }
+    respond @blocked 403
+    php_fastcgi unix//run/php/php8.3-fpm.sock {
+        trusted_proxies {{ revproxy_ip }}
+    }
+    file_server
+    encode gzip
+}

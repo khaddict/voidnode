@@ -68,6 +68,9 @@ spec:
               subPath: widgets.yaml
             - mountPath: /app/config/logs
               name: logs
+            - mountPath: /app/public/.well-known/security.txt
+              name: homepage-config
+              subPath: security.txt
       volumes:
         - name: homepage-config
           secret:

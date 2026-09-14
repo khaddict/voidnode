@@ -53,6 +53,15 @@ nginx_pkgs:
     - listen_in:
         - service: nginx
 
+/var/www/status-well-known/security.txt:
+  file.managed:
+    - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/files/status/security.txt
+    - skip_verify: True
+    - mode: '0644'
+    - user: root
+    - group: root
+    - makedirs: True
+
 /var/www/fallback/index.html:
   file.managed:
     - source: https://raw.githubusercontent.com/khaddict/khaddict-com/{{ khaddict_com_ref }}/vps-fallback/index.html

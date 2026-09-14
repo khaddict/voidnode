@@ -26,6 +26,9 @@
   'loki':
     - role.loki
 
+  'matomo':
+    - role.matomo
+
   'netbox':
     - role.netbox
 
