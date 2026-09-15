@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   edge:
-    image: docker.io/library/nginx:1.31.5
+    image: docker.io/library/nginx:1.31.6
     ports:
       - "0.0.0.0:8080:80"
     volumes:
@@ -15,7 +15,7 @@ services:
       - diagram
 
   www:
-    image: docker.io/library/nginx:1.31.5
+    image: docker.io/library/nginx:1.31.6
     volumes:
       - ${CONTENT}/www/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/www/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
@@ -27,7 +27,7 @@ services:
       - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   blog:
-    image: docker.io/library/nginx:1.31.5
+    image: docker.io/library/nginx:1.31.6
     volumes:
       - ${CONTENT}/blog/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/blog/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
@@ -42,7 +42,7 @@ services:
       - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   projects:
-    image: docker.io/library/nginx:1.31.5
+    image: docker.io/library/nginx:1.31.6
     volumes:
       - ${CONTENT}/projects/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/projects/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
@@ -64,7 +64,7 @@ services:
       - ./security-headers.conf:/etc/nginx/security-headers.conf:ro
 
   diagram:
-    image: docker.io/library/nginx:1.31.5
+    image: docker.io/library/nginx:1.31.6
     volumes:
       - ${CONTENT}/diagram/index.html:/usr/share/nginx/html/index.html:ro
       - ${CONTENT}/diagram/fr/index.html:/usr/share/nginx/html/fr/index.html:ro
