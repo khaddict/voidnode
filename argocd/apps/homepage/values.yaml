@@ -24,7 +24,7 @@ probes:
   enabled: true
   liveness:
     httpGet:
-      path: /
+      path: /api/healthcheck
       port: http
       httpHeaders:
         - name: Host
@@ -33,7 +33,7 @@ probes:
     periodSeconds: 10
   readiness:
     httpGet:
-      path: /
+      path: /api/healthcheck
       port: http
       httpHeaders:
         - name: Host
