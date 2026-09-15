@@ -123,7 +123,10 @@ File: `/etc/caddy/Caddyfile`
 ```caddyfile
 :80 {
     root * /opt/matomo
-    @blocked path /config /config/* /tmp /tmp/* /lang /lang/* /.* /.*/*
+    @blocked {
+        not path /.well-known/security.txt
+        path /config /config/* /tmp /tmp/* /lang /lang/* /.* /.*/*
+    }
     respond @blocked 403
     php_fastcgi unix//run/php/php8.3-fpm.sock {
         trusted_proxies 10.40.0.2
@@ -245,6 +248,7 @@ Snippet:
   var _paq = window._paq = window._paq || [];
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
+  _paq.push(['setCookieDomain', '*.khaddict.com']);
   (function() {
     var u="//matomo.khaddict.com/";
     _paq.push(['setTrackerUrl', u+'matomo.php']);
