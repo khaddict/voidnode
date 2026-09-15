@@ -31,6 +31,7 @@ server {
   var _paq = window._paq = window._paq || [];
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
+  _paq.push(['setCookieDomain', '*.khaddict.com']);
   (function() {
     var u=\"//matomo.khaddict.com/\";
     _paq.push(['setTrackerUrl', u+'matomo.php']);
