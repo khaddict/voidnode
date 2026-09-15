@@ -231,9 +231,11 @@ The snippet is baked in before `</head>` at build time, by `build.py` in the `kh
 | api.khaddict.com | `templates/pages/api.html.j2` |
 | diagram.khaddict.com | `templates/pages/diagram.html.j2` |
 | shared 404 page | `templates/pages/404.html.j2` |
-| sre.khaddict.com | BookStack's own "Custom HTML Head Content" setting (Settings → Customization). Not build.py-rendered, so the snippet is pasted there directly instead of coming from a template. |
+| sre.khaddict.com | BookStack's own "Custom HTML Head Content" setting (Settings → Customization), managed as `role/bookstack/files/custom-head.html` in `voidnode`. Not build.py-rendered, so the snippet lives there directly instead of coming from a template. |
+| dashboard.khaddict.com | Homepage's `custom.js` (`argocd/apps/homepage/templates/homepage-config-secret.yaml`), loaded via a `<Script src="/api/config/custom.js">` in the page head. The file holds plain JS, not a `<script>`-wrapped snippet. |
+| status.khaddict.com | Uptime Kuma has no custom-script setting (only `customCSS`), so the snippet is injected at the nginx layer on the VPS via `sub_filter` in `role/vps/files/status.khaddict.com`, rewriting `</head>` in Kuma's response. Requires `proxy_set_header Accept-Encoding "";` since `sub_filter` can't rewrite a gzip-compressed response. |
 
-All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**); `sre.khaddict.com` needs to be added there too.
+All use **siteId 1**. The subdomains are registered as URL aliases on the same Matomo site (**Administration → Sites web → Gérer → éditer le site**).
 
 Snippet:
 
