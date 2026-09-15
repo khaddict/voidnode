@@ -24,8 +24,16 @@
     - require:
       - file: /opt/matomo/.well-known/security.txt
 
+caddy:
+  service.running:
+    - enable: True
+    - require:
+      - file: /etc/caddy/Caddyfile
+
 matomo_caddy_reload:
   cmd.run:
     - name: systemctl reload caddy
     - onchanges:
       - file: /etc/caddy/Caddyfile
+    - require:
+      - service: caddy
