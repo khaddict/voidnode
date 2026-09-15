@@ -14,6 +14,7 @@
 | matomo              | CNAME | khaddict.com.       | Auto |
 | diagram             | CNAME | khaddict.com.       | Auto |
 | api                 | CNAME | khaddict.com.       | Auto |
+| sre                 | CNAME | khaddict.com.       | Auto |
 
 ## 2. Firewall configuration
 
