@@ -21,7 +21,7 @@ sites:
     replicas: 2
     image:
       repository: nginx
-      tag: "1.31.5"
+      tag: "1.31.6"
     host: www.khaddict.lab
     hasSitemap: true
     livenessInitialDelaySeconds: 15
@@ -29,7 +29,7 @@ sites:
     replicas: 2
     image:
       repository: nginx
-      tag: "1.31.5"
+      tag: "1.31.6"
     host: blog.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
@@ -45,7 +45,7 @@ sites:
     replicas: 2
     image:
       repository: nginx
-      tag: "1.31.5"
+      tag: "1.31.6"
     host: projects.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
@@ -53,7 +53,7 @@ sites:
     replicas: 2
     image:
       repository: nginx
-      tag: "1.31.5"
+      tag: "1.31.6"
     host: diagram.khaddict.lab
     hasSitemap: false
     livenessInitialDelaySeconds: 15
