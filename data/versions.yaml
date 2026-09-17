@@ -8,7 +8,7 @@ k9s: "0.51.0"
 # renovate: depName=prometheus/prometheus datasource=github-releases
 prometheus: "3.14.0"
 # renovate: depName=prometheus/alertmanager datasource=github-releases
-alertmanager: "0.34.0"
+alertmanager: "0.34.1"
 # renovate: depName=mikefarah/yq datasource=github-releases
 yq: "4.53.6"
 # sha256 of yq_linux_amd64 for the version above; update manually when bumping yq (renovate does not track this)
