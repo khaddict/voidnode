@@ -1,0 +1,20 @@
+[Unit]
+Description=Periodically syncs BookStack pages to GitHub
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=HOME=/root
+WorkingDirectory=/opt/bookstack_sync
+ExecStart=/usr/bin/python3 -u /opt/bookstack_sync/sync.py
+Restart=on-failure
+RestartSec=5
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/bookstack_sync/sre-notes
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
