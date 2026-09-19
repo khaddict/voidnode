@@ -1,3 +1,9 @@
+namespace: kube-system
+
+httproute:
+  host: hubble.khaddict.lab
+  gatewayName: envoy-gateway
+
 cilium:
   ipam:
     mode: kubernetes
