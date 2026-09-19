@@ -2,6 +2,7 @@
 {% import_yaml 'data/versions.yaml' as versions %}
 {% set k9s_version = versions.k9s %}
 {% set talosctl_version = versions.talosctl %}
+{% set cilium_cli_version = versions.cilium_cli %}
 
 include:
   - base.vault
@@ -83,6 +84,15 @@ k9s_pkg:
     - source_hash: https://github.com/siderolabs/talos/releases/download/v{{ talosctl_version }}/sha256sum.txt
     - mode: '0755'
     - unless: talosctl version --client 2>&1 | grep -q "{{ talosctl_version }}"
+
+cilium_cli_archive:
+  archive.extracted:
+    - name: /usr/local/bin
+    - source: https://github.com/cilium/cilium-cli/releases/download/v{{ cilium_cli_version }}/cilium-linux-amd64.tar.gz
+    - source_hash: https://github.com/cilium/cilium-cli/releases/download/v{{ cilium_cli_version }}/cilium-linux-amd64.tar.gz.sha256sum
+    - enforce_toplevel: False
+    - overwrite: True
+    - unless: cilium version --client 2>&1 | grep -q "{{ cilium_cli_version }}"
 
 /root/.vault-token:
   file.managed:

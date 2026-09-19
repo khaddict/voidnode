@@ -15,3 +15,5 @@ yq: "4.53.6"
 yq_sha256: "c5f056448f973ae7d39b5401949648a78f2dc1947d6a8eb65be60d5c504b9385"
 # renovate: depName=siderolabs/talos datasource=github-releases
 talosctl: "1.14.1"
+# renovate: depName=cilium/cilium-cli datasource=github-releases
+cilium_cli: "0.20.0"
