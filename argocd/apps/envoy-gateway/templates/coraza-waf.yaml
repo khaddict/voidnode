@@ -26,6 +26,10 @@ spec:
           # PromQL aggregate functions (count, sum, avg) trigger SQL injection rules 942xxx. Exclude the query arg on the VM API (vmsingle only)
           - "SecRule REQUEST_URI \"@beginsWith /api/v1/\" \"id:106,phase:1,pass,nolog,chain\""
           - "SecRule REQUEST_HEADERS:Host \"@streq vmsingle.khaddict.lab\" \"ctl:ruleRemoveByTag=attack-sqli\""
+          # Hubble UI's gRPC-Web streams send raw protobuf over application/octet-stream, which CRS's phase 1
+          # content-type check rejects, and whose body CRS's phase 2 form parser then misreads as text (random
+          # bytes trip null-character/CRLF-injection rules). Skip both checks for this host.
+          - "SecRule REQUEST_HEADERS:Host \"@streq hubble.khaddict.lab\" \"id:107,phase:1,pass,nolog,ctl:ruleRemoveById=920420,ctl:requestBodyAccess=Off\""
           # Include CRS rules embedded in the wasm image
           - "Include @owasp_crs/*.conf"
           # Blocking mode
