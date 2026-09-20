@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: cilium
-    version: 1.18.2
+    version: 1.20.2
     repository: https://helm.cilium.io/
