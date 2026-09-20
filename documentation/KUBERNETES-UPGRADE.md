@@ -103,9 +103,22 @@ Example with Talos 1.14:
 factory.talos.dev/metal-installer/<SCHEMATIC_ID>:v1.14.0
 ```
 
-For this cluster, which uses the standard `metal` platform without additional system extensions, the default image selected by `talosctl` can be used directly.
+This cluster uses a custom Image Factory schematic, not the default `metal` image: schematic `613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245`, which adds the `siderolabs/iscsi-tools` and `siderolabs/util-linux-tools` system extensions (required by Longhorn) on all 3 nodes.
 
-If a node uses custom system extensions or a custom Image Factory schematic, make sure the upgrade image preserves that schematic before upgrading.
+Confirm the current schematic before upgrading:
+
+```bash
+talosctl get extensions -n 10.40.0.5,10.40.0.6,10.40.0.7
+```
+
+Every future `talosctl upgrade` must pass `--image` with that schematic ID and the target version, or it silently falls back to the vanilla `metal` image and the extensions are lost:
+
+```bash
+talosctl upgrade --nodes <ip> \
+  --image factory.talos.dev/metal-installer/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245:v<TARGET_VERSION>
+```
+
+If a node ever needs a different set of system extensions, generate a new schematic on the [Image Factory](https://factory.talos.dev) first and update the schematic ID above.
 
 ### 3. Upgrade each node, one at a time
 
@@ -128,7 +141,8 @@ This keeps the Kubernetes API available while the workers are upgraded; the brie
 #### Worker 1
 
 ```bash
-talosctl upgrade --nodes 10.40.0.6
+talosctl upgrade --nodes 10.40.0.6 \
+  --image factory.talos.dev/metal-installer/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245:v<TARGET_VERSION>
 ```
 
 Wait for:
@@ -150,7 +164,8 @@ The node should be `Ready` and report the new Talos version.
 #### Worker 2
 
 ```bash
-talosctl upgrade --nodes 10.40.0.7
+talosctl upgrade --nodes 10.40.0.7 \
+  --image factory.talos.dev/metal-installer/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245:v<TARGET_VERSION>
 ```
 
 Verify:
@@ -171,7 +186,8 @@ kubectl get nodes -o wide
 Then upgrade the control-plane:
 
 ```bash
-talosctl upgrade --nodes 10.40.0.5
+talosctl upgrade --nodes 10.40.0.5 \
+  --image factory.talos.dev/metal-installer/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245:v<TARGET_VERSION>
 ```
 
 Because this cluster has a single control-plane node, expect a brief Kubernetes API outage while it reboots.
@@ -275,7 +291,7 @@ The dry-run:
 
 Review the output before proceeding.
 
-Changes to Talos-managed components such as `kube-proxy`, Flannel or CoreDNS can be expected when the new Talos/Kubernetes versions ship updated bootstrap manifests.
+This cluster runs `cluster.network.cni.name: none` and Cilium's kube-proxy-replacement, so Talos no longer manages `kube-proxy` or a CNI bootstrap manifest; only changes to CoreDNS can be expected here.
 
 ### 4. Run the upgrade
 
@@ -296,7 +312,7 @@ It updates, in order:
 * `kube-apiserver`
 * `kube-controller-manager`
 * `kube-scheduler`
-* `kube-proxy`
+* `kube-proxy` (skipped here: `cluster.network.cni.name` is `none`, Cilium replaces kube-proxy)
 * `kubelet` on the control-plane
 * `kubelet` on each worker
 * Talos-managed Kubernetes bootstrap manifests
