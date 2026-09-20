@@ -1,3 +1,9 @@
+namespace: longhorn-system
+
+httproute:
+  host: longhorn.khaddict.lab
+  gatewayName: envoy-gateway
+
 longhorn:
   defaultSettings:
     defaultDataPath: /var/mnt/longhorn
