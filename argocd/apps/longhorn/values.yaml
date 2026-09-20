@@ -13,6 +13,7 @@ longhorn:
   defaultSettings:
     defaultDataPath: /var/mnt/longhorn
     defaultReplicaCount: 2
+    storageOverProvisioningPercentage: 200
 
   defaultBackupStore:
     backupTarget: "s3://voidnode-longhorn-backups@void/"
