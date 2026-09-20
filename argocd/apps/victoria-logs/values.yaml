@@ -1,0 +1,13 @@
+namespace: victoria-logs
+
+httproute:
+  host: vlogs.khaddict.lab
+  gatewayName: envoy-gateway
+
+victoria-logs-single:
+  server:
+    fullnameOverride: victoria-logs
+    retentionPeriod: "30d"
+    persistentVolume:
+      storageClassName: longhorn
+      size: 20Gi

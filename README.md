@@ -129,6 +129,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | `longhorn-backup-bridge` | `rclone serve s3`, exposes Longhorn's S3 backup target backed by an Infomaniak kDrive (WebDAV) remote |
 | [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | Exposes resource metrics for HPA and kubectl top |
 | [VictoriaMetrics](https://victoriametrics.com/) | Metrics stack (vmsingle + vmagent + vmalert) for cluster observability, alerts routed to Alertmanager |
+| [VictoriaLogs](https://docs.victoriametrics.com/victorialogs/) | Log storage for the cluster, 30d retention. Fed by `victoria-logs-collector` (`vlagent` DaemonSet) tailing every pod's container logs |
 | `node-shell` | Privileged DaemonSet giving a root shell on any worker node for debugging |
 
 **Services:**

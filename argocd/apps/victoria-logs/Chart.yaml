@@ -1,0 +1,16 @@
+apiVersion: v2
+name: victoria-logs
+description: A Helm chart for victoria-logs
+type: application
+version: 0.1.0
+appVersion: "v1.52.0"
+home: https://victoriametrics.com
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/victoria-logs
+  - https://github.com/VictoriaMetrics/helm-charts
+maintainers:
+  - name: platform
+dependencies:
+  - name: victoria-logs-single
+    version: 0.13.9
+    repository: https://victoriametrics.github.io/helm-charts/

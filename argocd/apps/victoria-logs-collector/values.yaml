@@ -1,0 +1,7 @@
+namespace: victoria-logs
+
+victoria-logs-collector:
+  remoteWrite:
+    - url: http://victoria-logs.victoria-logs.svc.cluster.local:9428
+  tolerations:
+    - operator: Exists
