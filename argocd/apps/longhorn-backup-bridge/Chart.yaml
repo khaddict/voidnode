@@ -4,7 +4,7 @@ description: A Helm chart for longhorn-backup-bridge
 type: application
 version: 0.1.0
 # renovate: depName=rclone/rclone datasource=docker
-appVersion: "1.68.2"
+appVersion: "1.75.1"
 home: https://github.com/khaddict/voidnode
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/longhorn-backup-bridge
