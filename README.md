@@ -125,8 +125,7 @@ Three-node Talos Linux cluster on VLAN 40. GitOps-managed via ArgoCD. Every work
 | [Cilium](https://cilium.io/) | CNI (eBPF), replacing Flannel; kube-proxy-replacement mode, so no `kube-proxy` DaemonSet. Hubble UI/Relay for flow visibility |
 | [MetalLB](https://metallb.io/) | Allocates LoadBalancer IPs from the EDGE subnet (L2 mode) |
 | [Envoy Gateway](https://gateway.envoyproxy.io/) | Implements Kubernetes Gateway API; all services are exposed via HTTPRoute |
-| [Local Path Provisioner](https://github.com/rancher/local-path-provisioner) | Provides `local-path` StorageClass backed by `/var/local-path-provisioner` on the node |
-| [Longhorn](https://longhorn.io/) | Distributed block storage (v1 engine) used for PVC backups; needs a dedicated second disk on each worker node |
+| [Longhorn](https://longhorn.io/) | Distributed block storage (v1 engine), default StorageClass; needs a dedicated second disk on each worker node |
 | [Metrics Server](https://github.com/kubernetes-sigs/metrics-server) | Exposes resource metrics for HPA and kubectl top |
 | [VictoriaMetrics](https://victoriametrics.com/) | Metrics stack (vmsingle + vmagent + vmalert) for cluster observability, alerts routed to Alertmanager |
 | `node-shell` | Privileged DaemonSet giving a root shell on any worker node for debugging |
