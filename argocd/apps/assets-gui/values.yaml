@@ -47,7 +47,7 @@ probes:
 persistence:
   enabled: true
   storage: 5Gi
-  storageClassName: local-path
+  storageClassName: longhorn
   volumeName: ""
 
 secret:
