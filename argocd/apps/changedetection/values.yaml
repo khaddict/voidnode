@@ -41,4 +41,4 @@ httproute:
 
 pvc:
   storage: 5Gi
-  storageClassName: local-path
+  storageClassName: longhorn
