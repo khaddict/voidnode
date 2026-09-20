@@ -4,10 +4,19 @@ httproute:
   host: longhorn.khaddict.lab
   gatewayName: envoy-gateway
 
+backupTarget:
+  endpoint: http://longhorn-backup-bridge.longhorn-backup-bridge.svc.cluster.local:8333
+  accessKey: <path:kv/data/kubernetes/longhorn-backup-bridge#access_key>
+  secretKey: <path:kv/data/kubernetes/longhorn-backup-bridge#secret_key>
+
 longhorn:
   defaultSettings:
     defaultDataPath: /var/mnt/longhorn
     defaultReplicaCount: 2
+
+  defaultBackupStore:
+    backupTarget: "s3://voidnode-longhorn-backups@void/"
+    backupTargetCredentialSecret: longhorn-backup-target
 
   persistence:
     defaultClassReplicaCount: 2

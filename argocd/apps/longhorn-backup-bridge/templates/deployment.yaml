@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "longhorn-backup-bridge.labels" . | nindent 4 }}
+spec:
+  revisionHistoryLimit: 3
+  replicas: {{ .Values.deployment.replicas }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "longhorn-backup-bridge.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "longhorn-backup-bridge.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Values.app }}
+          image: {{ .Values.deployment.image }}
+          imagePullPolicy: {{ .Values.deployment.imagePullPolicy }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              exec rclone serve s3 {{ .Values.rclone.remote }}: \
+                --config /config/rclone/rclone.conf \
+                --addr :{{ .Values.service.port }} \
+                --vfs-cache-mode writes \
+                --auth-key "$ACCESS_KEY,$SECRET_KEY"
+          env:
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app }}-auth
+                  key: ACCESS_KEY
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app }}-auth
+                  key: SECRET_KEY
+          ports:
+            - name: s3
+              containerPort: {{ .Values.service.port }}
+          volumeMounts:
+            - name: rclone-conf
+              mountPath: /config/rclone
+              readOnly: true
+      volumes:
+        - name: rclone-conf
+          secret:
+            secretName: {{ .Values.app }}-rclone-conf

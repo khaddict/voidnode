@@ -1,0 +1,28 @@
+app: longhorn-backup-bridge
+namespace: longhorn-backup-bridge
+
+deployment:
+  replicas: 1
+  image: rclone/rclone:1.68.2
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+service:
+  name: longhorn-backup-bridge
+  port: 8333
+
+rclone:
+  remote: kdrive
+  kdriveUrl: https://3196454.connect.kdrive.infomaniak.com
+  kdriveUser: <path:kv/data/kubernetes/longhorn-backup-bridge#kdrive_user>
+  kdrivePassword: <path:kv/data/kubernetes/longhorn-backup-bridge#kdrive_encrypted_password>
+
+auth:
+  accessKey: <path:kv/data/kubernetes/longhorn-backup-bridge#access_key>
+  secretKey: <path:kv/data/kubernetes/longhorn-backup-bridge#secret_key>
