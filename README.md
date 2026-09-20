@@ -12,15 +12,15 @@ The new design isolates everything behind OPNsense on a dedicated `10.0.0.0/8` L
 
 ## Hardware
 
-<img src="https://media.khaddict.com/gallery/lab-rax-u7-mount-installed.jpg" alt="Homelab" style="width:100%; max-width:400px;">
+<img src="https://media.khaddict.com/gallery/lab-rax-u7-mount-installed.jpg" alt="Homelab" style="width:100%; max-width:300px;">
 
-- [GEEKOM A9 Max Mini PC](https://www.geekom.fr/geekom-a9-max-mini-pc)
-- [128GB DDR5-5600](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)
-- [4TB Samsung 990 EVO Plus NVMe](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)
-- [Unifi Switch Lite 8 PoE](https://eu.store.ui.com/eu/en/products/usw-lite-8-poe)
-- [Unifi U7 Pro](https://eu.store.ui.com/eu/en/products/u7-pro)
-- [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/): runs [Kodi](https://kodi.tv/), unrelated to the lab's network/services
-- [JetKVM](https://jetkvm.com/): remote KVM for the GEEKOM Mini PC (out-of-band console access to voidnode)
+[GEEKOM A9 Max Mini PC](https://www.geekom.fr/geekom-a9-max-mini-pc)<br>
+[128GB DDR5-5600](https://www.crucial.fr/memory/ddr5/ct2k64g56c46s5)<br>
+[4TB Samsung 990 EVO Plus NVMe](https://www.samsung.com/fr/memory-storage/nvme-ssd/990-evo-plus-4tb-nvme-pcie-gen-4-mz-v9s4t0bw)<br>
+[Unifi Switch Lite 8 PoE](https://eu.store.ui.com/eu/en/products/usw-lite-8-poe)<br>
+[Unifi U7 Pro](https://eu.store.ui.com/eu/en/products/u7-pro)<br>
+[Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/): runs [Kodi](https://kodi.tv/), unrelated to the lab's network/services<br>
+[JetKVM](https://jetkvm.com/): remote KVM for the GEEKOM Mini PC (out-of-band console access to voidnode)
 
 ## Network architecture
 
