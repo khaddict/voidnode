@@ -1,0 +1,16 @@
+apiVersion: v2
+name: longhorn
+description: A Helm chart for longhorn
+type: application
+version: 0.1.0
+appVersion: "1.12.1"
+home: https://longhorn.io
+sources:
+  - https://github.com/khaddict/voidnode/tree/main/argocd/apps/longhorn
+  - https://github.com/longhorn/longhorn
+maintainers:
+  - name: platform
+dependencies:
+  - name: longhorn
+    version: 1.12.1
+    repository: https://charts.longhorn.io
