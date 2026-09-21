@@ -12,6 +12,8 @@ REPO_DIR = Path("/opt/bookstack_sync/sre-notes")
 AUTH_HEADER = f"Token {BOOKSTACK_TOKEN_ID}:{BOOKSTACK_TOKEN_SECRET}"
 SYNC_INTERVAL_S = 120
 
+PRESERVED_PATHS = {REPO_DIR / "README.md"}
+
 
 def bookstack_get(path):
     req = urllib.request.Request(f"{BOOKSTACK_BASE}{path}", headers={"Authorization": AUTH_HEADER})
@@ -99,7 +101,7 @@ def full_resync():
                     sync_page(chapter_dir, page, wanted_paths)
 
     for existing in REPO_DIR.rglob("*.md"):
-        if existing not in wanted_paths:
+        if existing not in wanted_paths and existing not in PRESERVED_PATHS:
             existing.unlink()
 
     commit_and_push()
