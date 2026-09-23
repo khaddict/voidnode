@@ -473,6 +473,28 @@ pve:
       backup: true
       <<: *vlan_edge
 
+    assets:
+      vmid: 121
+      description: "Personal asset tracking"
+      template: debian-trixie-template
+      tags: "edge,trixie"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.40.0.12
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 8192
+        cpu:
+          sockets: 1
+          cores: 4
+        disks:
+          - name: scsi0
+            size_gb: 20
+      backup: true
+      <<: *vlan_edge
+
     # [end:vms]
 
   lxc:
