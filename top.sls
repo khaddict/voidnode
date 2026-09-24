@@ -38,6 +38,9 @@
   'pihole':
     - role.pihole
 
+  'hacking':
+    - role.hacking
+
   'prometheus':
     - role.prometheus
 
