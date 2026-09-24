@@ -105,6 +105,8 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `openwebui.khaddict.lab` | LXC | [Open WebUI](https://openwebui.com/) frontend for Ollama. Browser-based chat interface. |
 | `unifi.khaddict.lab` | LXC | Unifi network controller. Manages the Unifi Switch Lite 8 PoE and the Unifi U7 Pro AP. |
 | `pihole.khaddict.lab` | VM | [Pi-hole](https://pi-hole.net/) network-wide DNS ad-blocking and DNS server. |
+| `hacking.khaddict.lab` | VM | Personal environment for CTF challenges and HackTheBox boxes. |
+| `assets.khaddict.lab` | VM | Personal asset tracking. |
 
 ## VLAN 50 – IOT `10.50.0.0/24`
 
