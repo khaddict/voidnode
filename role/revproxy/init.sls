@@ -53,6 +53,17 @@ certbot_pkgs:
     - listen_in:
         - service: haproxy
 
+/etc/haproxy/client-ca.pem:
+  file.managed:
+    - source: salt://global/common/ca/files/voidnode.chain.crt
+    - mode: '0644'
+    - user: root
+    - group: root
+    - require:
+      - pkg: haproxy_pkg
+    - listen_in:
+        - service: haproxy
+
 /etc/letsencrypt/renewal-hooks/deploy/haproxy_assets.sh:
   file.managed:
     - source: salt://role/revproxy/files/haproxy_assets.sh
