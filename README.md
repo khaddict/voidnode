@@ -174,7 +174,9 @@ Browser
 
 If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
-**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `diagram` · `api` · `matomo` · `status` · `sre`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `diagram` · `api` · `matomo` · `status` · `sre` · `assets`
+
+`assets.khaddict.com` requires mTLS: a client certificate issued by the internal `easypki` CA is needed to access it, on top of the usual public TLS.
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 
