@@ -176,7 +176,7 @@ If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level,
 
 **Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `diagram` · `api` · `matomo` · `status` · `sre` · `assets`
 
-`assets.khaddict.com` requires mTLS: a client certificate issued by the internal `easypki` CA is needed to access it, on top of the usual public TLS.
+`assets.khaddict.com` is rate-limited at HAProxy (429 past 200 req/10s per IP); the app itself requires its own login with TOTP.
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 

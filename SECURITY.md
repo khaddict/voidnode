@@ -30,6 +30,15 @@ Five VLANs behind OPNsense, least-privilege by default; see the main [README](RE
 - **Dependencies**: `role/api/files/requirements.txt` pins every direct dependency exactly; transitive dependencies are resolved by `pip` at install time (via `virtualenv.managed`), not locked. Trades reproducibility for not having a separate lockfile for Renovate to drift out of sync.
 - **Docs**: `/docs` is the stock FastAPI/Swagger UI (unauthenticated, same capability as the endpoints themselves; hiding it wouldn't reduce actual attack surface). The domain root serves a separate, site-styled docs page maintained in the `khaddict-com` repo.
 
+## Cross-repo trust: assets to voidnode
+
+`assets.khaddict.com` is public with no auth at the HAProxy/nginx layer (mTLS was used initially and deliberately removed once the app's own login was confirmed solid enough to stand on its own — see the `assets` repo's own `README.md`/`docs/architecture.md` for how that auth actually works; not restated here to avoid this going stale independently of that repo).
+
+What this repo is actually responsible for at that boundary:
+- **Rate limiting**: an HAProxy stick-table (`role/revproxy/files/haproxy.cfg`), `sc_http_req_rate(0) gt 200` over 10s per source IP, scoped to this host only (`if host_assets`) — a first, cheap filter before traffic reaches nginx/the app.
+- **Timeouts** (`timeout http-request 10s`, `timeout http-keep-alive 10s` in `defaults`) apply cluster-wide, not just to this host, as a general slowloris mitigation.
+- **Real client IP**: `accept-proxy` + `option forwardfor` at HAProxy, so the app's own login throttle (per-IP) sees one address per client, not everyone behind the proxy as a single IP.
+
 ## Cross-repo trust: khaddict-com to voidnode
 
 `khaddict-com`'s CI can write to this repo: `publish-chart.yaml` and `media-khaddict.yaml` each have a `bump-voidnode` job that uses a fine-grained PAT (`VOIDNODE_REPO_TOKEN`, `Contents: Read and write`, scoped to this repo only) to bump a version string and open a PR here, never a direct push. Two things keep this contained:
