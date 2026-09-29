@@ -54,23 +54,18 @@ certbot_pkgs:
         - service: haproxy
 
 /etc/haproxy/client-ca.pem:
-  file.managed:
-    - source: salt://global/common/ca/files/voidnode.chain.crt
-    - mode: '0644'
-    - user: root
-    - group: root
-    - require:
-      - pkg: haproxy_pkg
-    - listen_in:
-        - service: haproxy
+  file.absent
 
 /etc/letsencrypt/renewal-hooks/deploy/haproxy_assets.sh:
   file.managed:
     - source: salt://role/revproxy/files/haproxy_assets.sh
+    - template: jinja
     - mode: '0755'
     - user: root
     - group: root
     - makedirs: True
+    - context:
+        public_domain: {{ public_domain }}
 
 /root/.secrets/infomaniak:
   file.managed:
