@@ -10,4 +10,4 @@ victoria-logs-single:
     retentionPeriod: "30d"
     persistentVolume:
       storageClassName: longhorn
-      size: 20Gi
+      size: 50Gi
