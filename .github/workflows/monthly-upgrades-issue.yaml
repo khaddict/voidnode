@@ -2,7 +2,7 @@ name: Monthly upgrades ticket
 
 on:
   schedule:
-    - cron: "0 8 1 * *"
+    - cron: "1 0 1 * *"
   push:
     branches: [main]
     paths:
@@ -68,7 +68,7 @@ jobs:
                 body,
               });
               console.log(`Updated #${match.number} ("${title}") with the current template.`);
-            } else if (context.eventName === "schedule") {
+            } else {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -76,6 +76,5 @@ jobs:
                 body,
                 labels: ["upgrades"],
               });
-            } else {
-              console.log(`No open "${title}" ticket to update, and this run was not triggered by the schedule. Skipping.`);
+              console.log(`Created "${title}".`);
             }
