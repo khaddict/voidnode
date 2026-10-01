@@ -124,9 +124,6 @@ LOGGING = {}
 # resets session lifetime on each request, keeping authenticated users logged in indefinitely
 LOGIN_PERSISTENCE = False
 
-# if False, unauthenticated users can view most of NetBox but not make changes
-LOGIN_REQUIRED = True
-
 # seconds before a logged-in web session must re-authenticate (default: 1209600, 14 days)
 LOGIN_TIMEOUT = None
 
