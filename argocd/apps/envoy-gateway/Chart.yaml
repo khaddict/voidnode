@@ -4,7 +4,7 @@ description: A Helm chart for envoy-gateway
 type: application
 version: 0.1.0
 # renovate: depName=envoyproxy/gateway datasource=docker
-appVersion: "v1.9.1"
+appVersion: "v1.9.2"
 home: https://github.com/envoyproxy/gateway
 sources:
   - https://github.com/khaddict/voidnode/tree/main/argocd/apps/envoy-gateway
