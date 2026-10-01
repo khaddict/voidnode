@@ -8,7 +8,6 @@
     - context:
         iface: ens19
         ip: 192.168.0.249
-        gateway: 192.168.0.254
 
 pihole_ens19_up:
   service.running:

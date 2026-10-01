@@ -3,5 +3,4 @@ Name={{ iface }}
 
 [Network]
 Address={{ ip }}/24
-Gateway={{ gateway }}
 IPv6AcceptRA=no

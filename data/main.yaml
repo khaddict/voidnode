@@ -409,7 +409,7 @@ pve:
     pihole:
       vmid: 122
       description: "Network-wide DNS ad-blocking and DNS server"
-      # net1/eth1 on vmbr0: 192.168.0.249/24, gw 192.168.0.254
+      # net1/eth1 on vmbr0: 192.168.0.249/24, no gateway (would create a second default route)
       template: debian-trixie-template
       tags: "edge,trixie"
       exporters:
