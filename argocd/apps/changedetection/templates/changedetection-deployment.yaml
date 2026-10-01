@@ -8,6 +8,8 @@ metadata:
 spec:
   revisionHistoryLimit: 3
   replicas: {{ .Values.deployment.replicas }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "changedetection.selectorLabels" . | nindent 6 }}
