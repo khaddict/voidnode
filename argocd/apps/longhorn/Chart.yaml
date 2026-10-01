@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: longhorn
-    version: 1.12.1
+    version: 1.13.0
     repository: https://charts.longhorn.io
