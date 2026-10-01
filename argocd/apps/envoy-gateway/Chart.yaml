@@ -13,5 +13,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: gateway-helm
-    version: 1.9.1
+    version: 1.9.2
     repository: oci://docker.io/envoyproxy
