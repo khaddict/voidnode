@@ -108,7 +108,7 @@ harbor_archive:
 
 harbor_install:
   cmd.run:
-    - name: ./install.sh
+    - name: ./install.sh --with-trivy
     - cwd: /etc/harbor
     - require:
       - archive: harbor_archive
