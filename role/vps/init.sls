@@ -10,8 +10,8 @@ include:
 {% set _khaddict_com_commit = salt['http.query']('https://api.github.com/repos/khaddict/khaddict-com/commits/main', decode=True) %}
 {% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha') %}
 
-# renovate: depName=louislam/uptime-kuma datasource=git-refs
-{% set uptime_kuma_rev = 'e4821321e559c887b14e37d9979e604b221a8945' %}
+# renovate: depName=louislam/uptime-kuma datasource=github-tags
+{% set uptime_kuma_rev = '2.5.5' %}
 
 nginx_pkgs:
   pkg.installed:

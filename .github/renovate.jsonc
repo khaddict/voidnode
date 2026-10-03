@@ -76,11 +76,19 @@
     },
     {
       "customType": "regex",
+      "managerFilePatterns": ["/role/vps/init\\.sls$/"],
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\{% set uptime_kuma_rev = '(?<currentValue>[^']+)' %\\}"
+      ],
+      "datasourceTemplate": "{{datasource}}",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": ["/role/netbox/init\\.sls$/"],
       "matchStrings": [
-        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\{% set netbox_rev = '(?<currentDigest>[^']+)' %\\}"
+        "# renovate: depName=(?<depName>[^\\s]+) datasource=(?<datasource>[^\\s]+)\\n\\{% set netbox_rev = '(?<currentValue>[^']+)' %\\}"
       ],
-      "packageNameTemplate": "https://github.com/{{depName}}",
       "datasourceTemplate": "{{datasource}}",
       "versioningTemplate": "semver"
     },
