@@ -32,6 +32,24 @@ scrape_configs:
         replacement: '$1'
         target_label: instance
 
+  - job_name: 'blackbox_https'
+    metrics_path: /probe
+    scrape_interval: 1h
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+{%- for sub in public_subdomains %}
+          - 'https://{{ sub }}{{ public_domain }}'
+{%- endfor %}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus.{{ domain }}:9115
+
   - job_name: 'blackbox_icmp'
     metrics_path: /probe
     params:

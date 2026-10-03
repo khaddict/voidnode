@@ -38,6 +38,24 @@ groups:
         labels:
           severity: warning
 
+      - alert: SystemdUnitFailed
+        annotations:
+          summary: "Systemd unit failed (instance {{ $labels.instance }})"
+          description: "{{ $labels.name }} is in failed state on {{ $labels.instance }}"
+        expr: node_systemd_unit_state{state="failed"} == 1
+        for: 5m
+        labels:
+          severity: warning
+
+      - alert: TLSCertExpiringSoon
+        annotations:
+          summary: "TLS certificate expiring soon (instance {{ $labels.instance }})"
+          description: "Certificate on {{ $labels.instance }} expires in less than 14 days"
+        expr: probe_ssl_earliest_cert_expiry{job="blackbox_https"} - time() < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+
       - alert: ICMPUnreachable
         annotations:
           summary: "ICMP unreachable (instance {{ $labels.instance }})"

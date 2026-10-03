@@ -4,6 +4,8 @@
 
 {% set pve = data.get('pve') %}
 {% set domain = data.get('network').get('domain') %}
+{% set public_domain = data.get('network').get('public_domain') %}
+{% set public_subdomains = ['', 'blog.', 'dashboard.', 'media.', 'projects.', 'matomo.', 'api.', 'diagram.', 'sre.', 'assets.', 'status.'] %}
 {% set node_hosts = {} %}
 {% set blackbox_hosts = {} %}
 {% do node_hosts.update(pve.get('nodes')) %}
@@ -64,6 +66,8 @@ prometheus_archive:
         node_hosts: {{ node_hosts }}
         blackbox_hosts: {{ blackbox_hosts }}
         domain: "{{ domain }}"
+        public_domain: "{{ public_domain }}"
+        public_subdomains: {{ public_subdomains }}
     - require:
       - archive: prometheus_archive
       - user: prometheus_user
