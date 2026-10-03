@@ -58,3 +58,34 @@ st2_voidnode_installation_cmd:
       - file: /opt/stackstorm/packs/st2_voidnode
     - onchanges:
       - file: /opt/stackstorm/packs/st2_voidnode
+
+/etc/redis/redis.conf:
+  file.append:
+    - text: "supervised systemd"
+
+redis-server:
+  service.running:
+    - enable: True
+    - watch:
+      - file: /etc/redis/redis.conf
+
+/var/log/st2/st2auth.audit.log:
+  file.managed:
+    - replace: False
+    - user: st2
+    - group: st2
+    - mode: '0644'
+
+/var/log/st2/st2api.audit.log:
+  file.managed:
+    - replace: False
+    - user: st2
+    - group: st2
+    - mode: '0644'
+
+/var/log/st2/st2stream.audit.log:
+  file.managed:
+    - replace: False
+    - user: st2
+    - group: st2
+    - mode: '0644'
