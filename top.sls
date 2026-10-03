@@ -64,3 +64,4 @@
 
   'khaddict-vps':
     - role.vps
+    - role.vps.fail2ban
