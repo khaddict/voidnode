@@ -19,6 +19,11 @@ common:
     kvstore:
       store: inmemory
 
+compactor:
+  working_directory: /var/lib/loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+
 schema_config:
   configs:
     - from: 2020-10-24
