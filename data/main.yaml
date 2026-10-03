@@ -96,7 +96,7 @@ pve:
       main_iface: *default_iface
       ssh: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ3v0wOk/qb2Bq80EzC+BZMArREUa/6WlIIzav05AQyt saltmaster@khaddict.lab"
       hardware:
-        ram_mb: 4096
+        ram_mb: 8192
         cpu:
           sockets: 1
           cores: 2
@@ -254,7 +254,7 @@ pve:
           cores: 2
         disks:
           - name: scsi0
-            size_gb: 40
+            size_gb: 60
       backup: true
       <<: *vlan_infra
 
@@ -361,6 +361,8 @@ pve:
         disks:
           - name: scsi0
             size_gb: 60
+          - name: scsi1
+            size_gb: 200
       backup: false
       <<: *vlan_edge
 
@@ -382,6 +384,8 @@ pve:
         disks:
           - name: scsi0
             size_gb: 60
+          - name: scsi1
+            size_gb: 200
       backup: false
       <<: *vlan_edge
 
