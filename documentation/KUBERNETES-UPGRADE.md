@@ -291,7 +291,22 @@ The dry-run:
 
 Review the output before proceeding.
 
-This cluster runs `cluster.network.cni.name: none` and Cilium's kube-proxy-replacement, so Talos no longer manages `kube-proxy` or a CNI bootstrap manifest; only changes to CoreDNS can be expected here.
+This cluster runs `cluster.network.cni.name: none` and Cilium's kube-proxy-replacement. Talos only skips the `kube-proxy` bootstrap manifest when `cluster.proxy.disabled: true` is set in the control-plane machine config. `cni.name: none` alone is not enough: without the flag, the dry-run proposes creating a `kube-proxy` DaemonSet that conflicts with Cilium.
+
+Check it before running the upgrade:
+
+```bash
+talosctl get machineconfig -n 10.40.0.5 -o yaml | grep -A2 'proxy:'
+```
+
+It must show `disabled: true`. If not, set it with a patch (applied without reboot):
+
+```bash
+printf 'cluster:\n  proxy:\n    disabled: true\n' > /tmp/disable-kube-proxy.yaml
+talosctl patch mc -n 10.40.0.5 --patch @/tmp/disable-kube-proxy.yaml
+```
+
+Then only changes to CoreDNS and the stale flannel/kube-proxy RBAC objects (pruned) can be expected here.
 
 ### 4. Run the upgrade
 
@@ -312,7 +327,7 @@ It updates, in order:
 * `kube-apiserver`
 * `kube-controller-manager`
 * `kube-scheduler`
-* `kube-proxy` (skipped here: `cluster.network.cni.name` is `none`, Cilium replaces kube-proxy)
+* `kube-proxy` (skipped here: `cluster.proxy.disabled` is `true`, Cilium replaces kube-proxy)
 * `kubelet` on the control-plane
 * `kubelet` on each worker
 * Talos-managed Kubernetes bootstrap manifests
