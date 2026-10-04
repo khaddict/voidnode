@@ -39,6 +39,14 @@ network:
       dns: *edge_router
       ntp: *edge_router
 
+    IOT: &vlan_iot
+      id: 50
+      cidr: 10.50.0.0/24
+      router: &iot_router 10.50.0.1
+      gateway: *iot_router
+      dns: *iot_router
+      ntp: *iot_router
+
 pve:
   backups:
     storage: pbs
@@ -520,6 +528,28 @@ pve:
             size_gb: 40
       backup: true
       <<: *vlan_edge
+
+    wol:
+      vmid: 125
+      description: "Wake-on-LAN relay"
+      template: debian-trixie-template
+      tags: "iot,trixie"
+      exporters:
+        blackbox: true
+        node: true
+      ip: 10.50.0.240
+      main_iface: *default_iface
+      ssh: null
+      hardware:
+        ram_mb: 2048
+        cpu:
+          sockets: 1
+          cores: 2
+        disks:
+          - name: scsi0
+            size_gb: 20
+      backup: true
+      <<: *vlan_iot
 
     # [end:vms]
 
