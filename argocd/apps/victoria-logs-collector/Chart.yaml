@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: victoria-logs-collector
-    version: 0.3.7
+    version: 0.3.8
     repository: https://victoriametrics.github.io/helm-charts/
