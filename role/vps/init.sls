@@ -11,7 +11,7 @@ include:
 {% set khaddict_com_ref = _khaddict_com_commit.get('dict', {}).get('sha') %}
 
 # renovate: depName=louislam/uptime-kuma datasource=github-tags
-{% set uptime_kuma_rev = '2.5.5' %}
+{% set uptime_kuma_rev = '2.5.8' %}
 
 nginx_pkgs:
   pkg.installed:
