@@ -18,8 +18,6 @@ global:
       # List of secrets in the same namespace of the component that can be used to pull images from private repositories.
       pullSecrets: []
     ratelimit:
-      # This is the full image name including the hub, repo, and tag.
-      image: "docker.io/envoyproxy/ratelimit:c8765e89"
       # Specify image pull policy if default behavior isn't desired.
       # Default behavior: latest images will be Always else IfNotPresent.
       pullPolicy: IfNotPresent
