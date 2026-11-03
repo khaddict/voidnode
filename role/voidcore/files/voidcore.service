@@ -1,0 +1,15 @@
+[Unit]
+Description=voidcore
+After=network.target
+
+[Service]
+WorkingDirectory=/srv/voidcore/backend
+Environment=PYTHONPATH=/srv/voidcore/backend
+EnvironmentFile=-/srv/voidcore/backend/.env
+ExecStart=/srv/voidcore/backend/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8020 --proxy-headers --forwarded-allow-ips={{ revproxy_ip }}
+UMask=0077
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

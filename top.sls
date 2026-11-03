@@ -59,6 +59,9 @@
   'vault':
     - role.vault
 
+  'voidcore':
+    - role.voidcore
+
   'voidnode':
     - role.pve
 
