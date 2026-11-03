@@ -1,6 +1,6 @@
 {% import_yaml 'data/main.yaml' as data %}
 # renovate: depName=netbox-community/netbox datasource=github-tags
-{% set netbox_rev = 'v4.7.2' %}
+{% set netbox_rev = 'v4.7.4' %}
 {% set psql_password = salt['vault'].read_secret('kv/minions/netbox/default').psql_password %}
 {% set secret_key = salt['vault'].read_secret('kv/minions/netbox/default').secret_key %}
 {% set api_token_peppers = salt['vault'].read_secret('kv/minions/netbox/default').api_token_peppers %}
