@@ -56,17 +56,6 @@ certbot_pkgs:
 /etc/haproxy/client-ca.pem:
   file.absent
 
-/etc/letsencrypt/renewal-hooks/deploy/haproxy_assets.sh:
-  file.managed:
-    - source: salt://role/revproxy/files/haproxy_assets.sh
-    - template: jinja
-    - mode: '0755'
-    - user: root
-    - group: root
-    - makedirs: True
-    - context:
-        public_domain: {{ public_domain }}
-
 /root/.secrets/infomaniak:
   file.managed:
     - mode: '0600'
