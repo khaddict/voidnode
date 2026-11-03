@@ -513,8 +513,8 @@ pve:
       template: debian-trixie-template
       tags: "iot,trixie"
       exporters:
-        blackbox: true
-        node: true
+        blackbox: false
+        node: false
       ip: 10.50.0.240
       main_iface: *default_iface
       ssh: null
