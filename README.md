@@ -106,7 +106,7 @@ External-facing services. Can reach Vault (secrets), SaltMaster (configuration),
 | `unifi.khaddict.lab` | LXC | Unifi network controller. Manages the Unifi Switch Lite 8 PoE and the Unifi U7 Pro AP. |
 | `pihole.khaddict.lab` | VM | [Pi-hole](https://pi-hole.net/) network-wide DNS ad-blocking and DNS server. |
 | `hacking.khaddict.lab` | VM | Personal environment for CTF challenges and HackTheBox boxes. |
-| `assets.khaddict.lab` | VM | Personal asset tracking. |
+| `voidcore.khaddict.lab` | VM | Personal brain and wealth tracker. |
 
 ## VLAN 50 – IOT `10.50.0.0/24`
 
@@ -174,9 +174,9 @@ Browser
 
 If HAProxy becomes unreachable, the VPS automatically fails over (TCP/SNI level, no HTTP round-trip to the lab) to a static page served locally, returning a real `503` and sharing the same header, live status widget, and footer as the rest of the site. Falls back within `fail_timeout` (10s) and recovers automatically once HAProxy answers again. See [documentation/KHADDICT-VPS.md](documentation/KHADDICT-VPS.md#13-homelab-down-fallback-page).
 
-**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `diagram` · `api` · `matomo` · `status` · `sre` · `assets`
+**Public domains:** `khaddict.com` · `www` · `blog` · `dashboard` · `media` · `projects` · `diagram` · `api` · `matomo` · `status` · `sre` · `voidcore`
 
-`assets.khaddict.com` is rate-limited at HAProxy (429 past 200 req/10s per IP); the app itself requires its own login with TOTP.
+`voidcore.khaddict.com` is rate-limited at HAProxy (429 past 200 req/10s per IP); the app itself requires its own login with TOTP.
 
 SSL certificates (`*.khaddict.com`) live on HAProxy and are renewed automatically via the Infomaniak DNS API.
 
