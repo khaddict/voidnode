@@ -3,7 +3,7 @@ namespace: longhorn-backup-bridge
 
 deployment:
   replicas: 1
-  image: rclone/rclone:1.75.2
+  image: rclone/rclone:1.76.0
   imagePullPolicy: IfNotPresent
   resources:
     requests:
