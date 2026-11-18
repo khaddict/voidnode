@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: metallb
-    version: 0.16.1
+    version: 0.16.2
     repository: https://metallb.github.io/metallb
