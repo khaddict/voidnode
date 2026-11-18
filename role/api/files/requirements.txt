@@ -3,6 +3,6 @@ uvicorn[standard]==0.54.0
 gunicorn==27.0.1
 httpx==0.28.1
 pydantic==2.14.3
-python-multipart==0.0.33
+python-multipart==0.0.34
 Pillow==13.0.0
 protobuf==7.36.2
