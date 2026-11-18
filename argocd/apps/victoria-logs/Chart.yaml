@@ -12,5 +12,5 @@ maintainers:
   - name: platform
 dependencies:
   - name: victoria-logs-single
-    version: 0.13.11
+    version: 0.13.13
     repository: https://victoriametrics.github.io/helm-charts/
